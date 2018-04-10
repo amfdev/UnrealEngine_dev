@@ -22,10 +22,10 @@ In the VisualStudio install utility please check the following:
         in line 53 change version check from _MSC_VER <= 1910 to the _MSC_VER <= 1913
      
      2) in file ".\Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\samples\CPPSamples\common\CmdLogger.h" 
-        in line 43 and line 50 change enum name from "LogLevel" to "AmdLogLevel"
+        in line 43 and line 50 change enum name from "LogLevel" to "AmfLogLevel"
 
      3) in file ".\Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\samples\CPPSamples\common\CmdLogger.cpp" 
-        in line 37 and line 61 change enum name from "LogLevel" to "AmdLogLevel"
+        in line 37 and line 61 change enum name from "LogLevel" to "AmfLogLevel"
 
 * Build release (sic!) verions of AmfMediaCommon for target platforms (x64 or x32)
 * In file ".\AmfMediaInstall.bat" change second line from "set VS_VERSION=vs2015" to "set VS_VERSION=%2"
