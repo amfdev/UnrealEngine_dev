@@ -31,7 +31,7 @@ SET Platform="Win64"
 set PROMPT_ARGUMENT=--force
 
 CD %UnrealHome%
-goto build
+rem goto build
 
 :setupBat
 ECHO Sync the dependencies...
