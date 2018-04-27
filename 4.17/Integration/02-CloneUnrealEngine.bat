@@ -9,18 +9,18 @@ GOTO checkFolder
 EXIT /B 1
 
 :checkFolder
-IF EXIST UnrealEngine (
+IF EXIST UnrealEngine-4.17 (
     ECHO UnrealEngine-4.17 folder found!
     GOTO :update
 ) ELSE (
-    MKDIR UnrealEngine
+    MKDIR UnrealEngine-4.17
 )
 
 :update
 SETLOCAL
 pushd %~dp0
 
-CD UnrealEngine
+CD UnrealEngine-4.17
 
 git init
 
