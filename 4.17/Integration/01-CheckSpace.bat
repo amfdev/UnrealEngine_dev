@@ -1,3 +1,5 @@
+REM Test for free 80Gb to prepare and build UnrealEngine
+
 @echo off
     setlocal enableextensions disabledelayedexpansion
 
