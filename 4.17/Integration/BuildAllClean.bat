@@ -1,5 +1,5 @@
-rem @ECHO OFF
-rem SETLOCAL
+@ECHO OFF
+SETLOCAL
 
 CALL TestDefines.bat
 IF ERRORLEVEL 1 GOTO :error
@@ -9,66 +9,24 @@ SET UnrealHome=UnrealEngine-4.17
 SET AmfHome=AmfMedia-4.17
 
 @ECHO Prepare UnrealEngine...
-IF NOT EXIST "%UnrealHome%" (
-    @ECHO No UnrealEngine folder found, create it
-    MKDIR "%UnrealHome%"
-) ELSE (
+IF EXIST "%UnrealHome%" (
     @ECHO UnrealEngine folder found, clear it
-    rem CALL 02-CleanUnrealEngine.bat
+    CALL 02-CleanUnrealEngine.bat
     IF ERRORLEVEL 1 GOTO :error
 )
     
-CALL 02-CloneUnrealEngine.bat
-IF ERRORLEVEL 1 GOTO :error
-
 @ECHO Prepare Amf...
-IF NOT EXIST "%AmfHome%" (
-    @ECHO No Amf folder found, create it
-    MKDIR "%AmfHome%"
-) ELSE (
+IF EXIST "%AmfHome%" (
     @ECHO Reset Amf libraries repository
     CALL 03-CleanAmfLibraries.bat
     IF ERRORLEVEL 1 GOTO :error
 )
-    
-CALL 03-CloneAmfLibraries.bat
-IF ERRORLEVEL 1 GOTO :error
-
-@ECHO Patch Amf libraries
-CALL 04-PatchAmfLibraries.bat
-IF ERRORLEVEL 1 GOTO :error
-
-@ECHO Build Amf libraries
-CALL 05-BuildAmfLibraries.bat
-IF ERRORLEVEL 1 GOTO :error
-
-@ECHO Setup UnrealEngine
-CALL 07-SetupUnrealEngine.bat
-IF ERRORLEVEL 1 GOTO :error
-
-@ECHO Apply Amf libraries
-CALL 06-ApplyAmfLibraries.bat
-IF ERRORLEVEL 1 (
-    @ECHO ToDo: investigate why error returned here
-    rem GOTO :error
-)
-
-@ECHO Prepare UnrealEngine solution
-CALL 07-PrepareUnrealEngineSolution.bat
-IF ERRORLEVEL 1 GOTO :error
-
-@ECHO Prepare UnrealEngine solution
-CALL 07-BuildUnrealEngine.bat
-IF ERRORLEVEL 1 GOTO :error
-
-@ECHO Build test scenes
-CALL 08-BuildScene.bat
-IF ERRORLEVEL 1 GOTO :error
 
 :done
-    @ECHO Clean build finished!
+    @ECHO Clean before build completed
+    CALL BuildAllClean.bat
     EXIT /B 0
 
 :error
-    @ECHO Error found, break!
+    @ECHO Error: failed to clean before build
     EXIT /B 1
