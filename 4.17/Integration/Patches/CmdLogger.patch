@@ -1,7 +1,3 @@
- .../AMD/AMF_SDK/amf/public/samples/CPPSamples/common/CmdLogger.cpp    | 4 ++--
- .../AMD/AMF_SDK/amf/public/samples/CPPSamples/common/CmdLogger.h      | 4 ++--
- 2 files changed, 4 insertions(+), 4 deletions(-)
-
 diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/CmdLogger.cpp b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/CmdLogger.cpp
 index 40cb334b57..379ee0ee3c 100644
 --- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/CmdLogger.cpp

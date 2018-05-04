@@ -1,17 +1,17 @@
-REM Test for free 80Gb to prepare and build UnrealEngine
+rem@echo off
+@echo Test for free 80Gb to prepare and build UnrealEngine
 
-@echo off
-    setlocal enableextensions disabledelayedexpansion
+setlocal enableextensions disabledelayedexpansion
 
-    call :checkFreeSpace d: 80000000000 && echo OK || echo No space
+CALL :checkFreeSpace %CD% 80000000000
+IF ERRORLEVEL 1 (
+    @ECHO Error: no enough space!
+    EXIT /B 1
+) ELSE (
+    @ECHO Enough space found.
+)
 
-    if errorlevel 1 (
-        echo No space
-    ) else (
-        echo OK
-    )
-
-    goto :eof
+EXIT /B 0
 
 :checkFreeSpace drive spaceRequired
     setlocal enableextensions disabledelayedexpansion

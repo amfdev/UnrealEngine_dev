@@ -1,34 +1,28 @@
 @ECHO OFF
+SETLOCAL
 
-IF [%1]==[] GOTO usage ELSE GOTO :checkFolder
-IF [%2]==[] GOTO usage ELSE GOTO :checkFolder
-GOTO checkFolder
-
-:usage
-@ECHO "Error: git login and password must be set, usage: 02-CloneUnrealEngine.bat <Login> <Password>"
-EXIT /B 1
-
-:checkFolder
-IF EXIST UnrealEngine-4.17 (
-    ECHO UnrealEngine-4.17 folder found!
-    GOTO :update
-) ELSE (
-    MKDIR UnrealEngine-4.17
+IF NOT DEFINED UnrealHome (
+    @ECHO Error: UnrealHome variable undefined!
+    GOTO :error
 )
 
-:update
-SETLOCAL
-pushd %~dp0
-
-CD UnrealEngine-4.17
+CD %UnrealHome%
+IF ERRORLEVEL 1 GOTO :error
 
 git init
-
+IF ERRORLEVEL 1 GOTO :error
 REM git config user.email %1
-git config user.name %1
-git config user.password %2
-
-git pull https://%1:%2@github.com/EpicGames/UnrealEngine.git 4.17
+REM git config user.name %1
+REM git config user.password %2
+REM git pull https://%1:%2@github.com/EpicGames/UnrealEngine.git 4.17
 REM git clone https://github.com/EpicGames/UnrealEngine.git
+git pull https://github.com/EpicGames/UnrealEngine.git 4.17
+IF ERRORLEVEL 1 GOTO :error
 
-cd ..
+:done
+    @ECHO UnrealEngine updated
+    EXIT /B 0
+
+:error
+    @ECHO Error: failed to update UnrealEngine
+    EXIT /B 1

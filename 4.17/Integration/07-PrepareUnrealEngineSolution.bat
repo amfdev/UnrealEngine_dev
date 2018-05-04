@@ -15,13 +15,6 @@ if %errorlevel% == 0 (
     GOTO :error
 )
 
-SET Target=build
-SET MaxCPUCount=/maxcpucount
-SET Solution=UE4.sln
-SET Configuration="Development Editor"
-SET Platform="Win64"
-
-pushd %~dp0
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
@@ -29,17 +22,10 @@ IF ERRORLEVEL 1 GOTO :error
 CALL GenerateProjectFiles.bat
 IF ERRORLEVEL 1 GOTO :error
 
-@ECHO Start building UnrealEngine
-
-TIME /T > build_time_begin.txt
-%msbuild% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %solution%
-IF ERRORLEVEL 1 GOTO :error
-TIME /T > build_time_end.txt
-
 :done
-    @ECHO UnrealEngine build completed
+    @ECHO Create of UnrealEngine project files completed
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to build UnrealEngine
+    @ECHO Error: failed to create UnrealEngine project files
     EXIT /B 1
