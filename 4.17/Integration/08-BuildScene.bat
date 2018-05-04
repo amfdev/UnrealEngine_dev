@@ -25,8 +25,10 @@ pushd %~dp0
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
+TIME /T > build_time_begin.txt
 "%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\FPSProject\FPSProject.uproject" -noP4 -platform=Win64 -clientconfig=Development -serverconfig=Development -cook -allmaps -build -stage -pak -archive -archivedirectory="Output Directory"
 IF ERRORLEVEL 1 GOTO :error
+TIME /T > build_time_end.txt
 
 :done
     @ECHO UnrealEngine setup completed
