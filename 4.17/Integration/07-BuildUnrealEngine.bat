@@ -1,4 +1,4 @@
-@ECHO OFF
+rem @ECHO OFF
 SETLOCAL
 
 IF NOT DEFINED UnrealHome (
@@ -25,14 +25,9 @@ pushd %~dp0
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
-@ECHO Generate UnrealEngine project files
-CALL GenerateProjectFiles.bat
-IF ERRORLEVEL 1 GOTO :error
-
 @ECHO Start building UnrealEngine
-
 TIME /T > build_time_begin.txt
-%msbuild% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %solution%
+%MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %solution%
 IF ERRORLEVEL 1 GOTO :error
 TIME /T > build_time_end.txt
 

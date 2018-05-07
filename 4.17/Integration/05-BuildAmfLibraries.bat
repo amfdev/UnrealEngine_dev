@@ -16,7 +16,7 @@ SET configuration="Release"
 SET platform="x64"
 
 TIME /T > build_time_begin.txt
-%msbuild% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %solution%
+%MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %solution%
 time /T > build_time_end.txt
 
 :done

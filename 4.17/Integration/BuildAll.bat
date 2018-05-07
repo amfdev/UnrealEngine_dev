@@ -17,18 +17,25 @@ IF NOT EXIST "%UnrealHome%" (
 CALL 02-CloneUnrealEngine.bat
 IF ERRORLEVEL 1 GOTO :error
 
+CALL SetupMSBuildExe.bat
+IF ERRORLEVEL 1 GOTO :error
+
 @ECHO Prepare Amf...
 IF NOT EXIST "%AmfHome%" (
     @ECHO No Amf folder found, create it
     MKDIR "%AmfHome%"
 )
-    
+
 CALL 03-CloneAmfLibraries.bat
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Patch Amf libraries
 CALL 04-PatchAmfLibraries.bat
-IF ERRORLEVEL 1 GOTO :error
+IF ERRORLEVEL 1 (
+    @ECHO Failed to apply Amf library patch
+    @ECHO It seems that Amf libraries is already patched!
+    @ECHO Automation will try to build it
+)    
 
 @ECHO Build Amf libraries
 CALL 05-BuildAmfLibraries.bat

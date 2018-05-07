@@ -1,4 +1,4 @@
-@ECHO OFF
+rem @ECHO OFF
 SETLOCAL
 
 IF NOT DEFINED UnrealHome (
@@ -6,30 +6,34 @@ IF NOT DEFINED UnrealHome (
     GOTO :error
 )
 
-:checkRights
-FSUTIL DIRTY QUERY %systemdrive% >nul
-if %errorlevel% == 0 (
-    echo Running with administrator rights.
-) else (
-    ECHO Error: administrator rights required!
-    GOTO :error
+SET DeployHome=Deploy
+
+IF EXIST "%DeployHome%" (
+    @ECHO Found deploy directory, clean it
+    
+    RD /S /Q %DeployHome/Tests
+    RD /S /Q %DeployHome/Prerequirements
+    IF ERRORLEVEL 1 GOTO :error
+) ELSE (
+    @ECHO Create deploy folders
+    
+    MKDIR %DeployHome%
+    MKDIR %DeployHome%\Prerequirements
+    IF ERRORLEVEL 1 GOTO :error
 )
 
-SET Target=build
-SET MaxCPUCount=/maxcpucount
-SET Solution=UE4.sln
-SET Configuration="Development Editor"
-SET Platform="Win64"
+@ECHO Copy prerequirements
+ROBOCOPY %CD%\%UnrealHome%\Engine\Extras\Redist\en-us\ %CD%\Deploy\Prerequirements /E
+@ECHO Todo: investigate why robocopy returns error
+rem IF ERRORLEVEL 1 GOTO :error
 
-pushd %~dp0
-CD %UnrealHome%
-IF ERRORLEVEL 1 GOTO :error
-
-"%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\FPSProject\FPSProject.uproject" -noP4 -platform=Win64 -clientconfig=Development -serverconfig=Development -cook -allmaps -NoCompile -stage -pak -archive -archivedirectory="Output Directory"
-IF ERRORLEVEL 1 GOTO :error
+@ECHO Copy scene to deploy folder
+ROBOCOPY "%CD%\TestsProjects\FPSProject\Saved\StagedBuilds\WindowsNoEditor" "%CD%\Deploy\Tests\FPSProject" /E
+@ECHO Todo: investigate why robocopy returns error
+rem IF ERRORLEVEL 1 GOTO :error
 
 :done
-    @ECHO Scene deploy cussefull
+    @ECHO Scene deployed successfully
     EXIT /B 0
 
 :error
