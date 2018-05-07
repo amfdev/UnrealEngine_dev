@@ -1,4 +1,4 @@
-rem @ECHO OFF
+@ECHO OFF
 SETLOCAL
 
 IF NOT DEFINED UnrealHome (
@@ -31,6 +31,14 @@ rem IF ERRORLEVEL 1 GOTO :error
 ROBOCOPY "%CD%\TestsProjects\FPSProject\Saved\StagedBuilds\WindowsNoEditor" "%CD%\Deploy\Tests\FPSProject" /E
 @ECHO Todo: investigate why robocopy returns error
 rem IF ERRORLEVEL 1 GOTO :error
+
+@ECHO Create video folder for first sample
+MKDIR "%CD%\Deploy\Tests\FPSProject\FPSProject\Content\Video
+IF ERRORLEVEL 1 GOTO :error
+
+@ECHO Copy sample 4K video file
+COPY "%CD%\TestsProjects\FPSProject\Content\Video\1.mp4" "%CD%\Deploy\Tests\FPSProject\FPSProject\Content\Video\1.mp4"
+IF ERRORLEVEL 1 GOTO :error
 
 :done
     @ECHO Scene deployed successfully
