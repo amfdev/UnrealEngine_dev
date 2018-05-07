@@ -69,7 +69,7 @@ CALL 09-DeployScene.bat
 IF ERRORLEVEL 1 GOTO :error
 
 :done
-    @ECHO Clean build finished!
+    @ECHO Build all finished!
     EXIT /B 0
 
 :error
