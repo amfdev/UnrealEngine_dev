@@ -11,15 +11,22 @@ SET DeployHome=Deploy
 IF EXIST "%DeployHome%" (
     @ECHO Found deploy directory, clean it
     
-    RD /S /Q %DeployHome/Tests
-    RD /S /Q %DeployHome/Prerequirements
+    RD /S /Q %DeployHome%\Tests
+    IF ERRORLEVEL 1 GOTO :error
+
+    RD /S /Q %DeployHome%\Prerequirements
     IF ERRORLEVEL 1 GOTO :error
 ) ELSE (
     @ECHO Create deploy folders
     
     MKDIR %DeployHome%
-    MKDIR %DeployHome%\Prerequirements
     IF ERRORLEVEL 1 GOTO :error
+
+    rem MKDIR %DeployHome%\Tests
+    rem IF ERRORLEVEL 1 GOTO :error
+
+    rem MKDIR %DeployHome%\Prerequirements
+    rem IF ERRORLEVEL 1 GOTO :error
 )
 
 @ECHO Copy prerequirements
