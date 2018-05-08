@@ -1,0 +1,13 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{5A10A2A6-4D0B-F915-6F03-D789609262A3}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "PlainScreen",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
