@@ -26,10 +26,10 @@ CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Start building UnrealEngine
-TIME /T > build_time_begin.txt
+TIME /T > build_time_begin_UnrealEngine.txt
 %MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %solution%
 IF ERRORLEVEL 1 GOTO :error
-TIME /T > build_time_end.txt
+TIME /T > build_time_end_UnrealEngine.txt
 
 :done
     @ECHO UnrealEngine build completed
