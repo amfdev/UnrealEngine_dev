@@ -29,7 +29,7 @@ ROBOCOPY %CD%\%UnrealHome%\Engine\Extras\Redist\en-us\ %CD%\Deploy\Prerequiremen
 rem IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Copy scene to deploy folder
-ROBOCOPY "%CD%\TestsProjects\PlainScreen\Saved\StagedBuilds\WindowsNoEditor" "%CD%\Deploy\Tests\PlainScreen" /E /xf *.pdb
+ROBOCOPY "%CD%\TestsProjects\PlainScreen\Saved\StagedBuilds\WindowsNoEditor" "%CD%\Deploy\Tests\PlainScreen" /E /xf *.pdb /xf *.txt
 @ECHO Todo: investigate why robocopy returns error
 rem IF ERRORLEVEL 1 GOTO :error
 
