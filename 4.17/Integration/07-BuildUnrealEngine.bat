@@ -15,6 +15,9 @@ if %errorlevel% == 0 (
     GOTO :error
 )
 
+CALL SetupMSBuildExe.bat
+IF ERRORLEVEL 1 GOTO :error
+
 SET Target=build
 SET MaxCPUCount=/maxcpucount
 SET Solution=UE4.sln
