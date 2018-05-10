@@ -35,7 +35,7 @@ rem IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Create video folder for first sample
 MKDIR "%CD%\Deploy\Tests\PlainScreen\PlainScreen\Content\Video
-IF ERRORLEVEL 1 GOTO :error
+rem IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Copy sample 4K video file
 COPY "%CD%\TestsProjects\PlainScreen\Content\Video\1.mp4" "%CD%\Deploy\Tests\PlainScreen\PlainScreen\Content\Video\1.mp4"
