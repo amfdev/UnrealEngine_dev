@@ -18,7 +18,7 @@ if %errorlevel% == 0 (
 SET Target=build
 SET MaxCPUCount=/maxcpucount
 SET Solution=UE4.sln
-SET Configuration="Development Editor"
+SET Configuration="Shipping"
 SET Platform="Win64"
 
 pushd %~dp0
@@ -26,10 +26,10 @@ CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Start building UnrealEngine
-TIME /T > build_time_begin_UnrealEngine.txt
+TIME /T > build_time_begin_%Solution%_%configuration%.txt
 %MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %solution%
 IF ERRORLEVEL 1 GOTO :error
-TIME /T > build_time_end_UnrealEngine.txt
+TIME /T > build_time_end_%Solution%_%configuration%.txt
 
 :done
     @ECHO UnrealEngine build completed

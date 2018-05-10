@@ -21,12 +21,6 @@ IF EXIST "%DeployHome%" (
     
     MKDIR %DeployHome%
     IF ERRORLEVEL 1 GOTO :error
-
-    rem MKDIR %DeployHome%\Tests
-    rem IF ERRORLEVEL 1 GOTO :error
-
-    rem MKDIR %DeployHome%\Prerequirements
-    rem IF ERRORLEVEL 1 GOTO :error
 )
 
 @ECHO Copy prerequirements
