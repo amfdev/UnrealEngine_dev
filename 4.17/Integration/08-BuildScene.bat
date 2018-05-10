@@ -18,7 +18,7 @@ if %errorlevel% == 0 (
 SET Target=build
 SET MaxCPUCount=/maxcpucount
 SET Solution=UE4.sln
-SET Configuration="Development Editor"
+SET Configuration="Shipping"
 SET Platform="Win64"
 
 pushd %~dp0
@@ -26,7 +26,7 @@ CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
 TIME /T > build_time_begin.txt
-"%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\FPSProject\FPSProject.uproject" -noP4 -platform=Win64 -clientconfig=Development -serverconfig=Development -cook -allmaps -build -stage -pak -archive -archivedirectory="Output Directory"
+"%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\PlainScreen\PlainScreen.uproject" -noP4 -platform=Win64 -clientconfig=Shipping -serverconfig=Shipping -cook -allmaps -build -stage -pak -archive -archivedirectory="Output Directory"
 IF ERRORLEVEL 1 GOTO :error
 TIME /T > build_time_end.txt
 
