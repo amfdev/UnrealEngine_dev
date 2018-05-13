@@ -25,17 +25,24 @@ IF EXIST "%DeployHome%" (
 
 @ECHO Copy prerequirements
 ROBOCOPY %CD%\%UnrealHome%\Engine\Extras\Redist\en-us\ %CD%\Deploy\Prerequirements /E
-@ECHO Todo: investigate why robocopy returns error
-rem IF ERRORLEVEL 1 GOTO :error
+IF ERRORLEVEL 1 (
+    COLOR 4
+    @ECHO Todo: investigate why robocopy returns error
+    rem GOTO :error
+)
+COLOR
 
 @ECHO Copy scene to deploy folder
 ROBOCOPY "%CD%\TestsProjects\PlainScreen\Saved\StagedBuilds\WindowsNoEditor" "%CD%\Deploy\Tests\PlainScreen" /E /xf *.pdb /xf *.txt
-@ECHO Todo: investigate why robocopy returns error
-rem IF ERRORLEVEL 1 GOTO :error
+IF ERRORLEVEL 1 (
+    COLOR 4
+    @ECHO Todo: investigate why robocopy returns error
+    rem GOTO :error
+)
+COLOR
 
 @ECHO Create video folder for first sample
 MKDIR "%CD%\Deploy\Tests\PlainScreen\PlainScreen\Content\Video
-rem IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Copy sample 4K video file
 COPY "%CD%\TestsProjects\PlainScreen\Content\Video\1.mp4" "%CD%\Deploy\Tests\PlainScreen\PlainScreen\Content\Video\1.mp4"

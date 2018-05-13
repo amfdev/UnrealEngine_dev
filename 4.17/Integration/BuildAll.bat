@@ -50,9 +50,11 @@ IF ERRORLEVEL 1 GOTO :error
 @ECHO Apply Amf libraries
 CALL 06-ApplyAmfLibraries.bat
 IF ERRORLEVEL 1 (
+    COLOR 4
     @ECHO ToDo: investigate why error returned here
     rem GOTO :error
 )
+COLOR
 
 @ECHO Prepare UnrealEngine solution
 CALL 07-PrepareUnrealEngineSolution.bat
