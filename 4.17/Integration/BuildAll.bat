@@ -32,10 +32,12 @@ IF ERRORLEVEL 1 GOTO :error
 @ECHO Patch Amf libraries
 CALL 04-PatchAmfLibraries.bat
 IF ERRORLEVEL 1 (
+    COLOR 4
     @ECHO Failed to apply Amf library patch
     @ECHO It seems that Amf libraries is already patched!
     @ECHO Automation will try to build it
-)    
+)
+COLOR
 
 @ECHO Build Amf libraries
 CALL 05-BuildAmfLibraries.bat

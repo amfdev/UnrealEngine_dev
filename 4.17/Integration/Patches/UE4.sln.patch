@@ -1,0 +1,12 @@
+diff --git "a/UE4.sln" "b/UE4.sln"
+index 355c23e..b2c77cc 100644
+--- "a/UE4.sln"
++++ "b/UE4.sln"
+@@ -4402,6 +4402,7 @@ Global
+ 		{5D7D66E8-8C76-4AF9-B3EC-2EF03421D730}.Shipping|Mac.ActiveCfg = Development|Any CPU
+ 		{5D7D66E8-8C76-4AF9-B3EC-2EF03421D730}.Shipping|Win32.ActiveCfg = Development|Any CPU
+ 		{5D7D66E8-8C76-4AF9-B3EC-2EF03421D730}.Shipping|Win64.ActiveCfg = Development|Any CPU
++		{5D7D66E8-8C76-4AF9-B3EC-2EF03421D730}.Shipping|Win64.Build.0 = Development|Any CPU
+ 		{5D7D66E8-8C76-4AF9-B3EC-2EF03421D730}.Test Client|HTML5.ActiveCfg = Development|Any CPU
+ 		{5D7D66E8-8C76-4AF9-B3EC-2EF03421D730}.Test Client|Mac.ActiveCfg = Development|Any CPU
+ 		{5D7D66E8-8C76-4AF9-B3EC-2EF03421D730}.Test Client|Win32.ActiveCfg = Development|Any CPU
