@@ -4,29 +4,32 @@ SETLOCAL
 CALL TestDefines.bat
 IF ERRORLEVEL 1 GOTO :error
 
-@ECHO Prepare folders...
-SET UnrealHome=UnrealEngine-4.17
-SET AmfHome=AmfMedia-4.17
+@ECHO Build version 4.17
+SET UE_VERSION=4.17
+SET AMF_VERSION=4.17
 
-@ECHO Prepare UnrealEngine...
-IF EXIST "%UnrealHome%" (
-    @ECHO UnrealEngine folder found, clear it
-    CALL 02-CleanUnrealEngine.bat
-    IF ERRORLEVEL 1 GOTO :error
+CALL 00-BuildAllCleanImplementation.bat
+IF ERRORLEVEL 1 (
+    @ECHO Error: failed to build version %UE_VERSION%
+) ELSE (
+    @ECHO Build for version %UE_VERSION% successfull!
 )
-    
-@ECHO Prepare Amf...
-IF EXIST "%AmfHome%" (
-    @ECHO Reset Amf libraries repository
-    CALL 03-CleanAmfLibraries.bat
-    IF ERRORLEVEL 1 GOTO :error
+
+@ECHO Build version 4.18
+SET UE_VERSION=4.18
+SET AMF_VERSION=4.18
+
+CALL 00-BuildAllCleanImplementation.bat
+IF ERRORLEVEL 1 (
+    @ECHO Error: failed to build version %UE_VERSION%
+) ELSE (
+    @ECHO Build for version %UE_VERSION% successfull!
 )
 
 :done
-    @ECHO Clean before build completed
-    CALL BuildAll.bat
+    @ECHO Clean build finished
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to clean before build
+    @ECHO Error: clean build failed
     EXIT /B 1
