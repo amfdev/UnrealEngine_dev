@@ -1,6 +1,11 @@
 @ECHO OFF
 SETLOCAL
 
+IF NOT DEFINED UE_VERSION (
+    @ECHO Error: UE_VERSION variable undefined!
+    GOTO :error
+)
+
 IF NOT DEFINED UnrealHome (
     @ECHO Error: UnrealHome variable undefined!
     GOTO :error
