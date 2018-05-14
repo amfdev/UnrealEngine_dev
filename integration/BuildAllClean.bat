@@ -4,26 +4,11 @@ SETLOCAL
 CALL TestDefines.bat
 IF ERRORLEVEL 1 GOTO :error
 
-@ECHO Build version 4.17
-SET UE_VERSION=4.17
-SET AMF_VERSION=4.17
-
-CALL 00-BuildAllCleanImplementation.bat
-IF ERRORLEVEL 1 (
-    @ECHO Error: failed to build version %UE_VERSION%
+if [%1]==[] (
+    CALL :runBuild 4.17
+    CALL :runBuild 4.18
 ) ELSE (
-    @ECHO Build for version %UE_VERSION% successfull!
-)
-
-@ECHO Build version 4.18
-SET UE_VERSION=4.18
-SET AMF_VERSION=4.18
-
-CALL 00-BuildAllCleanImplementation.bat
-IF ERRORLEVEL 1 (
-    @ECHO Error: failed to build version %UE_VERSION%
-) ELSE (
-    @ECHO Build for version %UE_VERSION% successfull!
+    CALL :runBuild %1
 )
 
 :done
@@ -33,3 +18,17 @@ IF ERRORLEVEL 1 (
 :error
     @ECHO Error: clean build failed
     EXIT /B 1
+
+:runBuild version_number
+    @ECHO Build version %~1
+    SET UE_VERSION=%~1
+    SET AMF_VERSION=%~1
+
+    CALL 00-BuildAllCleanImplementation.bat
+    IF ERRORLEVEL 1 (
+        @ECHO Error: failed to clean build version %~1
+        EXIT /B 1
+    ) ELSE (
+        @ECHO Clean build for version %~1 successfull!
+        EXIT /B 0
+    )
