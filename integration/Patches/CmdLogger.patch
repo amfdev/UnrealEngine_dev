@@ -1,0 +1,43 @@
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/CmdLogger.cpp b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/CmdLogger.cpp
+index 40cb334b57..379ee0ee3c 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/CmdLogger.cpp
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/CmdLogger.cpp
+@@ -34,7 +34,7 @@
+ #include <iostream>
+ #include <iomanip>
+ 
+-void ChangeTextColor(LogLevel level)
++void ChangeTextColor(AmfLogLevel level)
+ {
+ #if !defined(METRO_APP)
+     HANDLE hCmd = GetStdHandle(STD_OUTPUT_HANDLE);
+@@ -58,7 +58,7 @@ void ChangeTextColor(LogLevel level)
+ 
+ amf::AMFCriticalSection      s_std_out_cs;
+ 
+-void WriteLog(const wchar_t* message, LogLevel level)
++void WriteLog(const wchar_t* message, AmfLogLevel level)
+ {
+ #if 0
+     std::wstringstream messageStream;
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/CmdLogger.h b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/CmdLogger.h
+index d7aebb2773..826c10191c 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/CmdLogger.h
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/CmdLogger.h
+@@ -40,14 +40,14 @@
+ #include "public/common/Thread.h"
+ #include "public/common/AMFFactory.h"
+ 
+-enum LogLevel
++enum AmfLogLevel
+ { 
+     LogLevelInfo, 
+     LogLevelSuccess, 
+     LogLevelError 
+ };
+ 
+-void WriteLog(const wchar_t* message, LogLevel level);
++void WriteLog(const wchar_t* message, AmfLogLevel level);
+ 
+ #define LOG_WRITE(a, level)\
+     { \
