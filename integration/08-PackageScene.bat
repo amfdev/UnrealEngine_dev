@@ -17,7 +17,7 @@ if %errorlevel% == 0 (
 
 SET Target=build
 SET MaxCPUCount=/maxcpucount
-SET Configuration="Shipping"
+SET Configuration="Development"
 SET Platform="Win64"
 
 pushd %~dp0

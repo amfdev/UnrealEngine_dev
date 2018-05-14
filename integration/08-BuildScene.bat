@@ -18,7 +18,7 @@ if %errorlevel% == 0 (
 SET Target=build
 SET MaxCPUCount=/maxcpucount
 SET Solution=UE4.sln
-SET Configuration="Shipping"
+SET Configuration="Development"
 SET Platform="Win64"
 
 pushd %~dp0
