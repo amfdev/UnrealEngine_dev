@@ -1,4 +1,4 @@
-@ECHO OFF
+rem @ECHO OFF
 SETLOCAL
 
 IF NOT DEFINED UE_VERSION (
@@ -12,6 +12,8 @@ IF NOT DEFINED UnrealHome (
 )
 
 SET DeployHome=Deploy
+SET Configuration=Development
+SET Platform=Win64
 
 IF EXIST "%DeployHome%" (
     @ECHO Found deploy directory, clean it
@@ -47,7 +49,7 @@ IF ERRORLEVEL 1 (
 COLOR
 
 @ECHO Create video folder for first sample
-MKDIR "%CD%\Deploy\Tests\PlainScreen\PlainScreen_%UE_VERSION%_%Configuration%_%Platform%\Content\Video
+MKDIR "%CD%\Deploy\Tests\PlainScreen_%UE_VERSION%_%Configuration%_%Platform%\PlainScreen\Content\Video
 
 @ECHO Copy sample 4K video file
 COPY "%CD%\TestsProjects\PlainScreen\Content\Video\1.mp4" "%CD%\Deploy\Tests\PlainScreen_%UE_VERSION%_%Configuration%_%Platform%\PlainScreen\Content\Video\1.mp4"
