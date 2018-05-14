@@ -34,7 +34,7 @@ IF EXIST "%AmfHome%" (
 
 :done
     @ECHO Clean before build completed
-    CALL BuildAll.bat
+    CALL 00-BuildAllImplementation.bat
     EXIT /B 0
 
 :error
