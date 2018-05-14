@@ -19,7 +19,6 @@ popd %~dp0
 CD %AmfHome%
 IF ERRORLEVEL 1 GOTO :error
 
-REM AmfMediaInstall.bat "..\UnrealEngine-4.17"
 AmfMediaInstall.bat "..\%UnrealHome%"
 IF ERRORLEVEL 1 GOTO :error
 

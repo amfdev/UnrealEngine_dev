@@ -33,7 +33,7 @@ IF ERRORLEVEL 1 (
 COLOR
 
 @ECHO Copy scene to deploy folder
-ROBOCOPY "%CD%\TestsProjects\PlainScreen\Saved\StagedBuilds\WindowsNoEditor" "%CD%\Deploy\Tests\PlainScreen" /E /xf *.pdb /xf *.txt
+ROBOCOPY "%CD%\TestsProjects\PlainScreen\Saved\StagedBuilds\WindowsNoEditor" "%CD%\Deploy\Tests\PlainScreen_%UE_VERSION%_%Configuration%_%Platform%" /E /xf *.pdb /xf *.txt
 IF ERRORLEVEL 1 (
     COLOR 4
     @ECHO Todo: investigate why robocopy returns error
@@ -42,10 +42,10 @@ IF ERRORLEVEL 1 (
 COLOR
 
 @ECHO Create video folder for first sample
-MKDIR "%CD%\Deploy\Tests\PlainScreen\PlainScreen\Content\Video
+MKDIR "%CD%\Deploy\Tests\PlainScreen\PlainScreen_%UE_VERSION%_%Configuration%_%Platform%\Content\Video
 
 @ECHO Copy sample 4K video file
-COPY "%CD%\TestsProjects\PlainScreen\Content\Video\1.mp4" "%CD%\Deploy\Tests\PlainScreen\PlainScreen\Content\Video\1.mp4"
+COPY "%CD%\TestsProjects\PlainScreen\Content\Video\1.mp4" "%CD%\Deploy\Tests\PlainScreen_%UE_VERSION%_%Configuration%_%Platform%\PlainScreen\Content\Video\1.mp4"
 IF ERRORLEVEL 1 GOTO :error
 
 :done

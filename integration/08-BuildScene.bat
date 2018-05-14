@@ -1,6 +1,12 @@
 @ECHO OFF
 SETLOCAL
 
+IF [%1]==[] (
+    COLOR 4
+    @ECHO Error: UnrealEngine version not specified!
+    GOTO :error
+)
+
 IF NOT DEFINED UnrealHome (
     @ECHO Error: UnrealHome variable undefined!
     GOTO :error
@@ -26,9 +32,7 @@ CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
 TIME /T > build_time_begin_PlainScreen.txt
-rem "%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\PlainScreen\PlainScreen.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -allmaps -build -stage -pak -archive -archivedirectory="Output Directory"
-rem "%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\PlainScreen\PlainScreen.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -allmaps -build -stage -archive -archivedirectory="Output Directory"
-    "%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\PlainScreen\PlainScreen.uproject" -nocompile -nocompileeditor -nop4 -cook -stage -archive -archivedirectory="Output Directory" -package -clientconfig=%Configuration% -clean -compressed -SkipCookingEditorContent -pak -distribution -nodebuginfo -targetplatform=%Platform% -build -utf8output
+"%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\PlainScreen\PlainScreen.uproject" -nocompile -nocompileeditor -nop4 -cook -stage -archive -archivedirectory="Output Directory" -package -clientconfig=%Configuration% -clean -compressed -SkipCookingEditorContent -pak -distribution -nodebuginfo -targetplatform=%Platform% -build -utf8output
 IF ERRORLEVEL 1 GOTO :error
 TIME /T > build_time_end_PlainScreen.txt
 
