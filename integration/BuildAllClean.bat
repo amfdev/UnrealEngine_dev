@@ -8,7 +8,7 @@ IF ERRORLEVEL 1 GOTO :error
 SET UE_VERSION=4.17
 SET AMF_VERSION=4.17
 
-rem CALL 00-BuildAllCleanImplementation.bat
+CALL 00-BuildAllCleanImplementation.bat
 IF ERRORLEVEL 1 (
     @ECHO Error: failed to build version %UE_VERSION%
 ) ELSE (
