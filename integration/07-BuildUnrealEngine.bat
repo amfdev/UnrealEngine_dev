@@ -21,8 +21,8 @@ IF ERRORLEVEL 1 GOTO :error
 SET Target=build
 SET MaxCPUCount=/maxcpucount
 SET Solution=UE4.sln
-SET Configuration="Development Editor"
-SET Platform="Win64"
+SET Configuration=Development Editor
+SET Platform=Win64
 
 pushd %~dp0
 CD %UnrealHome%

@@ -15,8 +15,8 @@ IF ERRORLEVEL 1 GOTO :error
 SET target=build
 SET maxcpucount=/maxcpucount 
 SET solution=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs2015\AmfMediaCommon.sln
-SET configuration="Release"
-SET platform="x64"
+SET configuration=Release
+SET platform=x64
 
 TIME /T > build_time_begin_AmfLibraries.txt
 %MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %solution%
