@@ -25,7 +25,7 @@ CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Prepare scene pack...
-"%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\PlainScreen\PlainScreen.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -allmaps -NoCompile -stage -archive -archivedirectory="Output Directory"
+"%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\PlainScreen\PlainScreen.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -allmaps -NoCompile -stage -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%"
 IF ERRORLEVEL 1 GOTO :error
 
 :done

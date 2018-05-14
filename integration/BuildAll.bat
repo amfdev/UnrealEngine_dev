@@ -4,78 +4,32 @@ SETLOCAL
 CALL TestDefines.bat
 IF ERRORLEVEL 1 GOTO :error
 
-@ECHO Prepare folders...
-SET UnrealHome=UnrealEngine-4.17
-SET AmfHome=AmfMedia-4.17
+@ECHO Build version 4.17
+SET UE_VERSION=4.17
+SET AMF_VERSION=4.17
 
-@ECHO Prepare UnrealEngine...
-IF NOT EXIST "%UnrealHome%" (
-    @ECHO No UnrealEngine folder found, create it
-    MKDIR "%UnrealHome%"
-)
-
-CALL 02-CloneUnrealEngine.bat
-IF ERRORLEVEL 1 GOTO :error
-
-CALL SetupMSBuildExe.bat
-IF ERRORLEVEL 1 GOTO :error
-
-@ECHO Prepare Amf...
-IF NOT EXIST "%AmfHome%" (
-    @ECHO No Amf folder found, create it
-    MKDIR "%AmfHome%"
-)
-
-CALL 03-CloneAmfLibraries.bat
-IF ERRORLEVEL 1 GOTO :error
-
-@ECHO Patch Amf libraries
-CALL 04-PatchAmfLibraries.bat
+CALL 00-BuildAllImplementation.bat
 IF ERRORLEVEL 1 (
-    COLOR 4
-    @ECHO Failed to apply Amf library patch
-    @ECHO It seems that Amf libraries is already patched!
-    @ECHO Automation will try to build it
+    @ECHO Error: failed to build version %UE_VERSION%
+) ELSE (
+    @ECHO Build for version %UE_VERSION% successfull!
 )
-COLOR
 
-@ECHO Build Amf libraries
-CALL 05-BuildAmfLibraries.bat
-IF ERRORLEVEL 1 GOTO :error
+rem @ECHO Build version 4.18
+rem SET UE_VERSION=4.18
+rem SET AMF_VERSION=4.18
 
-@ECHO Setup UnrealEngine
-CALL 07-SetupUnrealEngine.bat
-IF ERRORLEVEL 1 GOTO :error
-
-@ECHO Apply Amf libraries
-CALL 06-ApplyAmfLibraries.bat
-IF ERRORLEVEL 1 (
-    COLOR 4
-    @ECHO ToDo: investigate why error returned here
-    rem GOTO :error
-)
-COLOR
-
-@ECHO Prepare UnrealEngine solution
-CALL 07-PrepareUnrealEngineSolution.bat
-IF ERRORLEVEL 1 GOTO :error
-
-@ECHO Prepare UnrealEngine solution
-CALL 07-BuildUnrealEngine.bat
-IF ERRORLEVEL 1 GOTO :error
-
-@ECHO Build test scenes
-CALL 08-BuildScene.bat
-IF ERRORLEVEL 1 GOTO :error
-
-@ECHO Deploy scenes
-CALL 09-DeployScene.bat
-IF ERRORLEVEL 1 GOTO :error
+rem CALL 00-BuildAllCleanImplementation.bat
+rem IF ERRORLEVEL 1 (
+rem    @ECHO Error: failed to build version %UE_VERSION%
+rem ) ELSE (
+rem     @ECHO Build for version %UE_VERSION% successfull!
+rem )
 
 :done
-    @ECHO Build all finished!
+    @ECHO Clean build finished
     EXIT /B 0
 
 :error
-    @ECHO Error found, break!
+    @ECHO Error: clean build failed
     EXIT /B 1
