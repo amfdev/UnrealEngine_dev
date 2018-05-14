@@ -16,7 +16,7 @@ IF ERRORLEVEL 1 GOTO :error
 
 git init
 IF ERRORLEVEL 1 GOTO :error
-git pull https://github.com/GPUOpenSoftware/UnrealEngine.git %AMF_VERSION%
+git pull https://github.com/GPUOpenSoftware/UnrealEngine.git AmfMedia-%AMF_VERSION%
 IF ERRORLEVEL 1 GOTO :error
 
 :done

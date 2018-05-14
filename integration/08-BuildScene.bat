@@ -1,9 +1,8 @@
 @ECHO OFF
 SETLOCAL
 
-IF [%1]==[] (
-    COLOR 4
-    @ECHO Error: UnrealEngine version not specified!
+IF NOT DEFINED UE_VERSION (
+    @ECHO Error: UE_VERSION variable undefined!
     GOTO :error
 )
 
@@ -32,7 +31,10 @@ CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
 TIME /T > build_time_begin_PlainScreen.txt
-"%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\PlainScreen\PlainScreen.uproject" -nocompile -nocompileeditor -nop4 -cook -stage -archive -archivedirectory="Output Directory" -package -clientconfig=%Configuration% -clean -compressed -SkipCookingEditorContent -pak -distribution -nodebuginfo -targetplatform=%Platform% -build -utf8output
+rem release "%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\PlainScreen\PlainScreen.uproject" -nocompile -nocompileeditor -nop4 -cook -stage -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%" -package -clientconfig=%Configuration% -clean -compressed -SkipCookingEditorContent -pak -distribution -nodebuginfo -targetplatform=%Platform% -build -utf8output
+rem investigate "%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\PlainScreen\PlainScreen.uproject" -nop4 -cook -clientconfig=%Configuration% -serverconfig=%Configuration% -stage -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%" -package -clean -compressed -SkipCookingEditorContent -pak -distribution -nodebuginfo -targetplatform=%Platform% -build -utf8output
+rem old "%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\PlainScreen\PlainScreen.uproject" -noP4 -platform=Win64 -clientconfig=Development -serverconfig=Development -cook -allmaps -build -stage -pak -archive -archivedirectory="Output Directory"
+"%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\PlainScreen\PlainScreen.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -build -stage -pak -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%"
 IF ERRORLEVEL 1 GOTO :error
 TIME /T > build_time_end_PlainScreen.txt
 

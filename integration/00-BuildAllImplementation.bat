@@ -4,21 +4,19 @@ SETLOCAL
 CALL TestDefines.bat
 IF ERRORLEVEL 1 GOTO :error
 
-@ECHO Test folders...
-IF NOT DEFINED UnrealHome (
-    @ECHO Error: UnrealHome variable undefined!
-    GOTO :error
-)
-
-IF NOT DEFINED AmfHome (
-    @ECHO Error: AmfHome variable undefined!
-    GOTO :error
-)
-
 IF NOT DEFINED UE_VERSION (
     @ECHO Error: UE_VERSION variable undefined!
     GOTO :error
 )
+
+IF NOT DEFINED AMF_VERSION (
+    @ECHO Error: AMF_VERSION variable undefined!
+    GOTO :error
+)
+
+@ECHO Prepare folders...
+SET UnrealHome=UnrealEngine-%UE_VERSION%
+SET AmfHome=AmfMedia-%AMF_VERSION%
 
 @ECHO Prepare UnrealEngine...
 IF NOT EXIST "%UnrealHome%" (
