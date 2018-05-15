@@ -1,0 +1,16 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{A3478482-4856-269D-75E0-98A58FEE02FA}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "PlainScreen",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"TargetPlatforms": [
+		"WindowsNoEditor"
+	]
+}
