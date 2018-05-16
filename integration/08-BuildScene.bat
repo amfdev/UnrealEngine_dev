@@ -38,9 +38,9 @@ IF ERRORLEVEL 1 GOTO :error
 TIME /T > build_time_end_PlainScreen.txt
 
 :done
-    @ECHO UnrealEngine setup completed
+    @ECHO Demo scene built successfully for %UE_VERSION%.
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to setup UnrealEngine
+    @ECHO Error: failed to build demo scene for %UE_VERSION%!
     EXIT /B 1
