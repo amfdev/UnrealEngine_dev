@@ -24,7 +24,7 @@ if [%1]==[] (
     SET UE_VERSION=%~1
     SET AMF_VERSION=%~1
 
-    CALL 00-BuildAllImplementation.bat
+    CALL 00-BuildAllImplementation.bat TRUE
     IF ERRORLEVEL 1 (
         @ECHO Error: failed to build version %~1
         EXIT /B 1
