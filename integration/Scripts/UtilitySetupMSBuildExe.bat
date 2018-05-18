@@ -31,7 +31,7 @@ IF ERRORLEVEL 1 GOTO :error
     @ECHO Neccessary defines tested successfully!
     
     rem POPD %~dp0
-    POPD %CD%
+    POPD
     
     EXIT /B 0
 
@@ -40,6 +40,6 @@ IF ERRORLEVEL 1 GOTO :error
     @ECHO Error: failed to test defines
 
     rem POPD %~dp0
-    POPD %CD%
+    POPD
     
     EXIT /B 1
