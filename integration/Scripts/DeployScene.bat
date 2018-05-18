@@ -28,10 +28,13 @@ IF EXIST "%DeployHome%" (
     
     MKDIR %DeployHome%
     IF ERRORLEVEL 1 GOTO :error
+
+    MKDIR %DeployHome%\Prerequirements\%UE_VERSION%
+    IF ERRORLEVEL 1 GOTO :error
 )
 
 @ECHO Copy prerequirements
-ROBOCOPY %CD%\%UnrealHome%\Engine\Extras\Redist\en-us\ %CD%\Deploy\Prerequirements /E
+ROBOCOPY %CD%\%UnrealHome%\Engine\Extras\Redist\en-us\ %CD%\Deploy\Prerequirements\%UE_VERSION% /E
 IF ERRORLEVEL 1 (
     COLOR 4
     @ECHO Todo: investigate why robocopy returns error
@@ -40,20 +43,36 @@ IF ERRORLEVEL 1 (
 COLOR
 
 @ECHO Copy scene to deploy folder
-ROBOCOPY "%CD%\TestsProjects\PlainScreen_%UE_VERSION%\Saved\StagedBuilds\WindowsNoEditor" "%CD%\Deploy\Tests\PlainScreen_%UE_VERSION%_%Configuration%_%Platform%" /E /xf *.pdb /xf *.txt
-IF ERRORLEVEL 1 (
-    COLOR 4
-    @ECHO Todo: investigate why robocopy returns error
-    rem GOTO :error
+IF NOT DEFINED AMF_VERSION (
+    ROBOCOPY "%CD%\TestsProjects\%UE_VERSION%\PlaneStandard\Saved\StagedBuilds\WindowsNoEditor" "%CD%\Deploy\Tests\PlaneStandard_%UE_VERSION%_%Configuration%_%Platform%" /E /xf *.pdb /xf *.txt
+    IF ERRORLEVEL 1 (
+        @ECHO Todo: investigate why robocopy returns error
+        rem GOTO :error
+    )
+
+    @ECHO Create video folder for first sample
+    MKDIR "%CD%\Deploy\Tests\PlaneStandard_%UE_VERSION%_%Configuration%_%Platform%\PlaneStandard\Content\Video
+    IF ERRORLEVEL 1 GOTO :error
+    
+    @ECHO Copy sample 4K video file
+    COPY "%CD%\TestsProjects\%UE_VERSION%\PlaneStandard\Content\Video\1.mp4" "%CD%\Deploy\Tests\PlaneStandard_%UE_VERSION%_%Configuration%_%Platform%\PlaneStandard\Content\Video\1.mp4"
+    IF ERRORLEVEL 1 GOTO :error
+
+) ELSE (
+    ROBOCOPY "%CD%\TestsProjects\%UE_VERSION%\PlaneAmf\Saved\StagedBuilds\WindowsNoEditor" "%CD%\Deploy\Tests\PlaneAmf_%UE_VERSION%_%Configuration%_%Platform%" /E /xf *.pdb /xf *.txt
+    IF ERRORLEVEL 1 (
+        @ECHO Todo: investigate why robocopy returns error
+        rem GOTO :error
+    )
+
+    @ECHO Create video folder for first sample
+    MKDIR "%CD%\Deploy\Tests\PlaneAmf_%UE_VERSION%_%Configuration%_%Platform%\PlaneStandard\Content\Video
+    IF ERRORLEVEL 1 GOTO :error
+
+    @ECHO Copy sample 4K video file
+    COPY "%CD%\TestsProjects\%UE_VERSION%\PlaneStandard\Content\Video\1.mp4" "%CD%\Deploy\Tests\PlaneStandard_%UE_VERSION%_%Configuration%_%Platform%\PlaneStandard\Content\Video\1.mp4"
+    IF ERRORLEVEL 1 GOTO :error
 )
-COLOR
-
-@ECHO Create video folder for first sample
-MKDIR "%CD%\Deploy\Tests\PlainScreen_%UE_VERSION%_%Configuration%_%Platform%\PlainScreen\Content\Video
-
-@ECHO Copy sample 4K video file
-COPY "%CD%\TestsProjects\PlainScreen_%UE_VERSION%\Content\Video\1.mp4" "%CD%\Deploy\Tests\PlainScreen_%UE_VERSION%_%Configuration%_%Platform%\PlainScreen\Content\Video\1.mp4"
-IF ERRORLEVEL 1 GOTO :error
 
 :done
     @ECHO Scene deployed successfully
