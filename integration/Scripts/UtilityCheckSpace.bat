@@ -1,4 +1,4 @@
-@ECHO OFF
+rem @ECHO OFF
 @ECHO Test for free 80Gb to prepare and build UnrealEngine
 
 setlocal enableextensions disabledelayedexpansion

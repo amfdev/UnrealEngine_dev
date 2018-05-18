@@ -1,6 +1,4 @@
-@ECHO OFF
-
-PUSHD %~dp0
+rem @ECHO OFF
 
 IF NOT DEFINED UnrealHome (
     @ECHO Error: UnrealHome variable undefined!
@@ -15,6 +13,7 @@ IF DEFINED VSComnToolsPath  (
 @ECHO VSComnToolsPath variable with path to run devenv.exe not found!
 @ECHO Automation scripts will try to detects devenv.exe automatically later
 
+rem PUSHD %~dp0
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 

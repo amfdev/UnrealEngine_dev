@@ -1,19 +1,19 @@
-@ECHO OFF
-
-PUSHD %~dp0
+rem @ECHO OFF
 
 IF NOT DEFINED UnrealHome (
     @ECHO Error: UnrealHome variable undefined!
     GOTO :error
 )
 
-:checkMSBuild
 IF DEFINED MSBUILD_EXE  (
     GOTO :testMSBuild
     )
     
 @ECHO MSBUILD_EXE variable with command to run MSBuild.exe not found!
 @ECHO Automation scripts will try to detects MSBuild.exe automatically later
+
+rem PUSHD %~dp0
+rem PUSHD %CD%
 
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
@@ -30,11 +30,15 @@ IF ERRORLEVEL 1 GOTO :error
     @ECHO
     @ECHO Neccessary defines tested successfully!
     
-    POPD %~dp0    
+    rem POPD %~dp0
+    POPD %CD%
+    @ECHO ON
     EXIT /B 0
 
 :error
     @ECHO Error: failed to test defines
 
-    POPD %~dp0
+    rem POPD %~dp0
+    POPD %CD%
+    @ECHO ON
     EXIT /B 1

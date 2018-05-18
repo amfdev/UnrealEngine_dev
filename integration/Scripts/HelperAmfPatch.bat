@@ -1,4 +1,4 @@
-@ECHO OFF
+rem @ECHO OFF
 SETLOCAL
 
 IF NOT DEFINED AmfHome (

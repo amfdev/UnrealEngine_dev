@@ -1,4 +1,4 @@
-@ECHO OFF
+rem @ECHO OFF
 SETLOCAL
 
 IF NOT DEFINED UE_VERSION (
@@ -25,7 +25,7 @@ SET MaxCPUCount=/maxcpucount
 SET Configuration=Development
 SET Platform=Win64
 
-pushd %~dp0
+rem pushd %~dp0
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 

@@ -1,4 +1,4 @@
-@ECHO OFF
+rem @ECHO OFF
 SETLOCAL
 
 IF NOT DEFINED AmfHome (
@@ -11,7 +11,7 @@ IF NOT DEFINED UnrealHome (
     GOTO :error
 )
 
-pushd %~dp0
+rem pushd %~dp0
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 popd %~dp0

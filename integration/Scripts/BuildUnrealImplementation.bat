@@ -1,4 +1,4 @@
-@ECHO OFF
+rem @ECHO OFF
 SETLOCAL
 
 CALL Scripts\UtilityTestDefines.bat
