@@ -6,7 +6,7 @@ IF NOT DEFINED AmfHome (
     GOTO :error
 )
 
-CALL ./Scripts/UtilitySetupMSBuildExe.bat
+CALL Scripts\UtilitySetupMSBuildExe.bat
 IF ERRORLEVEL 1 GOTO :error
 
 CD %AmfHome%

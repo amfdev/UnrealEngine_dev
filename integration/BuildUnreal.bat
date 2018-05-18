@@ -1,7 +1,7 @@
 @ECHO OFF
 SETLOCAL
 
-CALL ./Scripts/HelperTestDefines.bat
+CALL Scripts\UtilityTestDefines.bat
 IF ERRORLEVEL 1 GOTO :error
 
 if [%1]==[] (
@@ -32,7 +32,7 @@ if [%1]==[] (
         SET AMF_VERSION=%~1
     )
 
-    CALL ./Scripts/BuildUnrealImplementation.bat
+    CALL Scripts\BuildUnrealImplementation.bat
     IF ERRORLEVEL 1 (
         @ECHO Error: failed to build version %~1
         EXIT /B 1
