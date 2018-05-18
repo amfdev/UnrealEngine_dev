@@ -14,11 +14,12 @@ IF DEFINED MSBUILD_EXE  (
 
 rem PUSHD %~dp0
 rem PUSHD %CD%
+rem PUSHD
 
-CD %UnrealHome%
-IF ERRORLEVEL 1 GOTO :error
+rem CD %UnrealHome%
+rem IF ERRORLEVEL 1 GOTO :error
 
-CALL %CD%\Engine\Build\BatchFiles\GetMSBuildPath.bat
+CALL %UnrealHome%\Engine\Build\BatchFiles\GetMSBuildPath.bat
 IF ERRORLEVEL 1 GOTO :error
 
 :testMSBuild
@@ -31,7 +32,8 @@ IF ERRORLEVEL 1 GOTO :error
     @ECHO Neccessary defines tested successfully!
     
     rem POPD %~dp0
-    POPD
+    rem POPD
+    rem CD ..
     
     EXIT /B 0
 
@@ -40,6 +42,7 @@ IF ERRORLEVEL 1 GOTO :error
     @ECHO Error: failed to test defines
 
     rem POPD %~dp0
-    POPD
+    rem POPD
+    rem CD ..
     
     EXIT /B 1
