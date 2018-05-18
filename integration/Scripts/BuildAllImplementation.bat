@@ -1,7 +1,7 @@
 @ECHO OFF
 SETLOCAL
 
-CALL TestDefines.bat
+CALL ./Scripts/TestDefines.bat
 IF ERRORLEVEL 1 GOTO :error
 
 IF NOT DEFINED UE_VERSION (
@@ -23,14 +23,14 @@ IF NOT EXIST "%UnrealHome%" (
     MKDIR "%UnrealHome%"
 )
 
-CALL 02-CloneUnrealEng1ine.bat
+CALL ./Scripts/CloneUnrealEng1ine.bat
 IF ERRORLEVEL 1 GOTO :error
 
-CALL SetupMSBuildExe.bat
+CALL ./Scripts/SetupMSBuildExe.bat
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Setup UnrealEngine
-CALL 07-SetupUnrealEngine.bat
+CALL ./Scripts/SetupUnrealEngine.bat
 IF ERRORLEVEL 1 GOTO :error
 
 IF DEFINED AMF_VERSION (
@@ -42,13 +42,13 @@ IF DEFINED AMF_VERSION (
         IF ERRORLEVEL 1 GOTO :error
     )
 
-    CALL 03-CloneAmfLibraries.bat
+    CALL ./Scripts/CloneAmfLibraries.bat
     IF ERRORLEVEL 1 GOTO :error
 
     IF "%AMF_VERSION%" == "4.17" (
 
         @ECHO Patch Amf libraries
-        CALL 04-PatchAmfLibraries.bat
+        CALL ./Scripts/PatchAmfLibraries.bat
         IF ERRORLEVEL 1 (
             @ECHO Failed to apply Amf library patch
             @ECHO It seems that Amf libraries is already patched!
@@ -57,11 +57,11 @@ IF DEFINED AMF_VERSION (
     )
 
     @ECHO Build Amf libraries
-    CALL 05-BuildAmfLibraries.bat
+    CALL ./Scripts/BuildAmfLibraries.bat
     IF ERRORLEVEL 1 GOTO :error
 
     @ECHO Apply Amf libraries
-    CALL 06-ApplyAmfLibraries.bat
+    CALL ./Scripts/ApplyAmfLibraries.bat
     IF ERRORLEVEL 1 (
         @ECHO ToDo: investigate why error returned here
         rem GOTO :error
@@ -69,19 +69,19 @@ IF DEFINED AMF_VERSION (
 )
     
 @ECHO Prepare UnrealEngine solution
-CALL 07-PrepareUnrealEngineSolution.bat
+CALL ./Scripts/PrepareUnrealEngineSolution.bat
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Prepare UnrealEngine solution
-CALL 07-BuildUnrealEngine.bat
+CALL ./Scripts/BuildUnrealEngine.bat
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Build test scenes
-CALL 08-BuildScene.bat
+CALL ./Scripts/BuildScene.bat
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Deploy scenes
-CALL 09-DeployScene.bat
+CALL ./Scripts/DeployScene.bat
 IF ERRORLEVEL 1 GOTO :error
 
 :done

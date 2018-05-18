@@ -1,7 +1,7 @@
 @ECHO OFF
 SETLOCAL
 
-CALL TestDefines.bat
+CALL ./Scripts/TestDefines.bat
 IF ERRORLEVEL 1 GOTO :error
 
 if [%1]==[] (
@@ -24,7 +24,7 @@ if [%1]==[] (
     SET UE_VERSION=%~1
     SET AMF_VERSION=%~1
 
-    CALL 00-BuildSceneImplementation.bat
+    CALL ./Scripts/BuildSceneImplementation.bat
     IF ERRORLEVEL 1 (
         @ECHO Error: failed to build version %~1
         EXIT /B 1

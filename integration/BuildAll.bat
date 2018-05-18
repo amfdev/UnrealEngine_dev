@@ -6,9 +6,10 @@ IF ERRORLEVEL 1 GOTO :error
 
 if [%1]==[] (
     CALL :runBuild 4.17
-    CALL :runBuild 4.18
+    CALL :runBuild 4.17 4.17
+    CALL :runBuild 4.18 4.18
 ) ELSE (
-    CALL :runBuild %1
+    CALL :runBuild %1 %2
 )
 
 :done
@@ -19,12 +20,19 @@ if [%1]==[] (
     @ECHO Error: build all failed!
     EXIT /B 1
 
-:runBuild version_number
+:runBuild unreal_number amf_number
     @ECHO Build version %~1
     SET UE_VERSION=%~1
-    SET AMF_VERSION=%~1
 
-    CALL 00-BuildAllImplementation.bat TRUE
+    if "%~2" == "" (
+        @ECHO Set empty amf revision to generate standard player
+        SET AMF_VERSION=
+    ) ELSE (
+        @ECHO Set amf revision to %~1
+        SET AMF_VERSION=%~1
+    )
+
+    rem CALL 00-BuildAllImplementation.bat TRUE
     IF ERRORLEVEL 1 (
         @ECHO Error: failed to build version %~1
         EXIT /B 1
