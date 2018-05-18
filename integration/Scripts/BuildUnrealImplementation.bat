@@ -1,7 +1,7 @@
 @ECHO OFF
 SETLOCAL
 
-CALL ./Scripts/TestDefines.bat
+CALL ./Scripts/UtilityTestDefines.bat
 IF ERRORLEVEL 1 GOTO :error
 
 IF NOT DEFINED UE_VERSION (
@@ -23,14 +23,14 @@ IF NOT EXIST "%UnrealHome%" (
     MKDIR "%UnrealHome%"
 )
 
-CALL ./Scripts/CloneUnrealEng1ine.bat
+CALL ./Scripts/HelperUnrealClone.bat
 IF ERRORLEVEL 1 GOTO :error
 
-CALL ./Scripts/SetupMSBuildExe.bat
+CALL ./Scripts/UtilitySetupMSBuildExe.bat
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Setup UnrealEngine
-CALL ./Scripts/SetupUnrealEngine.bat
+CALL ./Scripts/HelperUnrealSetup.bat
 IF ERRORLEVEL 1 GOTO :error
 
 IF DEFINED AMF_VERSION (
@@ -42,13 +42,13 @@ IF DEFINED AMF_VERSION (
         IF ERRORLEVEL 1 GOTO :error
     )
 
-    CALL ./Scripts/CloneAmfLibraries.bat
+    CALL ./Scripts/HelperAmfClone.bat
     IF ERRORLEVEL 1 GOTO :error
 
     IF "%AMF_VERSION%" == "4.17" (
 
         @ECHO Patch Amf libraries
-        CALL ./Scripts/PatchAmfLibraries.bat
+        CALL ./Scripts/HelperAmfPatch.bat
         IF ERRORLEVEL 1 (
             @ECHO Failed to apply Amf library patch
             @ECHO It seems that Amf libraries is already patched!
@@ -57,11 +57,11 @@ IF DEFINED AMF_VERSION (
     )
 
     @ECHO Build Amf libraries
-    CALL ./Scripts/BuildAmfLibraries.bat
+    CALL ./Scripts/HelperAmfBuild.bat
     IF ERRORLEVEL 1 GOTO :error
 
     @ECHO Apply Amf libraries
-    CALL ./Scripts/ApplyAmfLibraries.bat
+    CALL ./Scripts/HelperAmfApply.bat
     IF ERRORLEVEL 1 (
         @ECHO ToDo: investigate why error returned here
         rem GOTO :error
@@ -69,19 +69,11 @@ IF DEFINED AMF_VERSION (
 )
     
 @ECHO Prepare UnrealEngine solution
-CALL ./Scripts/PrepareUnrealEngineSolution.bat
+CALL ./Scripts/HelperUnrealPrepare.bat
 IF ERRORLEVEL 1 GOTO :error
 
-@ECHO Prepare UnrealEngine solution
-CALL ./Scripts/BuildUnrealEngine.bat
-IF ERRORLEVEL 1 GOTO :error
-
-@ECHO Build test scenes
-CALL ./Scripts/BuildScene.bat
-IF ERRORLEVEL 1 GOTO :error
-
-@ECHO Deploy scenes
-CALL ./Scripts/DeployScene.bat
+@ECHO Build UnrealEngine solution
+CALL ./Scripts/HelperUnrealBuild.bat
 IF ERRORLEVEL 1 GOTO :error
 
 :done

@@ -15,7 +15,7 @@ if %errorlevel% == 0 (
     GOTO :error
 )
 
-CALL SetupMSBuildExe.bat
+CALL ./Scripts/UtilitySetupMSBuildExe.bat
 IF ERRORLEVEL 1 GOTO :error
 
 SET Target=build

@@ -1,7 +1,7 @@
 rem @ECHO OFF
 SETLOCAL
 
-CALL ./Scripts/TestDefines.bat
+CALL ./Scripts/UtilityTestDefines.bat
 IF ERRORLEVEL 1 GOTO :error
 
 IF NOT DEFINED UE_VERSION (
@@ -20,7 +20,7 @@ IF NOT DEFINED AMF_VERSION (
 @ECHO Prepare UnrealEngine...
 IF EXIST "%UnrealHome%" (
     @ECHO UnrealEngine folder found, clear it
-    CALL ./Scripts/CleanUnrealEngine.bat
+    CALL ./Scripts/HelperUnrealClean.bat
     IF ERRORLEVEL 1 GOTO :error
 )
 
@@ -28,14 +28,14 @@ IF DEFINED AMF_VERSION (
     @ECHO Prepare Amf...
     IF EXIST "%AmfHome%" (
         @ECHO Reset Amf libraries repository
-        CALL ./Scripts/CleanAmfLibraries.bat
+        CALL ./Scripts/HelperAmfClean.bat
         IF ERRORLEVEL 1 GOTO :error
     )
 )
 
 :done
     @ECHO Clean before build completed
-    CALL ./Scripts/BuildAllImplementation.bat
+    CALL ./Scripts/BuildUnrealImplementation.bat
     EXIT /B 0
 
 :error

@@ -32,9 +32,9 @@ if [%1]==[] (
         SET AMF_VERSION=%~1
     )
 
-    CALL ./Scripts/BuildSceneImplementation.bat
+    CALL ./Scripts/BuildUnrealImplementation.bat
     IF ERRORLEVEL 1 (
-        @ECHO Error: failed to build scene
+        @ECHO Error: failed to build version %~1
         EXIT /B 1
     ) ELSE (
         @ECHO Build for version %~1 successfull!

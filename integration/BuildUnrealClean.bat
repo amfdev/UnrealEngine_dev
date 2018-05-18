@@ -1,4 +1,4 @@
-@ECHO OFF
+rem @ECHO OFF
 SETLOCAL
 
 CALL ./Scripts/HelperTestDefines.bat
@@ -32,11 +32,11 @@ if [%1]==[] (
         SET AMF_VERSION=%~1
     )
 
-    CALL ./Scripts/BuildSceneImplementation.bat
+    CALL ./Scripts/BuildUnrealCleanImplementation.bat
     IF ERRORLEVEL 1 (
-        @ECHO Error: failed to build scene
+        @ECHO Error: failed to clean build version %~1
         EXIT /B 1
     ) ELSE (
-        @ECHO Build for version %~1 successfull!
+        @ECHO Clean build for version %~1 successfull!
         EXIT /B 0
     )

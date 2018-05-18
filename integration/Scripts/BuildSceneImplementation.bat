@@ -1,7 +1,7 @@
 @ECHO OFF
 SETLOCAL
 
-CALL ./Scripts/TestDefines.bat
+CALL ./Scripts/UtilityTestDefines.bat
 IF ERRORLEVEL 1 GOTO :error
 
 IF NOT DEFINED UE_VERSION (
@@ -9,20 +9,15 @@ IF NOT DEFINED UE_VERSION (
     GOTO :error
 )
 
-IF NOT DEFINED AMF_VERSION (
-    @ECHO Error: AMF_VERSION variable undefined!
-    GOTO :error
-)
-
 @ECHO Prepare folders...
 SET UnrealHome=UnrealEngine-%UE_VERSION%
 
 @ECHO Build test scenes
-CALL ./Scripts/BuildScene.bat
+CALL ./Scripts/HelperSceneBuild.bat
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Deploy scenes
-CALL ./Scripts/DeployScene.bat
+CALL ./Scripts/HelperSceneDeploy.bat
 IF ERRORLEVEL 1 GOTO :error
 
 :done

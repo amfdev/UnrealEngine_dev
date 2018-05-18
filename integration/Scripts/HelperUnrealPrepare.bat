@@ -22,13 +22,13 @@ IF ERRORLEVEL 1 GOTO :error
 CALL GenerateProjectFiles.bat
 IF ERRORLEVEL 1 GOTO :error
 
-@ECHO Add dependency to shipping configuration
-git apply ..\Patches\UE4.sln.patch
-IF ERRORLEVEL 1 (
-    COLOR 4
-    @ECHO Patch unsuccessfull, try to continue without patch...
-    )
-COLOR
+rem @ECHO Add dependency to shipping configuration
+rem git apply ..\Patches\UE4.sln.patch
+rem IF ERRORLEVEL 1 (
+rem     COLOR 4
+rem     @ECHO Patch unsuccessfull, try to continue without patch...
+rem     )
+rem COLOR
 
 :done
     @ECHO Create of UnrealEngine project files completed
