@@ -25,23 +25,25 @@ SET MaxCPUCount=/maxcpucount
 SET Configuration=Development
 SET Platform=Win64
 
+IF NOT DEFINED AMF_VERSION (
+    SET PlaneProjectName=PlaneStandard
+) ELSE (
+    SET PlaneProjectName=PlaneAmf
+)
+
 rem pushd %~dp0
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
-IF NOT DEFINED AMF_VERSION (
-    TIME /T > build_time_begin_PlaneStandard.txt
-    @ECHO Amf version unspecified, standard media playback will be used
-    "%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\%UE_VERSION%\PlaneStandard\PlaneStandard.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -build -stage -pak -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%"
-    IF ERRORLEVEL 1 GOTO :error
-    TIME /T > build_time_end_PlaneStandard.txt
-) ELSE (
-    TIME /T > build_time_begin_PlaneAmf.txt
-    @ECHO Amf version specified, amf playback will be used
-    "%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\%UE_VERSION%\PlaneAmf\PlaneStandard.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -build -stage -pak -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%"
-    IF ERRORLEVEL 1 GOTO :error
-    TIME /T > build_time_end_PlaneAmf.txt
-)
+DEL ..\Logs\%UE_VERSION%_%Configuration%_%Platform%_%PlaneProjectName%_begin.txt
+DEL ..\Logs\%UE_VERSION%_%Configuration%_%Platform%_%PlaneProjectName%_end.txt
+
+TIME /T > ..\Logs\%UE_VERSION%_%Configuration%_%Platform%_%PlaneProjectName%_begin.txt
+
+"%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\%UE_VERSION%\%PlaneProjectName%\%PlaneProjectName%.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -build -stage -pak -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%"
+IF ERRORLEVEL 1 GOTO :error
+
+TIME /T > Logs\%UE_VERSION%_%Configuration%_%Platform%_%PlaneProjectName%_end.txt
 
 :done
     @ECHO Demo scene built successfully for %UE_VERSION%.
