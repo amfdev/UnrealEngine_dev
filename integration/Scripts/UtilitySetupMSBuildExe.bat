@@ -27,18 +27,19 @@ IF ERRORLEVEL 1 GOTO :error
 IF ERRORLEVEL 1 GOTO :error
     
 :done
-    @ECHO
+    @ECHO ON
     @ECHO Neccessary defines tested successfully!
     
     rem POPD %~dp0
     POPD %CD%
-    @ECHO ON
+    
     EXIT /B 0
 
 :error
+    @ECHO ON
     @ECHO Error: failed to test defines
 
     rem POPD %~dp0
     POPD %CD%
-    @ECHO ON
+    
     EXIT /B 1
