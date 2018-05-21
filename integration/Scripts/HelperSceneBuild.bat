@@ -11,6 +11,11 @@ IF NOT DEFINED UnrealHome (
     GOTO :error
 )
 
+IF NOT DEFINED SceneConfiguration (
+    @ECHO Error: SceneConfiguration variable undefined!
+    GOTO :error
+)
+
 :checkRights
 FSUTIL DIRTY QUERY %systemdrive% >nul
 if %errorlevel% == 0 (
@@ -22,7 +27,7 @@ if %errorlevel% == 0 (
 
 SET Target=build
 SET MaxCPUCount=/maxcpucount
-SET Configuration=Development
+SET Configuration=SceneConfiguration
 SET Platform=Win64
 
 IF NOT DEFINED AMF_VERSION (

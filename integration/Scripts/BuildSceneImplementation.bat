@@ -9,6 +9,11 @@ IF NOT DEFINED UE_VERSION (
     GOTO :error
 )
 
+IF NOT DEFINED SceneConfiguration (
+    @ECHO Error: SceneConfiguration variable undefined!
+    GOTO :error
+)
+
 @ECHO Prepare folders...
 SET UnrealHome=UnrealEngine-%UE_VERSION%
 

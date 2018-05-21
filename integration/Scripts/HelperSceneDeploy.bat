@@ -11,8 +11,13 @@ IF NOT DEFINED UnrealHome (
     GOTO :error
 )
 
+IF NOT DEFINED SceneConfiguration (
+    @ECHO Error: SceneConfiguration variable undefined!
+    GOTO :error
+)
+
 SET DeployHome=Deploy
-SET Configuration=Development
+SET Configuration=SceneConfiguration
 SET Platform=Win64
 
 IF NOT DEFINED AMF_VERSION (

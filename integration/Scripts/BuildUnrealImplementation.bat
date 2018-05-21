@@ -17,6 +17,11 @@ IF NOT DEFINED AMF_VERSION (
     SET AmfHome=AmfMedia-%AMF_VERSION%
 )
 
+IF NOT DEFINED UnrealConfiguration (
+    @ECHO Error: UnrealConfiguration variable undefined!
+    GOTO :error
+)
+
 @ECHO Prepare UnrealEngine...
 IF NOT EXIST "%UnrealHome%" (
     @ECHO No UnrealEngine folder found, create it
