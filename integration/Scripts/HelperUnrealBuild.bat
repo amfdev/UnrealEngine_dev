@@ -34,6 +34,13 @@ TIME /T > build_time_begin_%Solution%_%configuration%.txt
 IF ERRORLEVEL 1 GOTO :error
 TIME /T > build_time_end_%Solution%_%configuration%.txt
 
+@ECHO Copy prerequirements
+ROBOCOPY %CD%\%UnrealHome%\Engine\Extras\Redist\en-us\ %CD%\Deploy\Prerequirements\%UE_VERSION% /E
+IF ERRORLEVEL 1 (
+    @ECHO Todo: investigate why robocopy returns error
+    rem GOTO :error
+)
+
 :done
     @ECHO UnrealEngine build completed
     EXIT /B 0
