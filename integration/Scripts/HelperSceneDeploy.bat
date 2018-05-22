@@ -33,7 +33,7 @@ IF NOT DEFINED AMF_VERSION (
 
 IF ["%SceneSourceType%"] == ["BluePrints"] (
     @ECHO Deploy blueprints scene
-) ELSE IF ["%SceneSourceType%"] == ["CPP"]
+) ELSE IF ["%SceneSourceType%"] == ["CPP"] (
     @ECHO Deploy C++ scene
     SET PlaneProjectName=%PlaneProjectName%Cpp
 ) ELSE (

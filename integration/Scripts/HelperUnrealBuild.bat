@@ -28,13 +28,12 @@ SET MaxCPUCount=/maxcpucount
 SET Solution=UE4.sln
 SET Platform=Win64
 
-rem pushd %~dp0
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Start building UnrealEngine
-rem %MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration="%UnrealConfiguration%";Platform=%platform% %parameters% %solution%
-rem IF ERRORLEVEL 1 GOTO :error
+%MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration="%UnrealConfiguration%";Platform=%platform% %parameters% %solution%
+IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Copy prerequirements
 ROBOCOPY %CD%\%UnrealHome%\Engine\Extras\Redist\en-us\ %CD%\Deploy\Prerequirements\%UE_VERSION% /E
