@@ -88,6 +88,12 @@ IF NOT DEFINED Build_Development IF NOT DEFINED Build_Shipping (
     SET Build_Shipping=1
 )
 
+IF NOT DEFINED Build_BluePrints IF NOT DEFINED Build_CPP IF DEFINED Build_Tests (
+    @ECHO No tests type are specified by args, Blueprints and C++ will be added
+    SET Build_BluePrints=1
+    SET Build_CPP=1
+)
+
 IF NOT DEFINED Build_Engine IF NOT DEFINED Build_Tests (
     @ECHO Engine and tests will be built
     SET Build_Engine=1
