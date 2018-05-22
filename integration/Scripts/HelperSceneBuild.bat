@@ -41,13 +41,13 @@ IF NOT DEFINED AMF_VERSION (
     SET PlaneProjectName=PlaneAmf
 )
 
-IF ["%SceneSourceType%"] == ["BluePrints"] (
+IF /I ["%SceneSourceType%"] == ["BluePrints"] (
     @ECHO Build blueprints scene
-) ELSE IF ["%SceneSourceType%"] == ["CPP"] (
+) ELSE IF /I ["%SceneSourceType%"] == ["CPP"] (
     @ECHO Build C++ scene
     SET PlaneProjectName=%PlaneProjectName%Cpp
 ) ELSE (
-    @ECHO Error: unsupported scene source type!
+    @ECHO Error: unsupported scene source type: %SceneSourceType%!
     GOTO :error
 )
 

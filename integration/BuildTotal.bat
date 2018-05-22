@@ -15,6 +15,7 @@ SET Build_CPP=
 SET Params=
 SET ParamsEngine=
 SET ParamsScene=
+SET SkipEngineBuild=
 
 FOR %%x IN (%*) DO (
    IF /i "%%~x"=="4.17" (
@@ -68,20 +69,26 @@ IF NOT DEFINED Build_4_17 IF NOT DEFINED Build_4_18 (
     SET Build_4_17=1
     SET Build_4_18=1
 )
+
 IF NOT DEFINED Build_Standard IF NOT DEFINED Build_Amf (
     @ECHO No build type specified by args, standard and Amf will be added 
     SET Build_Standard=1
     SET Build_Amf=1
 )
+
 IF NOT DEFINED Build_Development IF NOT DEFINED Build_Shipping (
     @ECHO No configuration specified by args, Development and Shipping will be added
     SET Build_Development=1
     SET Build_Shipping=1
 )
+
 IF ["%Params%"] == [""] (
     @ECHO No scenes specified by args, Blueprints and C++ will be added
     SET Build_BluePrints=1
     SET Build_CPP=1
+) ELSE (
+    @ECHO Only scenes will be built!
+    SET SkipEngineBuild=1
 )
 
 @ECHO Prepare log folder
@@ -158,32 +165,36 @@ IF DEFINED Build_4_18 (
         SET SceneConfiguration=
     )
 
-    SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%BuildTypePrintableName%
+    IF NOT DEFINED SkipEngineBuild (
+        SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%BuildTypePrintableName%
 
-    @ECHO:
-    @ECHO Build %UnrealConfigurationPrintableName%
+        @ECHO:
+        @ECHO Build %UnrealConfigurationPrintableName%
 
-    CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
-    
-    CALL Scripts\BuildUnrealCleanImplementation.bat
-    
-    IF ERRORLEVEL 1 (
-        @ECHO Error: failed to build %UnrealConfigurationPrintableName%
-        SET returnCode=1
+        CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
+        
+        CALL Scripts\BuildUnrealCleanImplementation.bat
+        
+        IF ERRORLEVEL 1 (
+            @ECHO Error: failed to build %UnrealConfigurationPrintableName%
+            SET returnCode=1
+        ) ELSE (
+            @ECHO %UnrealConfigurationPrintableName% built successfully!
+            SET returnCode=0
+        )
+
+        CALL :fillDateTimeVariables endYear endMonth endDay endHour endMinute endSecond
+
+        iF "%returnCode%" == "1" (
+            SET buildSuccess=failed
+        ) ELSE (
+            SET buildSuccess=succeeded
+        )
+
+        @ECHO %UnrealConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildSuccess%>>"%LogFileName%"
     ) ELSE (
-        @ECHO %UnrealConfigurationPrintableName% built successfully!
-        SET returnCode=0
+        @ECHO Skip building UnrealEngine
     )
-
-    CALL :fillDateTimeVariables endYear endMonth endDay endHour endMinute endSecond
-
-    iF "%returnCode%" == "1" (
-        SET buildSuccess=failed
-    ) ELSE (
-        SET buildSuccess=succeeded
-    )
-
-    @ECHO %UnrealConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildSuccess%>>"%LogFileName%""
 
     SET SceneSourceType=
     IF DEFINED Build_BluePrints (
@@ -204,10 +215,10 @@ IF DEFINED Build_4_18 (
     EXIT /B 0
 
 :buildScene
-    @ECHO Build %SceneConfigurationPrintableName%: %SceneSourceType%
-    EXIT /B 0
-    CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
+    @ECHO:
+    @ECHO Build %SceneConfigurationPrintableName%
     
+    CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
     CALL Scripts\BuildSceneImplementation.bat
     
     IF ERRORLEVEL 1 (
@@ -226,7 +237,7 @@ IF DEFINED Build_4_18 (
         SET buildSuccess=succeeded
     )
 
-    @ECHO %SceneConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildSuccess%>>"%LogFileName%""
+    @ECHO %SceneConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildSuccess%>>"%LogFileName%"
     
     EXIT /B 0
 
