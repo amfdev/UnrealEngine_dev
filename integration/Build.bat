@@ -111,7 +111,7 @@ CALL :fillDateTimeVariables CurrentYear CurrentMonth CurrentDay CurrentHour Curr
 rem @ECHO %CurrentYear%/%CurrentMonth%/%CurrentDay%
 rem @ECHO %CurrentHour%:%CurrentMinute%:%CurrentSecond%
 
-SET LogFileName=Logs\TotalBuild_%CurrentYear%_%CurrentMonth%_%CurrentDay%__%CurrentHour%_%CurrentMinute%_%CurrentSecond%.log.csv
+SET LogFileName=Logs\Build_%CurrentYear%_%CurrentMonth%_%CurrentDay%__%CurrentHour%_%CurrentMinute%_%CurrentSecond%.log.csv
 @ECHO project_name,start_date,start_time,end_date,end_time,result>>"%LogFileName%""
 
 IF DEFINED Build_4_17 (

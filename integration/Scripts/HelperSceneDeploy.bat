@@ -46,8 +46,6 @@ IF /I ["%SceneSourceType%"] == ["BluePrints"] (
 SET PlaneProjectOutputName=%PlaneProjectName%_%UE_VERSION%_%Configuration%_%Platform%
 @ECHO Plane project output name: %PlaneProjectOutputName%
 
-goto :Error
-
 IF NOT EXIST "%DeployHome%" (
     @ECHO Create deploy home folder
     MKDIR %DeployHome%
