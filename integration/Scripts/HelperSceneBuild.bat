@@ -32,7 +32,7 @@ if %errorlevel% == 0 (
 
 SET Target=build
 SET MaxCPUCount=/maxcpucount
-SET Configuration=SceneConfiguration
+SET Configuration=%SceneConfiguration%
 SET Platform=Win64
 
 IF NOT DEFINED AMF_VERSION (

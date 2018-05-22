@@ -22,7 +22,7 @@ IF NOT DEFINED SceneSourceType (
 )
 
 SET DeployHome=Deploy
-SET Configuration=SceneConfiguration
+SET Configuration=%SceneConfiguration%
 SET Platform=Win64
 
 IF NOT DEFINED AMF_VERSION (
