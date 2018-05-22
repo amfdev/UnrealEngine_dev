@@ -183,36 +183,31 @@ IF DEFINED Build_4_18 (
         SET SceneConfiguration=
     )
 
-    SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%BuildTypePrintableName%
-
     @ECHO:
-    rem @ECHO Current engine configuration: %UnrealConfigurationPrintableName%
+    
+    SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%BuildTypePrintableName%
+    SET returnCode=0
+    SET buildSuccess=""
+
+    CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
     
     IF DEFINED Build_Engine (
-        rem @ECHO Configuration will be built
-
-        CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond        
+        rem @ECHO Configuration will be built        
         CALL Scripts\BuildUnrealCleanImplementation.bat
         
         IF ERRORLEVEL 1 (
             @ECHO Error: failed to build "%UnrealConfigurationPrintableName%"
-            SET returnCode=1
-        ) ELSE (
-            @ECHO Build for "%UnrealConfigurationPrintableName%" is done
-            SET returnCode=0
-        )
-
-        CALL :fillDateTimeVariables endYear endMonth endDay endHour endMinute endSecond
-
-        iF "%returnCode%" == "1" (
             SET buildSuccess=failed
         ) ELSE (
+            @ECHO Build for "%UnrealConfigurationPrintableName%" is done
             SET buildSuccess=succeeded
         )
+    )
+    
+    CALL :fillDateTimeVariables endYear endMonth endDay endHour endMinute endSecond
 
+    IF DEFINED Build_Engine (
         @ECHO %UnrealConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildSuccess%>>"%LogFileName%"
-    ) ELSE (
-        rem @ECHO Skip building configuration
     )
 
     SET SceneSourceType=
