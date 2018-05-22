@@ -62,11 +62,10 @@ FOR %%x IN (%*) DO (
         SET Params=%Params%H
         SET ParamsScene=%ParamsScene%J
     ) ELSE IF /i "%%~x"=="Help" (
-        @ECHO Available commands: Build.bat [Engine] [Tests] [4.17] [4.18] [Standard] [Amf] [Development] [Shipping] BluePrints CPP Help
-        EXIT /B 0
+        GOTO :usage
     ) ELSE (
-        @ECHO Error: unsupported option: %%~x
-        GOTO :error
+        @ECHO Error: unsupported option: %%~x!
+        GOTO :usage
     )
 )
 
@@ -126,6 +125,11 @@ IF DEFINED Build_4_18 (
 :done
     @ECHO:
     @ECHO Build successfully finished!
+    EXIT /B 0
+
+:usage
+    @ECHO:
+    @ECHO Available commands: Build.bat [Engine] [Tests] [4.17] [4.18] [Standard] [Amf] [Development] [Shipping] [BluePrints] [CPP] [Help]
     EXIT /B 0
 
 :error
