@@ -1,4 +1,4 @@
-ECHO OFF
+@ECHO OFF
 SETLOCAL enabledelayedexpansion
 
 CALL Scripts\UtilityTestDefines.bat
