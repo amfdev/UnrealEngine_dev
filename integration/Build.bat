@@ -12,52 +12,58 @@ SET Build_Development=
 SET Build_Shipping=
 SET Build_BluePrints=
 SET Build_CPP=
+SET Build_Engine=
+SET Build_Tests=
 SET Params=
 SET ParamsEngine=
 SET ParamsScene=
-SET SkipEngineBuild=
 
 FOR %%x IN (%*) DO (
    IF /i "%%~x"=="4.17" (
-        rem @ECHO 4.17 enabled
         SET Build_4_17=1
         SET Params=%Params%A
         SET ParamsEngine=%ParamsEngine%A
     ) ELSE IF /i "%%~x"=="4.18" (
-        rem @ECHO 4.18 enabled
         SET Build_4_18=1
         SET Params=%Params%B
         SET ParamsEngine=%ParamsEngine%B
     ) ELSE IF /i "%%~x"=="Amf" (
-        rem @ECHO Amf enabled
         SET Build_Amf=1
         SET Params=%Params%C
         SET ParamsEngine=%ParamsEngine%C
     ) ELSE IF /i "%%~x"=="Standard" (
-        rem @ECHO Standard enabled
         SET Build_Standard=1
         SET Params=%Params%D
         SET ParamsEngine=%ParamsEngine%D
     ) ELSE IF /i "%%~x"=="Development" (
-        rem @ECHO Development build enabled
         SET Build_Development=1
         SET Params=%Params%E
         SET ParamsEngine=%ParamsEngine%E
     ) ELSE IF /i "%%~x"=="Shipping" (
-        rem @ECHO Shipping build enabled
         SET Build_Shipping=1
         SET Params=%Params%F
         SET ParamsEngine=%ParamsEngine%F
     ) ELSE IF /i "%%~x"=="BluePrints" (
-        rem @ECHO BluePrints enabled
         SET Build_BluePrints=1
+        SET Build_Tests=1
         SET Params=%Params%J
         SET ParamsScene=%ParamsScene%J
     ) ELSE IF /i "%%~x"=="CPP" (
-        rem @ECHO CPP enabled
         SET Build_CPP=1
+        SET Build_Tests=1
         SET Params=%Params%H
         SET ParamsScene=%ParamsScene%H
+    ) ELSE IF /i "%%~x"=="Engine" (
+        SET Build_Engine=1
+        SET Params=%Params%H
+        SET ParamsEngine=%ParamsScene%I
+    ) ELSE IF /i "%%~x"=="Tests" (
+        SET Build_Tests=1
+        SET Params=%Params%H
+        SET ParamsScene=%ParamsScene%J
+    ) ELSE IF /i "%%~x"=="Help" (
+        @ECHO Available commands: Build.bat [Engine] [Tests] [4.17] [4.18] [Standard] [Amf] [Development] [Shipping] BluePrints CPP Help
+        EXIT /B 0
     ) ELSE (
         @ECHO Error: unsupported option: %%~x
         GOTO :error
@@ -82,13 +88,12 @@ IF NOT DEFINED Build_Development IF NOT DEFINED Build_Shipping (
     SET Build_Shipping=1
 )
 
-IF ["%Params%"] == [""] (
-    @ECHO No scenes specified by args, Blueprints and C++ will be added
+IF NOT DEFINED Build_Engine IF NOT DEFINED Build_Tests (
+    @ECHO Engine and tests will be built
+    SET Build_Engine=1
+    SET Build_Tests=1
     SET Build_BluePrints=1
     SET Build_CPP=1
-) ELSE (
-    @ECHO Only scenes will be built!
-    SET SkipEngineBuild=1
 )
 
 @ECHO Prepare log folder
@@ -107,16 +112,19 @@ SET LogFileName=Logs\TotalBuild_%CurrentYear%_%CurrentMonth%_%CurrentDay%__%Curr
 IF DEFINED Build_4_17 (
     CALL :processBuildUnrealClean 4.17
     )
+
 IF DEFINED Build_4_18 (
     CALL :processBuildUnrealClean 4.18
     )
 
 :done
-    @ECHO Total build successfully finished!
+    @ECHO:
+    @ECHO Build successfully finished!
     EXIT /B 0
 
 :error
-    @ECHO Error: total build failed!
+    @ECHO:
+    @ECHO Error: build failed!
     EXIT /B 1
 
 :processBuildUnrealClean unreal_number
@@ -165,21 +173,22 @@ IF DEFINED Build_4_18 (
         SET SceneConfiguration=
     )
 
-    IF NOT DEFINED SkipEngineBuild (
-        SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%BuildTypePrintableName%
+    SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%BuildTypePrintableName%
 
-        @ECHO:
-        @ECHO Build %UnrealConfigurationPrintableName%
+    @ECHO:
+    rem @ECHO Current engine configuration: %UnrealConfigurationPrintableName%
+    
+    IF DEFINED Build_Engine (
+        rem @ECHO Configuration will be built
 
-        CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
-        
+        CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond        
         CALL Scripts\BuildUnrealCleanImplementation.bat
         
         IF ERRORLEVEL 1 (
-            @ECHO Error: failed to build %UnrealConfigurationPrintableName%
+            @ECHO Error: failed to build "%UnrealConfigurationPrintableName%"
             SET returnCode=1
         ) ELSE (
-            @ECHO %UnrealConfigurationPrintableName% built successfully!
+            @ECHO Build for "%UnrealConfigurationPrintableName%" is done
             SET returnCode=0
         )
 
@@ -193,10 +202,11 @@ IF DEFINED Build_4_18 (
 
         @ECHO %UnrealConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildSuccess%>>"%LogFileName%"
     ) ELSE (
-        @ECHO Skip building UnrealEngine
+        rem @ECHO Skip building configuration
     )
 
     SET SceneSourceType=
+
     IF DEFINED Build_BluePrints (
         SET SceneSourceType=Blueprints
         SET SceneConfigurationPrintableName=TestPlane_%UE_VERSION%_%SceneConfiguration%_%BuildTypePrintableName%_Blueprints

@@ -1,4 +1,4 @@
-rem @ECHO OFF
+@ECHO OFF
 SETLOCALE
 
 :choice

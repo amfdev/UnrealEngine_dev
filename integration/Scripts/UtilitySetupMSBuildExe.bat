@@ -1,4 +1,4 @@
-rem @ECHO OFF
+@ECHO OFF
 
 IF NOT DEFINED UnrealHome (
     @ECHO Error: UnrealHome variable undefined!
