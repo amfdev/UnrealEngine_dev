@@ -14,6 +14,11 @@ IF NOT DEFINED SceneConfiguration (
     GOTO :error
 )
 
+IF NOT DEFINED SceneSourceType (
+    @ECHO Error: SceneSourceType variable undefined!
+    GOTO :error
+)
+
 @ECHO Prepare folders...
 SET UnrealHome=UnrealEngine-%UE_VERSION%
 

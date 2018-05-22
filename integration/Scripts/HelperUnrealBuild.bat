@@ -33,10 +33,8 @@ CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Start building UnrealEngine
-TIME /T > build_time_begin_%Solution%_%UnrealConfiguration%.txt
-%MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration="%UnrealConfiguration%";Platform=%platform% %parameters% %solution%
-IF ERRORLEVEL 1 GOTO :error
-TIME /T > build_time_end_%Solution%_%UnrealConfiguration%.txt
+rem %MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration="%UnrealConfiguration%";Platform=%platform% %parameters% %solution%
+rem IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Copy prerequirements
 ROBOCOPY %CD%\%UnrealHome%\Engine\Extras\Redist\en-us\ %CD%\Deploy\Prerequirements\%UE_VERSION% /E

@@ -16,6 +16,11 @@ IF NOT DEFINED SceneConfiguration (
     GOTO :error
 )
 
+IF NOT DEFINED SceneSourceType (
+    @ECHO Error: SceneSourceType variable undefined!
+    GOTO :error
+)
+
 SET DeployHome=Deploy
 SET Configuration=SceneConfiguration
 SET Platform=Win64
@@ -25,6 +30,17 @@ IF NOT DEFINED AMF_VERSION (
 ) ELSE (
     SET PlaneProjectName=PlaneAmf
 )
+
+IF ["%SceneSourceType%"] == ["BluePrints"] (
+    @ECHO Deploy blueprints scene
+) ELSE IF ["%SceneSourceType%"] == ["CPP"]
+    @ECHO Deploy C++ scene
+    SET PlaneProjectName=%PlaneProjectName%Cpp
+) ELSE (
+    @ECHO Error: unsupported scene source type!
+    GOTO :error
+)
+
 @ECHO Plane project name: %PlaneProjectName%
 
 SET PlaneProjectOutputName=%PlaneProjectName%_%UE_VERSION%_%Configuration%_%Platform%

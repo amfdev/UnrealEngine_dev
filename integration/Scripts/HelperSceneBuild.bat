@@ -16,6 +16,11 @@ IF NOT DEFINED SceneConfiguration (
     GOTO :error
 )
 
+IF NOT DEFINED SceneSourceType (
+    @ECHO Error: SceneSourceType variable undefined!
+    GOTO :error
+)
+
 :checkRights
 FSUTIL DIRTY QUERY %systemdrive% >nul
 if %errorlevel% == 0 (
@@ -36,19 +41,23 @@ IF NOT DEFINED AMF_VERSION (
     SET PlaneProjectName=PlaneAmf
 )
 
-rem pushd %~dp0
+IF ["%SceneSourceType%"] == ["BluePrints"] (
+    @ECHO Build blueprints scene
+) ELSE IF ["%SceneSourceType%"] == ["CPP"]
+    @ECHO Build C++ scene
+    SET PlaneProjectName=%PlaneProjectName%Cpp
+) ELSE (
+    @ECHO Error: unsupported scene source type!
+    GOTO :error
+)
+
+@ECHO Plane project name: %PlaneProjectName%
+
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
-DEL ..\Logs\%UE_VERSION%_%Configuration%_%Platform%_%PlaneProjectName%_begin.txt
-DEL ..\Logs\%UE_VERSION%_%Configuration%_%Platform%_%PlaneProjectName%_end.txt
-
-TIME /T > ..\Logs\%UE_VERSION%_%Configuration%_%Platform%_%PlaneProjectName%_begin.txt
-
-"%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\%UE_VERSION%\%PlaneProjectName%\%PlaneProjectName%.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -build -stage -pak -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%"
-IF ERRORLEVEL 1 GOTO :error
-
-TIME /T > Logs\%UE_VERSION%_%Configuration%_%Platform%_%PlaneProjectName%_end.txt
+rem "%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\%UE_VERSION%\%PlaneProjectName%\%PlaneProjectName%.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -build -stage -pak -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%"
+rem IF ERRORLEVEL 1 GOTO :error
 
 :done
     @ECHO Demo scene built successfully for %UE_VERSION%.

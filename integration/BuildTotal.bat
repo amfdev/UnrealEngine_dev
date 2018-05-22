@@ -1,4 +1,4 @@
-@ECHO OFF
+ECHO OFF
 SETLOCAL enabledelayedexpansion
 
 CALL Scripts\UtilityTestDefines.bat
@@ -12,32 +12,51 @@ SET Build_Development=
 SET Build_Shipping=
 SET Build_BluePrints=
 SET Build_CPP=
+SET Params=
+SET ParamsEngine=
+SET ParamsScene=
 
 FOR %%x IN (%*) DO (
    IF /i "%%~x"=="4.17" (
         rem @ECHO 4.17 enabled
         SET Build_4_17=1
+        SET Params=%Params%A
+        SET ParamsEngine=%ParamsEngine%A
     ) ELSE IF /i "%%~x"=="4.18" (
         rem @ECHO 4.18 enabled
         SET Build_4_18=1
+        SET Params=%Params%B
+        SET ParamsEngine=%ParamsEngine%B
     ) ELSE IF /i "%%~x"=="Amf" (
         rem @ECHO Amf enabled
         SET Build_Amf=1
+        SET Params=%Params%C
+        SET ParamsEngine=%ParamsEngine%C
     ) ELSE IF /i "%%~x"=="Standard" (
         rem @ECHO Standard enabled
         SET Build_Standard=1
+        SET Params=%Params%D
+        SET ParamsEngine=%ParamsEngine%D
     ) ELSE IF /i "%%~x"=="Development" (
         rem @ECHO Development build enabled
         SET Build_Development=1
+        SET Params=%Params%E
+        SET ParamsEngine=%ParamsEngine%E
     ) ELSE IF /i "%%~x"=="Shipping" (
         rem @ECHO Shipping build enabled
         SET Build_Shipping=1
+        SET Params=%Params%F
+        SET ParamsEngine=%ParamsEngine%F
     ) ELSE IF /i "%%~x"=="BluePrints" (
         rem @ECHO BluePrints enabled
         SET Build_BluePrints=1
+        SET Params=%Params%J
+        SET ParamsScene=%ParamsScene%J
     ) ELSE IF /i "%%~x"=="CPP" (
         rem @ECHO CPP enabled
         SET Build_CPP=1
+        SET Params=%Params%H
+        SET ParamsScene=%ParamsScene%H
     ) ELSE (
         @ECHO Error: unsupported option: %%~x
         GOTO :error
@@ -59,6 +78,11 @@ IF NOT DEFINED Build_Development IF NOT DEFINED Build_Shipping (
     SET Build_Development=1
     SET Build_Shipping=1
 )
+IF ["%Params%"] == [""] (
+    @ECHO No scenes specified by args, Blueprints and C++ will be added
+    SET Build_BluePrints=1
+    SET Build_CPP=1
+)
 
 @ECHO Prepare log folder
 IF NOT EXIST Logs (
@@ -66,17 +90,12 @@ IF NOT EXIST Logs (
     IF ERRORLEVEL 1 GOTO :error
 )
 
-CALL :fillDateTimeVariables aaa bbb ccc CurrentHour CurrentMinute CurrentSecond
-@ECHO %aaa%/%bbb%/%ccc%
-@ECHO %CurrentHour%:%CurrentMinute%:%CurrentSecond%
-
 CALL :fillDateTimeVariables CurrentYear CurrentMonth CurrentDay CurrentHour CurrentMinute CurrentSecond
-@ECHO %CurrentYear%/%CurrentMonth%/%CurrentDay%
-@ECHO %CurrentHour%:%CurrentMinute%:%CurrentSecond%
+rem @ECHO %CurrentYear%/%CurrentMonth%/%CurrentDay%
+rem @ECHO %CurrentHour%:%CurrentMinute%:%CurrentSecond%
 
-
-exit /b 0
-SET LogFileName=Logs\TotalBuild_%CurrentYear%_%CurrentMonth%_%CurrentDay%__%CurrentHour%_%CurrentMinute%_%CurrentSecond%.log
+SET LogFileName=Logs\TotalBuild_%CurrentYear%_%CurrentMonth%_%CurrentDay%__%CurrentHour%_%CurrentMinute%_%CurrentSecond%.log.csv
+@ECHO project_name,start_date,start_time,end_date,end_time,result>>"%LogFileName%""
 
 IF DEFINED Build_4_17 (
     CALL :processBuildUnrealClean 4.17
@@ -118,7 +137,6 @@ IF DEFINED Build_4_18 (
 
 :prepareBuildUnrealClean unreal_number configuration amf_number
     SET UE_VERSION=%~1
-    SET UnrealConfiguration=%~2
 
     if "%~3" == "" (
         SET AMF_VERSION=
@@ -128,23 +146,32 @@ IF DEFINED Build_4_18 (
         SET BuildTypePrintableName=Amf
     )
 
-    SET UnrealConfiguration=%~2
-    SET UnrealConfigurationPrintableName=%1_%2_%BuildTypePrintableName%
+    IF ["%~2"] == ["Development"] (
+        SET UnrealConfiguration=Development Editor
+        SET SceneConfiguration=Development
+    ) ELSE IF ["%~2"] == ["Shipping"] (
+        SET UnrealConfiguration=Shipping
+        SET SceneConfiguration=Shipping
+    ) ELSE (
+        REM Must be failed later
+        SET UnrealConfiguration=
+        SET SceneConfiguration=
+    )
+
+    SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%BuildTypePrintableName%
 
     @ECHO:
-    @ECHO Build UnrealEngine %UnrealConfigurationPrintableName%
+    @ECHO Build %UnrealConfigurationPrintableName%
 
     CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
-    @ECHO %startYear%/%startMonth%/%startDay%
-    @ECHO %startHour%:%startMinute%:%startSecond%
-
-    rem CALL Scripts\BuildUnrealCleanImplementation.bat
+    
+    CALL Scripts\BuildUnrealCleanImplementation.bat
     
     IF ERRORLEVEL 1 (
-        @ECHO Error: failed to build UnrealEngine %UnrealConfigurationPrintableName%
+        @ECHO Error: failed to build %UnrealConfigurationPrintableName%
         SET returnCode=1
     ) ELSE (
-        @ECHO UnrealEngine %UnrealConfigurationPrintableName% built successfully!
+        @ECHO %UnrealConfigurationPrintableName% built successfully!
         SET returnCode=0
     )
 
@@ -156,24 +183,70 @@ IF DEFINED Build_4_18 (
         SET buildSuccess=succeeded
     )
 
-    @ECHO %UnrealConfigurationPrintableName% %startYear%/%startMonth%/%startDay%_%startHour%:%startMinute%:%startSecond% %startYear%/%startMonth%/%startDay%_%startHour%:%startMinute%:%startSecond% %buildSuccess%>>"%LogFileName%""
+    @ECHO %UnrealConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildSuccess%>>"%LogFileName%""
 
-    EXIT /B !returnCode!
+    SET SceneSourceType=
+    IF DEFINED Build_BluePrints (
+        SET SceneSourceType=Blueprints
+        SET SceneConfigurationPrintableName=TestPlane_%UE_VERSION%_%SceneConfiguration%_%BuildTypePrintableName%_Blueprints
+        
+        CALL :buildScene
+    )
+    
+    SET SceneSourceType=
+    IF DEFINED Build_CPP (
+        SET SceneSourceType=CPP
+        SET SceneConfigurationPrintableName=TestPlane_%UE_VERSION%_%SceneConfiguration%_%BuildTypePrintableName%_CPP
+
+        CALL :buildScene
+    )
+
+    EXIT /B 0
+
+:buildScene
+    @ECHO Build %SceneConfigurationPrintableName%: %SceneSourceType%
+    EXIT /B 0
+    CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
+    
+    CALL Scripts\BuildSceneImplementation.bat
+    
+    IF ERRORLEVEL 1 (
+        @ECHO Error: failed to build scene %SceneConfigurationPrintableName%
+        SET returnCode=1
+    ) ELSE (
+        @ECHO Scene %SceneConfigurationPrintableName% built successfully!
+        SET returnCode=0
+    )
+
+    CALL :fillDateTimeVariables endYear endMonth endDay endHour endMinute endSecond
+
+    iF "%returnCode%" == "1" (
+        SET buildSuccess=failed
+    ) ELSE (
+        SET buildSuccess=succeeded
+    )
+
+    @ECHO %SceneConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildSuccess%>>"%LogFileName%""
+    
+    EXIT /B 0
 
 :fillDateTimeVariables yy mm dd hour minute second [/A]
     SETLOCAL ENABLEEXTENSIONS
-    if "%date%A" LSS "A" (set toks=1-3) else (set toks=2-4)
-    for /f "tokens=2-4 delims=(-)" %%a in ('echo:^|date') do (
-    for /f "tokens=%toks% delims=.-/ " %%i in ('date/t') do (
-        set '%%a'=%%i
-        set '%%b'=%%j
-        set '%%c'=%%k
+    
+    IF "%date%A" LSS "A" (SET toks=1-3) ELSE (SET toks=2-4)
+    
+    FOR /f "tokens=2-4 delims=(-)" %%a IN ('echo:^|date') DO (
+        FOR /f "tokens=%toks% delims=.-/ " %%i IN ('date/t') DO (
+            SET '%%a'=%%i
+            SET '%%b'=%%j
+            SET '%%c'=%%k
+        )
     )
-    )
-    if /I "%'yy'%"=="" set "'yy'=%'aa'%"
-    if /I "%'yy'%"=="" ( set "'yy'=%'jj'%" & set "'dd'=%'tt'%" )
-    if %'yy'% LSS 100 set 'yy'=20%'yy'%
-    endlocal&set %1=%'yy'%&set %7 %2=%'mm'%&set %7 %3=%'dd'%
+
+    IF /I "%'yy'%"=="" SET "'yy'=%'aa'%"
+    IF /I "%'yy'%"=="" ( SET "'yy'=%'jj'%" & SET "'dd'=%'tt'%" )
+    IF %'yy'% LSS 100 SET 'yy'=20%'yy'%
+    ENDLOCAL&SET %1=%'yy'%&SET %7 %2=%'mm'%&SET %7 %3=%'dd'%
     
     SET currentTimeValue=%TIME%
     IF "%currentTimeValue:~0,1%" == " " (SET currentTimeValue=0%currentTimeValue:~1,7%)
@@ -183,29 +256,3 @@ IF DEFINED Build_4_18 (
     SET %6=%currentTimeValue:~6,2%
 
     EXIT /b 0
-
-:getDateValues yy mm dd [/A]
-    :: Returns the current date on any machine with regional-independent settings
-    :: Arguments:
-    ::   yy = variable name for the year output
-    ::   mm = variable name for the month output
-    ::   dd = variable name for the day output
-    ::   /A = OPTIONAL, removes leading 0 on days/months smaller than 10 (example: 01 becomes 1)
-    :: Remarks:
-    ::  Will return month in text format in regions with MMM month
-    ::
-    SETLOCAL ENABLEEXTENSIONS
-    if "%date%A" LSS "A" (set toks=1-3) else (set toks=2-4)
-    for /f "tokens=2-4 delims=(-)" %%a in ('echo:^|date') do (
-    for /f "tokens=%toks% delims=.-/ " %%i in ('date/t') do (
-        set '%%a'=%%i
-        set '%%b'=%%j
-        set '%%c'=%%k
-    )
-    )
-    if /I "%'yy'%"=="" set "'yy'=%'aa'%"
-    if /I "%'yy'%"=="" ( set "'yy'=%'jj'%" & set "'dd'=%'tt'%" )
-    if %'yy'% LSS 100 set 'yy'=20%'yy'%
-    endlocal&set %1=%'yy'%&set %4 %2=%'mm'%&set %4 %3=%'dd'%
-
-    EXIT /B 0
