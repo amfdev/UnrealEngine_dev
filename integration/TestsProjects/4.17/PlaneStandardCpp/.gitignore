@@ -1,8 +1,9 @@
-/Binaries
+/Build
 /DerivedDataCache
-/.vs
+/Intermediate
 /Saved
+/Binaries
+/.vs
 /PlainScreen.VC.db
 /PlainScreen.VC.VC.opendb
-/Intermediate
-/Build
+
