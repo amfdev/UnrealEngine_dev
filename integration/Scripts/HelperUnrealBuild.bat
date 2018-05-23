@@ -27,6 +27,7 @@ SET Target=build
 SET MaxCPUCount=/maxcpucount
 SET Solution=UE4.sln
 SET Platform=Win64
+SET CurrentDirectory=%CD%
 
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
@@ -36,9 +37,10 @@ IF ERRORLEVEL 1 GOTO :error
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Copy prerequirements
+CD %CurrentDirectory%
 ROBOCOPY %CD%\%UnrealHome%\Engine\Extras\Redist\en-us\ %CD%\Deploy\Prerequirements\%UE_VERSION% /E
 IF ERRORLEVEL 1 (
-    @ECHO Todo: investigate why robocopy returns error
+    @ECHO Error: failed to copy dependencies
     rem GOTO :error
 )
 
