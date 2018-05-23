@@ -12,15 +12,11 @@ IF DEFINED MSBUILD_EXE  (
 @ECHO MSBUILD_EXE variable with command to run MSBuild.exe not found!
 @ECHO Automation scripts will try to detects MSBuild.exe automatically later
 
-rem PUSHD %~dp0
-rem PUSHD %CD%
-rem PUSHD
-
-rem CD %UnrealHome%
-rem IF ERRORLEVEL 1 GOTO :error
-
 CALL %UnrealHome%\Engine\Build\BatchFiles\GetMSBuildPath.bat
 IF ERRORLEVEL 1 GOTO :error
+
+REM fix issue in script
+@ECHO OFF
 
 :testMSBuild
 @ECHO Test MSBuild:
@@ -28,21 +24,11 @@ IF ERRORLEVEL 1 GOTO :error
 IF ERRORLEVEL 1 GOTO :error
     
 :done
-    @ECHO ON
     @ECHO Neccessary defines tested successfully!
-    
-    rem POPD %~dp0
-    rem POPD
-    rem CD ..
     
     EXIT /B 0
 
 :error
-    @ECHO ON
     @ECHO Error: failed to test defines
 
-    rem POPD %~dp0
-    rem POPD
-    rem CD ..
-    
     EXIT /B 1
