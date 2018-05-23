@@ -18,8 +18,8 @@ SET solution=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs2015\AmfMedi
 SET configuration=Release
 SET platform=x64
 
-rem %MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %solution%
-rem IF ERRORLEVEL 1 GOTO :error
+%MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %solution%
+IF ERRORLEVEL 1 GOTO :error
 
 :done
     @ECHO Amf libraries built

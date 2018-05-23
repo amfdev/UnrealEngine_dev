@@ -12,9 +12,13 @@ IF NOT DEFINED UE_VERSION (
 )
 
 IF NOT DEFINED AMF_VERSION (
+    SET AmfHome=
+    
     @ECHO Amf variable undefined! Build standard version
 ) ELSE (
     SET AmfHome=AmfMedia-%AMF_VERSION%
+
+    @ECHO Amf variable defined, AmfHome: %AmfHome%
 )
 
 @ECHO Prepare UnrealEngine...

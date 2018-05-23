@@ -39,7 +39,6 @@ CALL Scripts\HelperUnrealSetup.bat
 IF ERRORLEVEL 1 GOTO :error
 
 IF DEFINED AMF_VERSION (
-
     @ECHO Prepare Amf...
     IF NOT EXIST "%AmfHome%" (
         @ECHO No Amf folder found, create it
@@ -72,7 +71,7 @@ IF DEFINED AMF_VERSION (
         rem GOTO :error
     )
 )
-    
+
 @ECHO Prepare UnrealEngine solution
 CALL Scripts\HelperUnrealPrepare.bat
 IF ERRORLEVEL 1 GOTO :error

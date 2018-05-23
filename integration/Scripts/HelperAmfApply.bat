@@ -11,10 +11,11 @@ IF NOT DEFINED UnrealHome (
     GOTO :error
 )
 
-rem pushd %~dp0
+SET CurrentDirectory=%CD%
+
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
-popd %~dp0
+CD %CurrentDirectory%
 
 CD %AmfHome%
 IF ERRORLEVEL 1 GOTO :error
