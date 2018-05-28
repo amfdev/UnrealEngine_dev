@@ -14,6 +14,9 @@ SET Build_BluePrints=
 SET Build_CPP=
 SET Build_Engine=
 SET Build_Tests=
+SET Build_Dirty=
+SET Build_Clean=
+
 SET Params=
 SET ParamsEngine=
 SET ParamsScene=
@@ -101,18 +104,24 @@ IF NOT DEFINED Build_Engine IF NOT DEFINED Build_Tests (
     SET Build_CPP=1
 )
 
+CALL :fillDateTimeVariables CurrentYear CurrentMonth CurrentDay CurrentHour CurrentMinute CurrentSecond
+rem @ECHO %CurrentYear%/%CurrentMonth%/%CurrentDay%
+rem @ECHO %CurrentHour%:%CurrentMinute%:%CurrentSecond%
+
+SET LogFolderName=Logs\Build_%CurrentYear%_%CurrentMonth%_%CurrentDay%__%CurrentHour%_%CurrentMinute%_%CurrentSecond%
+SET ResultsFileName=%LogFolderName%\results.csv
+
 @ECHO Prepare log folder
 IF NOT EXIST Logs (
     MKDIR Logs
     IF ERRORLEVEL 1 GOTO :error
 )
+IF NOT EXIST %LogFolderName% (
+    MKDIR %LogFolderName%
+    IF ERRORLEVEL 1 GOTO :error
+)
 
-CALL :fillDateTimeVariables CurrentYear CurrentMonth CurrentDay CurrentHour CurrentMinute CurrentSecond
-rem @ECHO %CurrentYear%/%CurrentMonth%/%CurrentDay%
-rem @ECHO %CurrentHour%:%CurrentMinute%:%CurrentSecond%
-
-SET LogFileName=Logs\Build_%CurrentYear%_%CurrentMonth%_%CurrentDay%__%CurrentHour%_%CurrentMinute%_%CurrentSecond%.log.csv
-@ECHO project_name,start_date,start_time,end_date,end_time,result>>"%LogFileName%""
+@ECHO project_name,start_date,start_time,end_date,end_time,result>>"%ResultsFileName%""
 
 IF DEFINED Build_4_17 (
     CALL :processBuildUnrealClean 4.17
@@ -186,14 +195,15 @@ IF DEFINED Build_4_18 (
     @ECHO:
     
     SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%BuildTypePrintableName%
+    SET UnrealBuildLogFile="%LogFolderName%\%UnrealConfigurationPrintableName%.log"
     SET returnCode=0
     SET buildSuccess=""
 
     CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
     
     IF DEFINED Build_Engine (
-        rem @ECHO Configuration will be built        
-        CALL Scripts\BuildUnrealCleanImplementation.bat
+        CALL Scripts\BuildUnrealCleanImplementation.bat > %UnrealBuildLogFile% 2>>%1 %UnrealBuildLogFile%
+        rem CALL Scripts\BuildUnrealCleanImplementation.bat
         
         IF ERRORLEVEL 1 (
             @ECHO Error: failed to build "%UnrealConfigurationPrintableName%"
@@ -207,7 +217,7 @@ IF DEFINED Build_4_18 (
     CALL :fillDateTimeVariables endYear endMonth endDay endHour endMinute endSecond
 
     IF DEFINED Build_Engine (
-        @ECHO %UnrealConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildSuccess%>>"%LogFileName%"
+        @ECHO %UnrealConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildSuccess%>>"%ResultsFileName%"
     )
 
     SET SceneSourceType=
@@ -232,9 +242,13 @@ IF DEFINED Build_4_18 (
 :buildScene
     @ECHO:
     @ECHO Build %SceneConfigurationPrintableName%
-    
+
+    SET SceneBuildLogFile="%LogFolderName%\%SceneConfigurationPrintableName%.log"
+    SET returnCode=0
+    SET buildSuccess=""
+
     CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
-    CALL Scripts\BuildSceneImplementation.bat
+    CALL Scripts\BuildSceneImplementation.bat > %SceneBuildLogFile% 2>>%1 %SceneBuildLogFile%
     
     IF ERRORLEVEL 1 (
         @ECHO Error: failed to build scene %SceneConfigurationPrintableName%
@@ -252,7 +266,7 @@ IF DEFINED Build_4_18 (
         SET buildSuccess=succeeded
     )
 
-    @ECHO %SceneConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildSuccess%>>"%LogFileName%"
+    @ECHO %SceneConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildSuccess%>>"%ResultsFileName%"
     
     EXIT /B 0
 
