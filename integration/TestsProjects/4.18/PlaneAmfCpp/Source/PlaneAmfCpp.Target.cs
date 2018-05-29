@@ -3,12 +3,12 @@
 using UnrealBuildTool;
 using System.Collections.Generic;
 
-public class PlainScreenTarget : TargetRules
+public class PlaneAmfCppTarget : TargetRules
 {
-	public PlainScreenTarget(TargetInfo Target) : base(Target)
+	public PlaneAmfCppTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
 
-		ExtraModuleNames.AddRange( new string[] { "PlainScreen" } );
+		ExtraModuleNames.AddRange( new string[] { "PlaneAmfCpp" } );
 	}
 }

@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "PlainScreen.h"
+#include "PlaneAmfCpp.h"
 #include "Modules/ModuleManager.h"
 
-IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, PlainScreen, "PlainScreen" );
+IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, PlaneAmfCpp, "PlaneAmfCpp" );
