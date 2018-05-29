@@ -224,11 +224,9 @@ IF DEFINED Build_4_18 (
     
     IF DEFINED Build_Engine (
         IF DEFINED Build_Clean (
-            CALL Scripts\BuildUnrealCleanImplementation.bat > %UnrealBuildLogFile% 2>>&1 %UnrealBuildLogFile%
-            rem CALL Scripts\BuildUnrealCleanImplementation.bat
+            CALL Scripts\BuildUnrealCleanImplementation.bat >> %UnrealBuildLogFile% 2>>&1 %UnrealBuildLogFile%
         ) ELSE (
-            CALL Scripts\BuildUnrealImplementation.bat > %UnrealBuildLogFile% 2>>&1 %UnrealBuildLogFile%
-            rem CALL Scripts\BuildUnrealImplementation.bat
+            CALL Scripts\BuildUnrealImplementation.bat >> %UnrealBuildLogFile% 2>>&1 %UnrealBuildLogFile%
         )
         
         IF ERRORLEVEL 1 (
@@ -274,7 +272,7 @@ IF DEFINED Build_4_18 (
     SET buildSuccess=""
 
     CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
-    CALL Scripts\BuildSceneImplementation.bat > %SceneBuildLogFile% 2>>&1 %SceneBuildLogFile%
+    CALL Scripts\BuildSceneImplementation.bat >> %SceneBuildLogFile% 2>>&1 %SceneBuildLogFile%
     
     IF ERRORLEVEL 1 (
         @ECHO Error: failed to build scene %SceneConfigurationPrintableName%
