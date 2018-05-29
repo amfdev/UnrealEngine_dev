@@ -14,9 +14,9 @@ IF NOT DEFINED UnrealConfiguration (
 :checkRights
 FSUTIL DIRTY QUERY %systemdrive% >nul
 if %errorlevel% == 0 (
-    echo Running with administrator rights.
+    @ECHO Running with administrator rights.
 ) else (
-    ECHO Error: administrator rights required!
+    @ECHO Error: administrator rights required!
     GOTO :error
 )
 
@@ -33,12 +33,12 @@ CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Start building UnrealEngine
-%MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration="%UnrealConfiguration%";Platform=%platform% %parameters% %solution%
+%MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration="%UnrealConfiguration%";Platform=%platform% %parameters% %solution% >> %UnrealBuildLogFile% 2>>&1 %UnrealBuildLogFile%
 IF ERRORLEVEL 1 GOTO :error
 
-@ECHO Copy prerequirements
+@ECHO Copy built prerequirements
 CD %CurrentDirectory%
-ROBOCOPY %CD%\%UnrealHome%\Engine\Extras\Redist\en-us\ %CD%\Deploy\Prerequirements\%UE_VERSION% /E
+ROBOCOPY %CD%\%UnrealHome%\Engine\Extras\Redist\en-us\ %CD%\Deploy\Prerequirements\%UE_VERSION% /E >> %UnrealBuildLogFile% 2>>&1 %UnrealBuildLogFile%
 IF ERRORLEVEL 1 (
     @ECHO Error: failed to copy dependencies
     rem GOTO :error

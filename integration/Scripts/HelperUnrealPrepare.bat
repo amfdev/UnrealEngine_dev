@@ -9,9 +9,9 @@ IF NOT DEFINED UnrealHome (
 :checkRights
 FSUTIL DIRTY QUERY %systemdrive% >nul
 if %errorlevel% == 0 (
-    echo Running with administrator rights.
+    @ECHO Running with administrator rights.
 ) else (
-    ECHO Error: administrator rights required!
+    @ECHO Error: administrator rights required!
     GOTO :error
 )
 
@@ -19,7 +19,7 @@ CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Generate UnrealEngine project files
-CALL GenerateProjectFiles.bat
+CALL GenerateProjectFiles.bat >> %UnrealBuildLogFile% 2>>&1 %UnrealBuildLogFile%
 IF ERRORLEVEL 1 GOTO :error
 
 rem @ECHO Add dependency to shipping configuration

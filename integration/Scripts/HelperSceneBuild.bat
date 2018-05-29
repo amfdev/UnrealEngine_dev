@@ -24,9 +24,9 @@ IF NOT DEFINED SceneSourceType (
 :checkRights
 FSUTIL DIRTY QUERY %systemdrive% >nul
 if %errorlevel% == 0 (
-    echo Running with administrator rights.
+    @ECHO Running with administrator rights.
 ) else (
-    ECHO Error: administrator rights required!
+    @ECHO Error: administrator rights required!
     GOTO :error
 )
 

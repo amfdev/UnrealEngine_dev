@@ -9,7 +9,7 @@ IF NOT DEFINED UnrealHome (
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
-git reset --hard && git clean -fdx
+git reset --hard && git clean -fdx >> %UnrealBuildLogFile% 2>>&1 %UnrealBuildLogFile%
 IF ERRORLEVEL 1 GOTO :error
 
 :done
