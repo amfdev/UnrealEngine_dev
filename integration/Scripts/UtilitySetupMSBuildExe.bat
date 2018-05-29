@@ -1,4 +1,4 @@
-@ECHO OFF
+@ECHO %Verbose%
 
 IF NOT DEFINED UnrealHome (
     @ECHO Error: UnrealHome variable undefined!
@@ -16,7 +16,7 @@ CALL %UnrealHome%\Engine\Build\BatchFiles\GetMSBuildPath.bat
 IF ERRORLEVEL 1 GOTO :error
 
 REM fix issue in script
-@ECHO OFF
+@ECHO %Verbose%
 
 :testMSBuild
 @ECHO Test MSBuild:

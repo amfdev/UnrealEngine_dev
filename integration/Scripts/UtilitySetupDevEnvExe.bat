@@ -1,4 +1,4 @@
-@ECHO OFF
+@ECHO %Verbose%
 
 IF NOT DEFINED UnrealHome (
     @ECHO Error: UnrealHome variable undefined!

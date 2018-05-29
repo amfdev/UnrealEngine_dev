@@ -1,4 +1,5 @@
-@ECHO OFF
+@SET Verbose=OFF
+@ECHO %Verbose%
 SETLOCAL enabledelayedexpansion
 
 CALL Scripts\UtilityTestDefines.bat
@@ -16,6 +17,7 @@ SET Build_Engine=
 SET Build_Tests=
 SET Build_Dirty=
 SET Build_Clean=
+SET Build_Verbose=
 
 SET Params=
 SET ParamsEngine=
@@ -58,12 +60,18 @@ FOR %%x IN (%*) DO (
         SET ParamsScene=%ParamsScene%H
     ) ELSE IF /i "%%~x"=="Engine" (
         SET Build_Engine=1
-        SET Params=%Params%H
+        SET Params=%Params%I
         SET ParamsEngine=%ParamsScene%I
     ) ELSE IF /i "%%~x"=="Tests" (
         SET Build_Tests=1
-        SET Params=%Params%H
+        SET Params=%Params%J
         SET ParamsScene=%ParamsScene%J
+    ) ELSE IF /i "%%~x"=="Dirty" (
+        SET Build_Dirty=1
+    ) ELSE IF /i "%%~x"=="Clean" (
+        SET Build_Clean=1
+    ) ELSE IF /i "%%~x"=="Verbose" (
+        SET Build_Verbose=1
     ) ELSE IF /i "%%~x"=="Help" (
         GOTO :usage
     ) ELSE (
@@ -71,6 +79,14 @@ FOR %%x IN (%*) DO (
         GOTO :usage
     )
 )
+
+IF DEFINED Build_Verbose (
+    SET Verbose=ON
+) ELSE (
+    SET Verbose=OFF
+)
+
+@ECHO %Verbose%
 
 IF NOT DEFINED Build_4_17 IF NOT DEFINED Build_4_18 (
     @ECHO No UnrealEngine version specified, 4.17 and 4.18 will be added
@@ -94,6 +110,11 @@ IF NOT DEFINED Build_BluePrints IF NOT DEFINED Build_CPP IF DEFINED Build_Tests 
     @ECHO No tests type are specified by args, only blueprints will be built
     SET Build_BluePrints=1
     rem SET Build_CPP=1
+)
+
+IF NOT DEFINED Build_Dirty IF NOT DEFINED Build_Clean (
+    @ECHO No rebuilding flags specified, clean build will be used
+    SET Build_Dirty=1
 )
 
 IF NOT DEFINED Build_Engine IF NOT DEFINED Build_Tests (
@@ -138,7 +159,7 @@ IF DEFINED Build_4_18 (
 
 :usage
     @ECHO:
-    @ECHO Available commands: Build.bat [Engine] [Tests] [4.17] [4.18] [Standard] [Amf] [Development] [Shipping] [BluePrints] [CPP] [Help]
+    @ECHO Available commands: Build.bat [Engine] [Tests] [4.17] [4.18] [Standard] [Amf] [Development] [Shipping] [BluePrints] [CPP] [Help] [Dirty] [Clean]
     EXIT /B 0
 
 :error
@@ -202,8 +223,13 @@ IF DEFINED Build_4_18 (
     CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
     
     IF DEFINED Build_Engine (
-        CALL Scripts\BuildUnrealCleanImplementation.bat > %UnrealBuildLogFile% 2>>%1 %UnrealBuildLogFile%
-        rem CALL Scripts\BuildUnrealCleanImplementation.bat
+        IF DEFINED Build_Clean (
+            CALL Scripts\BuildUnrealCleanImplementation.bat > %UnrealBuildLogFile% 2>>&1 %UnrealBuildLogFile%
+            rem CALL Scripts\BuildUnrealCleanImplementation.bat
+        ) ELSE (
+            CALL Scripts\BuildUnrealImplementation.bat > %UnrealBuildLogFile% 2>>&1 %UnrealBuildLogFile%
+            rem CALL Scripts\BuildUnrealImplementation.bat
+        )
         
         IF ERRORLEVEL 1 (
             @ECHO Error: failed to build "%UnrealConfigurationPrintableName%"
@@ -248,7 +274,7 @@ IF DEFINED Build_4_18 (
     SET buildSuccess=""
 
     CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
-    CALL Scripts\BuildSceneImplementation.bat > %SceneBuildLogFile% 2>>%1 %SceneBuildLogFile%
+    CALL Scripts\BuildSceneImplementation.bat > %SceneBuildLogFile% 2>>&1 %SceneBuildLogFile%
     
     IF ERRORLEVEL 1 (
         @ECHO Error: failed to build scene %SceneConfigurationPrintableName%
