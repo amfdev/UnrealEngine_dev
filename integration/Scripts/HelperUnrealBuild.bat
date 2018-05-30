@@ -33,12 +33,25 @@ CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Start building UnrealEngine
-%MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration="%UnrealConfiguration%";Platform=%platform% %parameters% %solution% >> %UnrealBuildLogFile% 2>>&1 %UnrealBuildLogFile%
+@ECHO:
+
+@ECHO MsBuild: %MSBUILD_EXE% 
+@ECHO Target: %target%
+@ECHO Affinity: %maxcpucount%
+@ECHO Configuration: %UnrealConfiguration%
+@ECHO Platform: %platform%
+@ECHO Params: %parameters%
+@ECHO Solution: %solution%
+@ECHO Log file: %UnrealBuildLogFile%
+@ECHO:
+
+CALL %MSBUILD_EXE% /target:"%target%" "%maxcpucount%" /property:Configuration="%UnrealConfiguration%";Platform="%platform%" "%parameters%" "%solution%" >> "%UnrealBuildLogFile%" 2>>&1
 IF ERRORLEVEL 1 GOTO :error
 
-@ECHO Copy built prerequirements
+@ECHO Copy prerequirements
 CD %CurrentDirectory%
-ROBOCOPY %CD%\%UnrealHome%\Engine\Extras\Redist\en-us\ %CD%\Deploy\Prerequirements\%UE_VERSION% /E >> %UnrealBuildLogFile% 2>>&1 %UnrealBuildLogFile%
+
+ROBOCOPY %CD%\%UnrealHome%\Engine\Extras\Redist\en-us\ %CD%\Deploy\Prerequirements\%UE_VERSION% /E
 IF ERRORLEVEL 1 (
     @ECHO Error: failed to copy dependencies
     rem GOTO :error

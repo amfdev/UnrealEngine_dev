@@ -75,7 +75,7 @@ MKDIR "%CD%\Deploy\Tests\%PlaneProjectOutputName%\%PlaneProjectName%\Content\Vid
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Copy scene to deploy folder
-ROBOCOPY "%CD%\TestsProjects\%UE_VERSION%\%PlaneProjectName%\Saved\StagedBuilds\WindowsNoEditor" "%CD%\Deploy\Tests\%PlaneProjectOutputName%" /E /xf *.pdb /xf *.txt
+ROBOCOPY %CD%\TestsProjects\%UE_VERSION%\%PlaneProjectName%\Saved\StagedBuilds\WindowsNoEditor %CD%\Deploy\Tests\%PlaneProjectOutputName% /E /xf *.pdb /xf *.txt
 IF ERRORLEVEL 1 (
     @ECHO Todo: investigate why robocopy returns error
     rem GOTO :error

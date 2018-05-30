@@ -22,7 +22,8 @@ IF ERRORLEVEL 1 GOTO :error
 
 :setupBat
 @ECHO Sync the dependencies...
-.\Engine\Binaries\DotNET\GitDependencies.exe %PROMPT_ARGUMENT% >> %UnrealBuildLogFile% 2>>&1 %UnrealBuildLogFile%
+
+.\Engine\Binaries\DotNET\GitDependencies.exe %PROMPT_ARGUMENT%
 if ERRORLEVEL 1 goto :error
 
 @ECHO Setup the git hooks disabled, todo: implement it

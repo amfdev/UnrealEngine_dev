@@ -19,7 +19,8 @@ CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO Generate UnrealEngine project files
-CALL GenerateProjectFiles.bat >> %UnrealBuildLogFile% 2>>&1 %UnrealBuildLogFile%
+
+CALL GenerateProjectFiles.bat
 IF ERRORLEVEL 1 GOTO :error
 
 rem @ECHO Add dependency to shipping configuration

@@ -114,7 +114,7 @@ IF NOT DEFINED Build_BluePrints IF NOT DEFINED Build_CPP IF DEFINED Build_Tests 
 
 IF NOT DEFINED Build_Dirty IF NOT DEFINED Build_Clean (
     @ECHO No rebuilding flags specified, clean build will be used
-    SET Build_Dirty=1
+    SET Build_Clean=1
 )
 
 IF NOT DEFINED Build_Engine IF NOT DEFINED Build_Tests (
@@ -216,7 +216,7 @@ IF DEFINED Build_4_18 (
     @ECHO:
     
     SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%BuildTypePrintableName%
-    SET UnrealBuildLogFile="%LogFolderName%\%UnrealConfigurationPrintableName%.log"
+    SET UnrealBuildLogFile=%CD%\%LogFolderName%\%UnrealConfigurationPrintableName%.log
     SET returnCode=0
     SET buildSuccess=""
 
@@ -267,7 +267,7 @@ IF DEFINED Build_4_18 (
     @ECHO:
     @ECHO Build %SceneConfigurationPrintableName%
 
-    SET SceneBuildLogFile="%LogFolderName%\%SceneConfigurationPrintableName%.log"
+    SET SceneBuildLogFile=%CD%\%LogFolderName%\%SceneConfigurationPrintableName%.log
     SET returnCode=0
     SET buildSuccess=""
 

@@ -52,11 +52,12 @@ IF /I ["%SceneSourceType%"] == ["BluePrints"] (
 )
 
 @ECHO Plane project name: %PlaneProjectName%
+@ECHO Output file name: %SceneBuildLogFile%
 
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
-"%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\%UE_VERSION%\%PlaneProjectName%\%PlaneProjectName%.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -build -stage -pak -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%"
+CALL "%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\%UE_VERSION%\%PlaneProjectName%\%PlaneProjectName%.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -build -stage -pak -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%" >> "%SceneBuildLogFile%" 2>>&1
 IF ERRORLEVEL 1 GOTO :error
 
 :done

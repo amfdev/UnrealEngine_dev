@@ -9,7 +9,10 @@ IF NOT DEFINED AmfHome (
 CD %AmfHome%
 IF ERRORLEVEL 1 GOTO :error
 
-git reset --hard && git clean -fdx
+git reset --hard
+IF ERRORLEVEL 1 GOTO :error
+
+git clean -fdx
 IF ERRORLEVEL 1 GOTO :error
 
 RD /S /Q "%CD%/.git/rebase-apply"

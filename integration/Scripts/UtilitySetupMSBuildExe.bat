@@ -10,7 +10,7 @@ IF DEFINED MSBUILD_EXE  (
     )
     
 @ECHO MSBUILD_EXE variable with command to run MSBuild.exe not found!
-@ECHO Automation scripts will try to detects MSBuild.exe automatically later
+@ECHO Automation scripts will try to detects MSBuild.exe automatically:
 
 CALL %UnrealHome%\Engine\Build\BatchFiles\GetMSBuildPath.bat
 IF ERRORLEVEL 1 GOTO :error

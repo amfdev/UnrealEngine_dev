@@ -16,7 +16,8 @@ IF ERRORLEVEL 1 GOTO :error
 
 git init
 IF ERRORLEVEL 1 GOTO :error
-git pull https://github.com/EpicGames/UnrealEngine.git %UE_VERSION% >> %UnrealBuildLogFile% 2>>&1 %UnrealBuildLogFile%
+
+git pull https://github.com/EpicGames/UnrealEngine.git %UE_VERSION%
 IF ERRORLEVEL 1 GOTO :error
 
 :done
