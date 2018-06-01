@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "PlainScreenGameModeBase.generated.h"
+#include "PlaneStandardCppGameModeBase.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PLAINSCREEN_API APlainScreenGameModeBase : public AGameModeBase
+class PLANESTANDARDCPP_API APlaneStandardCppGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	

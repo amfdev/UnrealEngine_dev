@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class PlainScreen : ModuleRules
+public class PlaneStandardCpp : ModuleRules
 {
-	public PlainScreen(ReadOnlyTargetRules Target) : base(Target)
+	public PlaneStandardCpp(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
