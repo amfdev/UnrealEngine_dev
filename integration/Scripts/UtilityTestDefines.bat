@@ -1,15 +1,13 @@
 @ECHO %Verbose%
 
 SETLOCAL ENABLEEXTENSIONS
-IF ERRORLEVEL 1 GOTO :noExt
-@ECHO Command line extensions found
-GOTO checkRights
+IF ERRORLEVEL 1 GOTO :error
+@ECHO Command line extensions enabled
 
-:noExt
-    @ECHO Unable to enable extensions
-    EXIT /B 1
+SETLOCAL EnableDelayedExpansion
+IF ERRORLEVEL 1 GOTO :error
+@ECHO Delayed expansion enabled
 
-:checkRights
 FSUTIL DIRTY QUERY %systemdrive% >nul
 if %errorlevel% == 0 (
     @ECHO Running with administrator rights.

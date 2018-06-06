@@ -11,9 +11,7 @@ IF NOT DEFINED UE_VERSION (
     SET UnrealHome=UnrealEngine-%UE_VERSION%
 )
 
-IF NOT DEFINED AMF_VERSION (
-    @ECHO Amf variable undefined! Build standard version
-) ELSE (
+IF DEFINED AMF_VERSION (
     SET AmfHome=AmfMedia-%AMF_VERSION%
 )
 
@@ -66,6 +64,39 @@ IF DEFINED AMF_VERSION (
 
     @ECHO Apply Amf libraries
     CALL Scripts\HelperAmfApply.bat
+    IF ERRORLEVEL 1 (
+        @ECHO ToDo: investigate why error returned here
+        rem GOTO :error
+    )
+
+)
+
+SET PROJECT_FOLDER=
+SET PROJECT_URL=
+SET PROJECT_BRANCH=
+SET PROJECT_SOLUTION=
+
+IF DEFINED STITCH_VERSION (
+    SET PROJECT_FOLDER=AmfStitchMedia-4.18
+    SET PROJECT_URL=https://github.com/GPUOpenSoftware/UnrealEngine.git
+    SET PROJECT_BRANCH=AmfStitchMedia-4.18
+    SET PROJECT_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs2015\AmfStitchMediaCommon.sln
+    SET PROJECT_APPLY_PROGRAM=AmfStitchMediaInstall.bat
+    
+    rem CALL Scripts\HelperClone.bat
+    IF ERRORLEVEL 1 GOTO :error
+
+    CALL Scripts\HelperPatch.bat
+    IF ERRORLEVEL 1 (
+        @ECHO Failed to apply patch!
+        @ECHO It seems like the code is already patched,
+        @ECHO try to build it...
+        )    
+
+    CALL Scripts\HelperBuild.bat
+    IF ERRORLEVEL 1 GOTO :error
+
+    CALL Scripts\HelperApply.bat
     IF ERRORLEVEL 1 (
         @ECHO ToDo: investigate why error returned here
         rem GOTO :error

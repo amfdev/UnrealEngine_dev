@@ -25,26 +25,25 @@ SET DeployHome=Deploy
 SET Configuration=%SceneConfiguration%
 SET Platform=Win64
 
-IF NOT DEFINED AMF_VERSION (
-    SET PlaneProjectName=PlaneStandard
-) ELSE (
-    SET PlaneProjectName=PlaneAmf
-)
+SET SceneProjectName=%SceneName%
 
-IF /I ["%SceneSourceType%"] == ["BluePrints"] (
+IF /I ["%SceneSourceType%"] == ["BluePrints"] (    
     @ECHO Deploy blueprints scene
-) ELSE IF /I ["%SceneSourceType%"] == ["CPP"] (
+    
+) ELSE IF /I ["%SceneSourceType%"] == ["CPP"] (    
     @ECHO Deploy C++ scene
-    SET PlaneProjectName=%PlaneProjectName%Cpp
+
+    SET SceneProjectName=%SceneProjectName%Cpp
+
 ) ELSE (
-    @ECHO Error: unsupported scene source type!
-    GOTO :error
+    @ECHO Error: unsupported scene source type: %SceneSourceType%!
+    GOTO :error\
 )
 
-@ECHO Plane project name: %PlaneProjectName%
+@ECHO Project name to deploy: %SceneProjectName%
 
-SET PlaneProjectOutputName=%PlaneProjectName%_%UE_VERSION%_%Configuration%_%Platform%
-@ECHO Plane project output name: %PlaneProjectOutputName%
+SET SceneProjectOutputName=%SceneProjectName%_%UE_VERSION%_%Configuration%_%Platform%
+@ECHO Scene project output name: %SceneProjectOutputName%
 
 IF NOT EXIST "%DeployHome%" (
     @ECHO Create deploy home folder
@@ -59,31 +58,35 @@ IF NOT EXIST "%DeployHome%\Tests" (
     IF ERRORLEVEL 1 GOTO :error
 )
 
-IF EXIST "%DeployHome%\Tests\%PlaneProjectOutputName%" (
-    @ECHO Delete old %PlaneProjectOutputName% folder
+IF EXIST "%DeployHome%\Tests\%SceneProjectOutputName%" (
+    @ECHO Delete old %SceneProjectOutputName% folder
     
-    RD /S /Q %DeployHome%\Tests\%PlaneProjectOutputName%
+    RD /S /Q %DeployHome%\Tests\%SceneProjectOutputName%
     IF ERRORLEVEL 1 GOTO :error
 )
 
-@ECHO Create deploy folder for %PlaneProjectOutputName%
-MKDIR %DeployHome%\Tests\%PlaneProjectOutputName%
+@ECHO Create deploy folder for %SceneProjectOutputName%
+MKDIR %DeployHome%\Tests\%SceneProjectOutputName%
 IF ERRORLEVEL 1 GOTO :error
 
-@ECHO Create folder for video file
-MKDIR "%CD%\Deploy\Tests\%PlaneProjectOutputName%\%PlaneProjectName%\Content\Video
-IF ERRORLEVEL 1 GOTO :error
+IF NOT DEFINED STITCH_VERSION (
+    @ECHO Create folder for video file
+    MKDIR "%CD%\Deploy\Tests\%SceneProjectOutputName%\%SceneProjectName%\Content\Video
+    IF ERRORLEVEL 1 GOTO :error
+)
 
 @ECHO Copy scene to deploy folder
-ROBOCOPY %CD%\TestsProjects\%UE_VERSION%\%PlaneProjectName%\Saved\StagedBuilds\WindowsNoEditor %CD%\Deploy\Tests\%PlaneProjectOutputName% /E /xf *.pdb /xf *.txt
+ROBOCOPY %CD%\TestsProjects\%UE_VERSION%\%SceneProjectName%\Saved\StagedBuilds\WindowsNoEditor %CD%\Deploy\Tests\%SceneProjectOutputName% /E /xf *.pdb /xf *.txt
 IF ERRORLEVEL 1 (
     @ECHO Todo: investigate why robocopy returns error
     rem GOTO :error
 )
 
-@ECHO Copy sample 4K video file
-COPY "%CD%\TestsProjects\%UE_VERSION%\%PlaneProjectName%\Content\Video\1.mp4" "%CD%\Deploy\Tests\%PlaneProjectOutputName%\%PlaneProjectName%\Content\Video\1.mp4"
-IF ERRORLEVEL 1 GOTO :error
+IF NOT DEFINED STITCH_VERSION (
+    @ECHO Copy sample 4K video file
+    COPY "%CD%\TestsProjects\%UE_VERSION%\%SceneProjectName%\Content\Video\1.mp4" "%CD%\Deploy\Tests\%SceneProjectOutputName%\%SceneProjectName%\Content\Video\1.mp4"
+    IF ERRORLEVEL 1 GOTO :error
+)
 
 :done
     @ECHO Scene deployed successfully

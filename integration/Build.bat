@@ -1,14 +1,15 @@
 @SET Verbose=OFF
 @ECHO %Verbose%
-SETLOCAL enabledelayedexpansion
 
 CALL Scripts\UtilityTestDefines.bat
 IF ERRORLEVEL 1 GOTO :error
 
 SET Build_4_17=
 SET Build_4_18=
+SET Build_4_19=
 SET Build_Amf=
 SET Build_Standard=
+SET Build_Stitch=
 SET Build_Development=
 SET Build_Shipping=
 SET Build_BluePrints=
@@ -32,10 +33,18 @@ FOR %%x IN (%*) DO (
         SET Build_4_18=1
         SET Params=%Params%B
         SET ParamsEngine=%ParamsEngine%B
+    ) ELSE IF /i "%%~x"=="4.19" (
+        SET Build_4_19=1
+        SET Params=%Params%B2
+        SET ParamsEngine=%ParamsEngine%B2
     ) ELSE IF /i "%%~x"=="Amf" (
         SET Build_Amf=1
         SET Params=%Params%C
         SET ParamsEngine=%ParamsEngine%C
+    ) ELSE IF /i "%%~x"=="Stitch" (
+        SET Build_Stitch=1
+        SET Params=%Params%C2
+        SET ParamsEngine=%ParamsEngine%C2
     ) ELSE IF /i "%%~x"=="Standard" (
         SET Build_Standard=1
         SET Params=%Params%D
@@ -88,16 +97,18 @@ IF DEFINED Build_Verbose (
 
 @ECHO %Verbose%
 
-IF NOT DEFINED Build_4_17 IF NOT DEFINED Build_4_18 (
-    @ECHO No UnrealEngine version specified, 4.17 and 4.18 will be added
+IF NOT DEFINED Build_4_17 IF NOT DEFINED Build_4_18 IF NOT DEFINED Build_4_19 (
+    @ECHO No UnrealEngine version specified, 4.17, 4.18, 4.19 will be added
     SET Build_4_17=1
     SET Build_4_18=1
+    SET Build_4_19=1
 )
 
-IF NOT DEFINED Build_Standard IF NOT DEFINED Build_Amf (
-    @ECHO No build type specified by args, standard and Amf will be added 
+IF NOT DEFINED Build_Standard IF NOT DEFINED Build_Amf IF NOT DEFINED Build_Stitch (
+    @ECHO No build type specified by args, standard, Amf and Stitch will be added 
     SET Build_Standard=1
     SET Build_Amf=1
+    SET Build_Stitch=1
 )
 
 IF NOT DEFINED Build_Development IF NOT DEFINED Build_Shipping (
@@ -145,11 +156,15 @@ IF NOT EXIST %LogFolderName% (
 @ECHO project_name,start_date,start_time,end_date,end_time,result>>"%ResultsFileName%""
 
 IF DEFINED Build_4_17 (
-    CALL :processBuildUnrealClean 4.17
+    CALL :runBuildHelper 4.17
     )
 
 IF DEFINED Build_4_18 (
-    CALL :processBuildUnrealClean 4.18
+    CALL :runBuildHelper 4.18
+    )
+
+IF DEFINED Build_4_19 (
+    CALL :runBuildHelper 4.19
     )
 
 :done
@@ -159,7 +174,7 @@ IF DEFINED Build_4_18 (
 
 :usage
     @ECHO:
-    @ECHO Available commands: Build.bat [Engine] [Tests] [4.17] [4.18] [Standard] [Amf] [Development] [Shipping] [BluePrints] [CPP] [Help] [Dirty] [Clean]
+    @ECHO Available commands: Build.bat [Engine] [Tests] [4.17] [4.18] [4.19] [Standard] [Amf] [Development] [Shipping] [BluePrints] [CPP] [Help] [Dirty] [Clean]
     EXIT /B 0
 
 :error
@@ -167,38 +182,56 @@ IF DEFINED Build_4_18 (
     @ECHO Error: build failed!
     EXIT /B 1
 
-:processBuildUnrealClean unreal_number
+:runBuildHelper unreal_number
     IF DEFINED Build_Standard (        
         IF DEFINED Build_Development (
-            CALL :prepareBuildUnrealClean %~1 Development
+            CALL :runBuildProcess %~1 Development Standard
         )
 
         IF DEFINED Build_Shipping (
-            CALL :prepareBuildUnrealClean %~1 Shipping
+            CALL :runBuildProcess %~1 Shipping Standard
         )
     )
     
     IF DEFINED Build_Amf (
         IF DEFINED Build_Development (
-            CALL :prepareBuildUnrealClean %~1 Development %~1
+            CALL :runBuildProcess %~1 Development Amf
         )
 
         IF DEFINED Build_Shipping (
-            CALL :prepareBuildUnrealClean %~1 Shipping %~1
+            CALL :runBuildProcess %~1 Shipping Amf
+        )
+    )
+
+    IF DEFINED Build_Stitch (        
+        IF DEFINED Build_Development (
+            CALL :runBuildProcess %~1 Development Stitch
+        )
+
+        IF DEFINED Build_Shipping (
+            CALL :runBuildProcess %~1 Shipping Stitch
         )
     )
     
     EXIT /B 0
 
-:prepareBuildUnrealClean unreal_number configuration amf_number
+:runBuildProcess unreal_number configuration renderType
+  
     SET UE_VERSION=%~1
+    SET AMF_VERSION=
+    SET STITCH_VERSION=
 
-    if "%~3" == "" (
-        SET AMF_VERSION=
-        SET BuildTypePrintableName=Standard
+    SET renderTypePrintable=%~3
+
+    IF ["%~3"] == ["Standard"] (
+        REM default values
+    ) ELSE IF ["%~3"] == ["Amf"] (
+        SET AMF_VERSION=%~1
+    ) ELSE IF ["%~3"] == ["Stitch"] (
+        SET STITCH_VERSION=4.18
     ) ELSE (
-        SET AMF_VERSION=%~3
-        SET BuildTypePrintableName=Amf
+        @ECHO Error! unsupported renderType
+        EXIT /B 1
     )
 
     IF ["%~2"] == ["Development"] (
@@ -211,11 +244,11 @@ IF DEFINED Build_4_18 (
         REM Must be failed later
         SET UnrealConfiguration=
         SET SceneConfiguration=
-    )
-
+    )    
+    
     @ECHO:
     
-    SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%BuildTypePrintableName%
+    SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%renderType%
     SET UnrealBuildLogFile=%CD%\%LogFolderName%\%UnrealConfigurationPrintableName%.log
     SET returnCode=0
     SET buildSuccess=""
@@ -245,10 +278,23 @@ IF DEFINED Build_4_18 (
     )
 
     SET SceneSourceType=
+    SET SceneConfigurationPrintableName=
+    SET SceneName=
 
+    IF "%~3" == "Standard" (
+        SET SceneName=PlaneStandard
+    ) ELSE IF "%~3" == "Amf" (
+        SET SceneName=PlaneAmf
+    ) ELSE IF "%~3" == "Stitch" (
+        SET SceneName=StitchAmf
+    ) ELSE (
+        @ECHO Error! unsupported renderType
+        EXIT /B 1
+    )
+    
     IF DEFINED Build_BluePrints (
         SET SceneSourceType=Blueprints
-        SET SceneConfigurationPrintableName=TestPlane_%UE_VERSION%_%SceneConfiguration%_%BuildTypePrintableName%_Blueprints
+        SET SceneConfigurationPrintableName=!SceneName!_!UE_VERSION!_!SceneConfiguration!_!SceneSourceType!
         
         CALL :buildScene
     )
@@ -256,7 +302,7 @@ IF DEFINED Build_4_18 (
     SET SceneSourceType=
     IF DEFINED Build_CPP (
         SET SceneSourceType=CPP
-        SET SceneConfigurationPrintableName=TestPlane_%UE_VERSION%_%SceneConfiguration%_%BuildTypePrintableName%_CPP
+        SET SceneConfigurationPrintableName=!SceneName!_!UE_VERSION!_!SceneConfiguration!_!SceneSourceType!
 
         CALL :buildScene
     )
@@ -265,9 +311,10 @@ IF DEFINED Build_4_18 (
 
 :buildScene
     @ECHO:
-    @ECHO Build %SceneConfigurationPrintableName%
+    @ECHO SceneConfigurationPrintableName: !SceneConfigurationPrintableName!
+    @ECHO SceneSourceType: !SceneSourceType!
 
-    SET SceneBuildLogFile=%CD%\%LogFolderName%\%SceneConfigurationPrintableName%.log
+    SET SceneBuildLogFile=!CD!\!LogFolderName!\!SceneConfigurationPrintableName!.log
     SET returnCode=0
     SET buildSuccess=""
 
@@ -275,22 +322,22 @@ IF DEFINED Build_4_18 (
     CALL Scripts\BuildSceneImplementation.bat
     
     IF ERRORLEVEL 1 (
-        @ECHO Error: failed to build scene %SceneConfigurationPrintableName%
+        @ECHO Error: failed to build scene !SceneConfigurationPrintableName!
         SET returnCode=1
     ) ELSE (
-        @ECHO Scene %SceneConfigurationPrintableName% built successfully!
+        @ECHO Scene !SceneConfigurationPrintableName! built successfully!
         SET returnCode=0
     )
 
     CALL :fillDateTimeVariables endYear endMonth endDay endHour endMinute endSecond
 
-    iF "%returnCode%" == "1" (
+    iF "!returnCode!" == "1" (
         SET buildSuccess=failed
     ) ELSE (
         SET buildSuccess=succeeded
     )
 
-    @ECHO %SceneConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildSuccess%>>"%ResultsFileName%"
+    @ECHO !SceneConfigurationPrintableName!,!startYear!/!startMonth!/!startDay!,!startHour!:!startMinute!:!startSecond!,!endYear!/!endMonth!/!endDay!,!endHour!:!endMinute!:!endSecond!,!buildSuccess!>>"!ResultsFileName!"
     
     EXIT /B 0
 

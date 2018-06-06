@@ -11,6 +11,11 @@ IF NOT DEFINED UnrealHome (
     GOTO :error
 )
 
+IF NOT DEFINED SceneName (
+    @ECHO Error: SceneSourceType variable undefined!
+    GOTO :error
+)
+
 IF NOT DEFINED SceneConfiguration (
     @ECHO Error: SceneConfiguration variable undefined!
     GOTO :error
@@ -21,43 +26,33 @@ IF NOT DEFINED SceneSourceType (
     GOTO :error
 )
 
-:checkRights
-FSUTIL DIRTY QUERY %systemdrive% >nul
-if %errorlevel% == 0 (
-    @ECHO Running with administrator rights.
-) else (
-    @ECHO Error: administrator rights required!
-    GOTO :error
-)
-
 SET Target=build
 SET MaxCPUCount=/maxcpucount
 SET Configuration=%SceneConfiguration%
 SET Platform=Win64
 
-IF NOT DEFINED AMF_VERSION (
-    SET PlaneProjectName=PlaneStandard
-) ELSE (
-    SET PlaneProjectName=PlaneAmf
-)
+SET SceneProjectName=%SceneName%
 
-IF /I ["%SceneSourceType%"] == ["BluePrints"] (
+IF /I ["%SceneSourceType%"] == ["BluePrints"] (    
     @ECHO Build blueprints scene
-) ELSE IF /I ["%SceneSourceType%"] == ["CPP"] (
+
+) ELSE IF /I ["%SceneSourceType%"] == ["CPP"] (    
     @ECHO Build C++ scene
-    SET PlaneProjectName=%PlaneProjectName%Cpp
+
+    SET SceneProjectName=%SceneProjectName%Cpp
+
 ) ELSE (
     @ECHO Error: unsupported scene source type: %SceneSourceType%!
-    GOTO :error
+    GOTO :error\
 )
 
-@ECHO Plane project name: %PlaneProjectName%
+@ECHO Project name to deploy: %SceneProjectName%
 @ECHO Output file name: %SceneBuildLogFile%
 
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
-CALL "%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\%UE_VERSION%\%PlaneProjectName%\%PlaneProjectName%.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -build -stage -pak -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%" >> "%SceneBuildLogFile%" 2>>&1
+CALL "%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\%UE_VERSION%\%SceneProjectName%\%SceneProjectName%.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -build -stage -pak -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%" >> "%SceneBuildLogFile%" 2>>&1
 IF ERRORLEVEL 1 GOTO :error
 
 :done

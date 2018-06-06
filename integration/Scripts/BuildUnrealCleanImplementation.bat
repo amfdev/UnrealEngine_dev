@@ -15,9 +15,7 @@ IF NOT DEFINED UE_VERSION (
 
 SET AmfHome=
 
-IF NOT DEFINED AMF_VERSION (
-    @ECHO Amf variable undefined, standard version will be built
-) ELSE (
+IF DEFINED AMF_VERSION (
     SET AmfHome=AmfMedia-%AMF_VERSION%
     @ECHO Amf variable defined, AmfHome: AmfMedia-%AMF_VERSION%
 )
@@ -30,12 +28,19 @@ IF EXIST "%UnrealHome%" (
 )
 
 IF DEFINED AMF_VERSION (
-    @ECHO Prepare Amf...
+    @ECHO Clean Amf...
     IF EXIST "%AmfHome%" (
         @ECHO Reset Amf libraries repository
         CALL Scripts\HelperAmfClean.bat
         IF ERRORLEVEL 1 GOTO :error
     )
+) ELSE IF DEFINED STITCH_VERSION (
+    @ECHO Clean Stitch...
+    @ECHO:
+    @ECHO:
+    @ECHO TODO: Implement
+    @ECHO:
+    @ECHO:
 )
 
 :done
