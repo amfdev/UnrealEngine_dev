@@ -248,7 +248,7 @@ IF DEFINED Build_4_19 (
     
     @ECHO:
     
-    SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%renderType%
+    SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%renderTypePrintable%
     SET UnrealBuildLogFile=%CD%\%LogFolderName%\%UnrealConfigurationPrintableName%.log
     SET returnCode=0
     SET buildSuccess=""
@@ -311,10 +311,10 @@ IF DEFINED Build_4_19 (
 
 :buildScene
     @ECHO:
-    @ECHO SceneConfigurationPrintableName: !SceneConfigurationPrintableName!
-    @ECHO SceneSourceType: !SceneSourceType!
+    @ECHO SceneConfigurationPrintableName: %SceneConfigurationPrintableName%
+    @ECHO SceneSourceType: %SceneSourceType%
 
-    SET SceneBuildLogFile=!CD!\!LogFolderName!\!SceneConfigurationPrintableName!.log
+    SET SceneBuildLogFile=%CD%\%LogFolderName%\%SceneConfigurationPrintableName%.log
     SET returnCode=0
     SET buildSuccess=""
 
@@ -322,16 +322,16 @@ IF DEFINED Build_4_19 (
     CALL Scripts\BuildSceneImplementation.bat
     
     IF ERRORLEVEL 1 (
-        @ECHO Error: failed to build scene !SceneConfigurationPrintableName!
+        @ECHO Error: failed to build scene %SceneConfigurationPrintableName%
         SET returnCode=1
     ) ELSE (
-        @ECHO Scene !SceneConfigurationPrintableName! built successfully!
+        @ECHO Scene %SceneConfigurationPrintableName% built successfully!
         SET returnCode=0
     )
 
     CALL :fillDateTimeVariables endYear endMonth endDay endHour endMinute endSecond
 
-    iF "!returnCode!" == "1" (
+    iF "%returnCode%" == "1" (
         SET buildSuccess=failed
     ) ELSE (
         SET buildSuccess=succeeded
