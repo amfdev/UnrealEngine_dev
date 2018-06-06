@@ -77,6 +77,8 @@ SET PROJECT_BRANCH=
 SET PROJECT_SOLUTION=
 
 IF DEFINED STITCH_VERSION (
+    @ECHO Prepare stitch plugin...
+    
     SET PROJECT_FOLDER=AmfStitchMedia-4.18
     SET PROJECT_URL=https://github.com/GPUOpenSoftware/UnrealEngine.git
     SET PROJECT_BRANCH=AmfStitchMedia-4.18

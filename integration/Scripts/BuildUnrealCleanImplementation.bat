@@ -38,7 +38,7 @@ IF DEFINED AMF_VERSION (
     @ECHO Clean Stitch...
     @ECHO:
     @ECHO:
-    @ECHO TODO: Implement
+    @ECHO TODO: Implement clean of Stitch plugin sources
     @ECHO:
     @ECHO:
 )
