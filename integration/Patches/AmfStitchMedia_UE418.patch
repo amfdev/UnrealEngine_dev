@@ -1,0 +1,112 @@
+From 23b2ca548d7886cf48a34e8884e12e4db5c52888 Mon Sep 17 00:00:00 2001
+From: zcampbel <zachary.campbell@amd.com>
+Date: Thu, 8 Mar 2018 13:49:34 -0500
+Subject: [PATCH] Changes required for MediaTextureCubes implemented through
+ AmfStitchMedia plugin to work
+
+---
+ .../Runtime/Engine/Classes/Engine/TextureCube.h    | 30 +++++++++++-----------
+ .../Private/Misc/MediaTextureResource.cpp          |  2 +-
+ .../Windows/D3D11RHI/Private/D3D11Texture.cpp      |  6 +++++
+ 3 files changed, 22 insertions(+), 16 deletions(-)
+
+diff --git a/Engine/Source/Runtime/Engine/Classes/Engine/TextureCube.h b/Engine/Source/Runtime/Engine/Classes/Engine/TextureCube.h
+index 9a4ada437f6..727f33333de 100644
+--- a/Engine/Source/Runtime/Engine/Classes/Engine/TextureCube.h
++++ b/Engine/Source/Runtime/Engine/Classes/Engine/TextureCube.h
+@@ -21,11 +21,11 @@ public:
+ 	TMap<FString, FTexturePlatformData*> CookedPlatformData;
+ 
+ 	//~ Begin UObject Interface.
+-	virtual void Serialize(FArchive& Ar) override;
+-	virtual void PostLoad() override;
+-	virtual void GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags) const override;
+-	virtual FString GetDesc() override;
+-	virtual void GetResourceSizeEx(FResourceSizeEx& CumulativeResourceSize) override;
++    ENGINE_API virtual void Serialize(FArchive& Ar) override;
++    ENGINE_API virtual void PostLoad() override;
++    ENGINE_API virtual void GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags) const override;
++    ENGINE_API virtual FString GetDesc() override;
++    ENGINE_API virtual void GetResourceSizeEx(FResourceSizeEx& CumulativeResourceSize) override;
+ 	//~ End UObject Interface.
+ 
+ 	/** Trivial accessors. */
+@@ -63,13 +63,13 @@ public:
+ 	}
+ 
+ 	//~ Begin UTexture Interface
+-	virtual float GetSurfaceWidth() const override { return GetSizeX(); }
+-	virtual float GetSurfaceHeight() const override { return GetSizeY(); }
+-	virtual FTextureResource* CreateResource() override;
+-	virtual void UpdateResource() override;
+-	virtual EMaterialValueType GetMaterialType() const override { return MCT_TextureCube; }
+-	virtual FTexturePlatformData** GetRunningPlatformData() override { return &PlatformData; }
+-	virtual TMap<FString, FTexturePlatformData*> *GetCookedPlatformData() override { return &CookedPlatformData; }
++    ENGINE_API virtual float GetSurfaceWidth() const override { return GetSizeX(); }
++    ENGINE_API virtual float GetSurfaceHeight() const override { return GetSizeY(); }
++    ENGINE_API virtual FTextureResource* CreateResource() override;
++    ENGINE_API virtual void UpdateResource() override;
++    ENGINE_API virtual EMaterialValueType GetMaterialType() const override { return MCT_TextureCube; }
++    ENGINE_API virtual FTexturePlatformData** GetRunningPlatformData() override { return &PlatformData; }
++    ENGINE_API virtual TMap<FString, FTexturePlatformData*> *GetCookedPlatformData() override { return &CookedPlatformData; }
+ 	//~ End UTexture Interface
+ 	
+ 	/**
+@@ -78,7 +78,7 @@ public:
+ 	 * @param	MipCount	Number of mips to calculate size for, counting from the smallest 1x1 mip-level and up.
+ 	 * @return	Size of MipCount mips in bytes
+ 	 */
+-	uint32 CalcTextureMemorySize( int32 MipCount ) const;
++    ENGINE_API uint32 CalcTextureMemorySize( int32 MipCount ) const;
+ 
+ 	/**
+ 	 * Calculates the size of this texture if it had MipCount miplevels streamed in.
+@@ -86,13 +86,13 @@ public:
+ 	 * @param	Enum	Which mips to calculate size for.
+ 	 * @return	Total size of all specified mips, in bytes
+ 	 */
+-	virtual uint32 CalcTextureMemorySizeEnum( ETextureMipCount Enum ) const override;
++    ENGINE_API virtual uint32 CalcTextureMemorySizeEnum( ETextureMipCount Enum ) const override;
+ 
+ #if WITH_EDITOR
+ 	/**
+ 	* Return maximum dimension for this texture type.
+ 	*/
+-	virtual uint32 GetMaximumDimension() const override;
++    ENGINE_API virtual uint32 GetMaximumDimension() const override;
+ #endif
+ };
+ 
+diff --git a/Engine/Source/Runtime/MediaAssets/Private/Misc/MediaTextureResource.cpp b/Engine/Source/Runtime/MediaAssets/Private/Misc/MediaTextureResource.cpp
+index 1577e4a4ee6..c2b72df22a1 100644
+--- a/Engine/Source/Runtime/MediaAssets/Private/Misc/MediaTextureResource.cpp
++++ b/Engine/Source/Runtime/MediaAssets/Private/Misc/MediaTextureResource.cpp
+@@ -568,7 +568,7 @@ void FMediaTextureResource::CopySample(const TSharedPtr<IMediaTextureSample, ESP
+ 			UpdateResourceSize();
+ 		}
+ 	}
+-	else
++	else if (Sample->GetBuffer() != nullptr)
+ 	{
+ 		// create a new output render target if necessary
+ 		const uint32 OutputCreateFlags = TexCreate_Dynamic | (SrgbOutput ? TexCreate_SRGB : 0);
+diff --git a/Engine/Source/Runtime/Windows/D3D11RHI/Private/D3D11Texture.cpp b/Engine/Source/Runtime/Windows/D3D11RHI/Private/D3D11Texture.cpp
+index d97808b6657..7fe0601b339 100644
+--- a/Engine/Source/Runtime/Windows/D3D11RHI/Private/D3D11Texture.cpp
++++ b/Engine/Source/Runtime/Windows/D3D11RHI/Private/D3D11Texture.cpp
+@@ -408,6 +408,12 @@ void ReturnPooledTexture2D(int32 MipCount, EPixelFormat PixelFormat, ID3D11Textu
+ DXGI_FORMAT FD3D11DynamicRHI::GetPlatformTextureResourceFormat(DXGI_FORMAT InFormat, uint32 InFlags)
+ {
+ 	// DX 11 Shared textures must be B8G8R8A8_UNORM
++    //MM hack: added this for stitching
++    if (InFormat == DXGI_FORMAT_R8G8B8A8_TYPELESS || InFormat == DXGI_FORMAT_B8G8R8A8_TYPELESS)
++    {
++        return InFormat;
++    }
++    //MM end of hack
+ 	if (InFlags & TexCreate_Shared)
+ 	{
+ 		return DXGI_FORMAT_B8G8R8A8_UNORM;
+-- 
+2.13.3.windows.1
+
