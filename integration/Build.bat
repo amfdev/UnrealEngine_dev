@@ -255,7 +255,7 @@ IF DEFINED Build_4_19 (
 
     CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
     
-    IF DEFINED Build_Engine (
+    IF DEFINED Build_Engine2 (
         IF DEFINED Build_Clean (
             CALL Scripts\BuildUnrealCleanImplementation.bat
         ) ELSE (
@@ -313,6 +313,8 @@ IF DEFINED Build_4_19 (
     @ECHO:
     @ECHO SceneConfigurationPrintableName: %SceneConfigurationPrintableName%
     @ECHO SceneSourceType: %SceneSourceType%
+
+    exit /b 1
 
     SET SceneBuildLogFile=%CD%\%LogFolderName%\%SceneConfigurationPrintableName%.log
     SET returnCode=0
