@@ -43,9 +43,14 @@ IF DEFINED AMF_VERSION (
     @ECHO:
 )
 
+@ECHO: 
+@ECHO Cleanup before build finished
+@ECHO:
+
+CALL Scripts\BuildUnrealImplementation.bat
+IF ERRORLEVEL 1 GOTO :error
+
 :done
-    @ECHO Clean before build completed
-    CALL Scripts\BuildUnrealImplementation.bat
     EXIT /B 0
 
 :error

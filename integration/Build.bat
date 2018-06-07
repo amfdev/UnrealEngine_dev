@@ -258,7 +258,7 @@ IF DEFINED Build_4_19 (
     SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%renderTypePrintable%
     SET UnrealBuildLogFile=%CD%\%LogFolderName%\%UnrealConfigurationPrintableName%.log
     SET returnCode=0
-    SET buildSuccess=""
+    SET buildResult=""
 
     CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
     
@@ -270,18 +270,18 @@ IF DEFINED Build_4_19 (
         )
         
         IF ERRORLEVEL 1 (
-            @ECHO Error: failed to build "%UnrealConfigurationPrintableName%"
-            SET buildSuccess=failed
+            @ECHO Build for configuration "!UnrealConfigurationPrintableName!" finished with errors
+            SET buildResult=failed
         ) ELSE (
-            @ECHO Build for "%UnrealConfigurationPrintableName%" is done
-            SET buildSuccess=succeeded
+            @ECHO Build for configuration "!UnrealConfigurationPrintableName!" finished successfully
+            SET buildResult=succeeded
         )
     )
     
     CALL :fillDateTimeVariables endYear endMonth endDay endHour endMinute endSecond
 
     IF DEFINED Build_Engine (
-        @ECHO %UnrealConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildSuccess%>>"%ResultsFileName%"
+        @ECHO %UnrealConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildResult%>>"%ResultsFileName%"
     )
 
     SET SceneSourceType=
@@ -328,7 +328,7 @@ IF DEFINED Build_4_19 (
 
     
     SET returnCode=0
-    SET buildSuccess=""
+    SET buildResult=""
 
     CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
     CALL Scripts\BuildSceneImplementation.bat
@@ -344,12 +344,12 @@ IF DEFINED Build_4_19 (
     CALL :fillDateTimeVariables endYear endMonth endDay endHour endMinute endSecond
 
     iF "%returnCode%" == "1" (
-        SET buildSuccess=failed
+        SET buildResult=failed
     ) ELSE (
-        SET buildSuccess=succeeded
+        SET buildResult=succeeded
     )
 
-    @ECHO !SceneConfigurationPrintableName!,!startYear!/!startMonth!/!startDay!,!startHour!:!startMinute!:!startSecond!,!endYear!/!endMonth!/!endDay!,!endHour!:!endMinute!:!endSecond!,!buildSuccess!>>"!ResultsFileName!"
+    @ECHO !SceneConfigurationPrintableName!,!startYear!/!startMonth!/!startDay!,!startHour!:!startMinute!:!startSecond!,!endYear!/!endMonth!/!endDay!,!endHour!:!endMinute!:!endSecond!,!buildResult!>>"!ResultsFileName!"
     
     EXIT /B 0
 

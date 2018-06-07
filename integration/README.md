@@ -8,22 +8,23 @@ play 4k video to tests media playback inside Unreal Engine.
 ## Supported versions
 Unreal Engine 4.17 
 Unreal Engine 4.18
+Unreal Engine 4.19
 
 ## Supported configurations
 Development [Editor]
 Shipping
 
-## Supported test types
+## Supported tests types
 Standard (using Windows media playback)
-Amf (using improved Amf media plaing assets)
+Amf (using improved Amf media playback)
+Stitch (using Amf Stitch plugin)
 
 ## Supported project types
 Blueprints (only) project
-C++ project (with Amf objects castings)
+C++ project
 
 ## Supported platforms
 Win64
-(Win32 in short plans)
 
 # Futures
 Build.bat could builds entire combinations of the all available configurations or just a list of the specified options. Build.bat can
@@ -38,9 +39,11 @@ Build.bat supports of the followings params:
 
   - 4.17 - specify Unreal Engine version 4.17
   - 4.18 - specify Unreal Engine version 4.18
+  - 4.19 - specify Unreal Engine version 4.19
 
   - Amf - use Unreal Engine with Amf support (and patches)
   - Standard - use standard Unreal Engine without Amf patches
+  - Stitch - use Stitch amf plugin for Unreal Engine without Amf patches
 
   - CPP - Build C++ based tests
   - BluePrints - Build blueprints based tests
