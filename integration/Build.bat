@@ -255,7 +255,7 @@ IF DEFINED Build_4_19 (
 
     CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
     
-    IF DEFINED Build_Engine2 (
+    IF DEFINED Build_Engine (
         IF DEFINED Build_Clean (
             CALL Scripts\BuildUnrealCleanImplementation.bat
         ) ELSE (
