@@ -47,15 +47,14 @@ IF DEFINED AMF_VERSION (
     CALL Scripts\HelperAmfClone.bat
     IF ERRORLEVEL 1 GOTO :error
 
-    IF "%AMF_VERSION%" == "4.17" (
-
-        @ECHO Patch Amf libraries
-        CALL Scripts\HelperAmfPatch.bat
-        IF ERRORLEVEL 1 (
-            @ECHO Failed to apply Amf library patch
-            @ECHO It seems that Amf libraries is already patched!
-            @ECHO Automation will try to build it
-        )
+    @ECHO Patch Amf libraries
+    CALL Scripts\HelperAmfPatch.bat
+    IF ERRORLEVEL 1 (
+        @ECHO:
+        @ECHO Failed to apply Amf library patch
+        @ECHO It seems that Amf libraries is already patched!
+        @ECHO Automation will try to build it
+        @ECHO:
     )
 
     @ECHO Build Amf libraries
