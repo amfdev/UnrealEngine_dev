@@ -318,8 +318,6 @@ IF DEFINED Build_4_19 (
     @ECHO SceneConfigurationPrintableName: %SceneConfigurationPrintableName%
     @ECHO SceneSourceType: %SceneSourceType%
 
-    exit /b 1
-
     SET SceneBuildLogFile=%CD%\%LogFolderName%\%SceneConfigurationPrintableName%.log
     SET returnCode=0
     SET buildSuccess=""
