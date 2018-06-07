@@ -4,6 +4,9 @@
 CALL Scripts\UtilityTestDefines.bat
 IF ERRORLEVEL 1 GOTO :error
 
+SETLOCAL EnableDelayedExpansion
+IF ERRORLEVEL 1 GOTO :error
+
 SET Build_4_17=
 SET Build_4_18=
 SET Build_4_19=
@@ -315,8 +318,9 @@ IF DEFINED Build_4_19 (
 
 :buildScene
     @ECHO:
-    @ECHO SceneConfigurationPrintableName: %SceneConfigurationPrintableName%
+    @ECHO SceneConfigurationPrintableName: !SceneConfigurationPrintableName!
     @ECHO SceneSourceType: %SceneSourceType%
+    @ECHO ResultsFileName: %ResultsFileName%
 
     SET SceneBuildLogFile=%CD%\%LogFolderName%\%SceneConfigurationPrintableName%.log
     SET returnCode=0
