@@ -302,6 +302,7 @@ IF DEFINED Build_4_19 (
     IF DEFINED Build_BluePrints (
         SET SceneSourceType=Blueprints
         SET SceneConfigurationPrintableName=!SceneName!_!UE_VERSION!_!SceneConfiguration!_!SceneSourceType!
+        SET SceneBuildLogFile=!CD!\!LogFolderName!\!SceneConfigurationPrintableName!.log
         
         CALL :buildScene
     )
@@ -310,6 +311,7 @@ IF DEFINED Build_4_19 (
     IF DEFINED Build_CPP (
         SET SceneSourceType=CPP
         SET SceneConfigurationPrintableName=!SceneName!_!UE_VERSION!_!SceneConfiguration!_!SceneSourceType!
+        SET SceneBuildLogFile=!CD!\!LogFolderName!\!SceneConfigurationPrintableName!.log
 
         CALL :buildScene
     )
@@ -317,12 +319,14 @@ IF DEFINED Build_4_19 (
     EXIT /B 0
 
 :buildScene
+
     @ECHO:
-    @ECHO SceneConfigurationPrintableName: !SceneConfigurationPrintableName!
+    @ECHO SceneConfigurationPrintableName: %SceneConfigurationPrintableName%
     @ECHO SceneSourceType: %SceneSourceType%
     @ECHO ResultsFileName: %ResultsFileName%
+    @ECHO SceneBuildLogFile: %SceneBuildLogFile%
 
-    SET SceneBuildLogFile=%CD%\%LogFolderName%\%SceneConfigurationPrintableName%.log
+    
     SET returnCode=0
     SET buildSuccess=""
 
