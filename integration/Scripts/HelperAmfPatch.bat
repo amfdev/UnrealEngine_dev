@@ -22,6 +22,8 @@ IF ["%AMF_VERSION%"] == ["4.17"] (
     IF ERRORLEVEL 1 GOTO :error    
 ) ELSE IF ["%AMF_VERSION%"] == ["4.19"] (
     git apply ..\Patches\AmfMedia_UE418.patch
+    IF ERRORLEVEL 1 GOTO :error    
+    
     git apply ..\Patches\AmfMedia_UE419.patch
     IF ERRORLEVEL 1 GOTO :error    
 )
