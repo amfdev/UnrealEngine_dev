@@ -172,7 +172,7 @@ IF DEFINED Build_4_19 (
 
 :done
     @ECHO:
-    @ECHO Build successfully finished!
+    @ECHO Work of build system finished
     EXIT /B 0
 
 :usage
@@ -182,7 +182,7 @@ IF DEFINED Build_4_19 (
 
 :error
     @ECHO:
-    @ECHO Error: build failed!
+    @ECHO Error: Work of build system failed!
     EXIT /B 1
 
 :runBuildHelper unreal_number
@@ -265,16 +265,26 @@ IF DEFINED Build_4_19 (
     IF DEFINED Build_Engine (
         IF DEFINED Build_Clean (
             CALL Scripts\BuildUnrealCleanImplementation.bat
-        ) ELSE (
-            CALL Scripts\BuildUnrealImplementation.bat
+
+            IF ERRORLEVEL 1 (
+                @ECHO Clean for configuration "!UnrealConfigurationPrintableName!" finished with errors
+                SET buildResult=failed
+            ) ELSE (
+                @ECHO Clean for configuration "!UnrealConfigurationPrintableName!" finished successfully
+                SET buildResult=succeeded
+            )
         )
-        
-        IF ERRORLEVEL 1 (
-            @ECHO Build for configuration "!UnrealConfigurationPrintableName!" finished with errors
-            SET buildResult=failed
-        ) ELSE (
-            @ECHO Build for configuration "!UnrealConfigurationPrintableName!" finished successfully
-            SET buildResult=succeeded
+
+        IF NOT ["failed"] == ["%buildResult%"] (
+            CALL Scripts\BuildUnrealImplementation.bat
+
+            IF ERRORLEVEL 1 (
+                @ECHO Build for configuration "!UnrealConfigurationPrintableName!" finished with errors
+                SET buildResult=failed
+            ) ELSE (
+                @ECHO Build for configuration "!UnrealConfigurationPrintableName!" finished successfully
+                SET buildResult=succeeded
+            )
         )
     )
     
@@ -284,7 +294,6 @@ IF DEFINED Build_4_19 (
         @ECHO %UnrealConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildResult%>>"%ResultsFileName%"
     )
 
-    SET SceneSourceType=
     SET SceneConfigurationPrintableName=
     SET SceneName=
 
@@ -299,6 +308,7 @@ IF DEFINED Build_4_19 (
         EXIT /B 1
     )
     
+    SET SceneSourceType=
     IF DEFINED Build_BluePrints (
         SET SceneSourceType=Blueprints
         SET SceneConfigurationPrintableName=!SceneName!_!UE_VERSION!_!SceneConfiguration!_!SceneSourceType!
@@ -319,13 +329,14 @@ IF DEFINED Build_4_19 (
     EXIT /B 0
 
 :buildScene
-
     @ECHO:
     @ECHO SceneConfigurationPrintableName: %SceneConfigurationPrintableName%
     @ECHO SceneSourceType: %SceneSourceType%
     @ECHO ResultsFileName: %ResultsFileName%
     @ECHO SceneBuildLogFile: %SceneBuildLogFile%
 
+    rem @echo scene built!
+    rem exit /b 0
     
     SET returnCode=0
     SET buildResult=""

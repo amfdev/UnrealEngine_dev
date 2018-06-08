@@ -46,7 +46,7 @@ IF /I ["%SceneSourceType%"] == ["BluePrints"] (
     GOTO :error\
 )
 
-@ECHO Project name to deploy: %SceneProjectName%
+@ECHO Project name to build: %SceneProjectName%
 @ECHO Output file name: %SceneBuildLogFile%
 
 CD %UnrealHome%
