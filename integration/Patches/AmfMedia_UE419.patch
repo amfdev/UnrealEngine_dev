@@ -1,0 +1,55 @@
+diff --git "a/Engine/Plugins/Runtime/Sphere360/Source/Sphere360/Private/Sphere360MeshComponent.cpp" "b/Engine/Plugins/Runtime/Sphere360/Source/Sphere360/Private/Sphere360MeshComponent.cpp"
+index 7cf62fab7a..7301b0461d 100644
+--- "a/Engine/Plugins/Runtime/Sphere360/Source/Sphere360/Private/Sphere360MeshComponent.cpp"
++++ "b/Engine/Plugins/Runtime/Sphere360/Source/Sphere360/Private/Sphere360MeshComponent.cpp"
+@@ -109,7 +109,7 @@ public:
+ class FSphere360MeshIndexBuffer : public FIndexBuffer
+ {
+ public:
+-	TArray<int32> Indices;
++	TArray<uint32> Indices;
+ 
+ 	virtual void InitRHI() override
+ 	{
+@@ -128,7 +128,8 @@ class FSphere360MeshVertexFactory : public FLocalVertexFactory
+ {
+ public:
+ 
+-	FSphere360MeshVertexFactory()
++	FSphere360MeshVertexFactory():
++		FLocalVertexFactory( ERHIFeatureLevel::SM4, "FSphere360MeshVertexFactory" )
+ 	{}
+ 
+ 	/** Init function that should only be called on render thread. */
+@@ -192,7 +193,8 @@ static void ConvertSphere360MeshToDynMeshVertex(FDynamicMeshVertex& Vert, const
+ {
+ 	Vert.Position = ProcVert.Position;
+ 	Vert.Color = ProcVert.Color;
+-	Vert.TextureCoordinate = ProcVert.UV0;
++	//Vert.TextureCoordinate = ProcVert.UV0;
++	Vert.TextureCoordinate[0] = ProcVert.UV0;
+ 	Vert.TangentX = ProcVert.Tangent.TangentX;
+ 	Vert.TangentZ = ProcVert.Normal;
+ 	Vert.TangentZ.Vector.W = ProcVert.Tangent.bFlipTangentY ? 0 : 255;
+@@ -202,7 +204,6 @@ static void ConvertSphere360MeshToDynMeshVertex(FDynamicMeshVertex& Vert, const
+ class Sphere360MeshSceneProxy : public FPrimitiveSceneProxy
+ {
+ public:
+-
+ 	Sphere360MeshSceneProxy(UProceduralMeshComponent* Component)
+ 		: FPrimitiveSceneProxy(Component)
+ 		, BodySetup(Component->GetBodySetup())
+@@ -272,6 +273,13 @@ public:
+ 		}
+ 	}
+ 
++	/** Return a type (or subtype) specific hash for sorting purposes */
++	SIZE_T GetTypeHash() const override
++	{
++		static size_t UniquePointer;
++		return reinterpret_cast<size_t>(&UniquePointer);
++	}
++
+ 	/** Called on render thread to assign new dynamic data */
+ 	void UpdateSection_RenderThread(FSphere360MeshSectionUpdateData* SectionData)
+ 	{
