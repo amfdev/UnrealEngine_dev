@@ -17,67 +17,47 @@ SET Build_Development=
 SET Build_Shipping=
 SET Build_BluePrints=
 SET Build_CPP=
+SET Build_Plane=
+SET Build_x360=
 SET Build_Engine=
 SET Build_Tests=
 SET Build_Dirty=
 SET Build_Clean=
 SET Build_Verbose=
 
-SET Params=
-SET ParamsEngine=
-SET ParamsScene=
-
 FOR %%x IN (%*) DO (
    IF /i "%%~x"=="4.17" (
         SET Build_4_17=1
-        SET Params=%Params%A
-        SET ParamsEngine=%ParamsEngine%A
     ) ELSE IF /i "%%~x"=="4.18" (
         SET Build_4_18=1
-        SET Params=%Params%B
-        SET ParamsEngine=%ParamsEngine%B
     ) ELSE IF /i "%%~x"=="4.19" (
         SET Build_4_19=1
-        SET Params=%Params%B2
-        SET ParamsEngine=%ParamsEngine%B2
     ) ELSE IF /i "%%~x"=="Amf" (
         SET Build_Amf=1
-        SET Params=%Params%C
-        SET ParamsEngine=%ParamsEngine%C
     ) ELSE IF /i "%%~x"=="Stitch" (
         SET Build_Stitch=1
-        SET Params=%Params%C2
-        SET ParamsEngine=%ParamsEngine%C2
     ) ELSE IF /i "%%~x"=="Standard" (
         SET Build_Standard=1
-        SET Params=%Params%D
-        SET ParamsEngine=%ParamsEngine%D
     ) ELSE IF /i "%%~x"=="Development" (
         SET Build_Development=1
-        SET Params=%Params%E
-        SET ParamsEngine=%ParamsEngine%E
     ) ELSE IF /i "%%~x"=="Shipping" (
         SET Build_Shipping=1
-        SET Params=%Params%F
-        SET ParamsEngine=%ParamsEngine%F
     ) ELSE IF /i "%%~x"=="BluePrints" (
         SET Build_BluePrints=1
         SET Build_Tests=1
-        SET Params=%Params%J
-        SET ParamsScene=%ParamsScene%J
     ) ELSE IF /i "%%~x"=="CPP" (
         SET Build_CPP=1
         SET Build_Tests=1
-        SET Params=%Params%H
-        SET ParamsScene=%ParamsScene%H
+    ) ELSE IF /i "%%~x"=="Plane" (
+        SET Build_Tests=1
+        SET Build_Plane=1
+    ) ELSE IF /i "%%~x"=="x360" (
+        SET Build_Tests=1
+        SET Build_x360=1
     ) ELSE IF /i "%%~x"=="Engine" (
         SET Build_Engine=1
-        SET Params=%Params%I
-        SET ParamsEngine=%ParamsScene%I
     ) ELSE IF /i "%%~x"=="Tests" (
         SET Build_Tests=1
-        SET Params=%Params%J
-        SET ParamsScene=%ParamsScene%J
     ) ELSE IF /i "%%~x"=="Dirty" (
         SET Build_Dirty=1
     ) ELSE IF /i "%%~x"=="Clean" (
@@ -123,7 +103,7 @@ IF NOT DEFINED Build_Development IF NOT DEFINED Build_Shipping (
 IF NOT DEFINED Build_BluePrints IF NOT DEFINED Build_CPP IF DEFINED Build_Tests (
     @ECHO No tests type are specified by args, only blueprints will be built
     SET Build_BluePrints=1
-    rem SET Build_CPP=1
+    SET Build_CPP=1
 )
 
 IF NOT DEFINED Build_Dirty IF NOT DEFINED Build_Clean (
@@ -137,6 +117,11 @@ IF NOT DEFINED Build_Engine IF NOT DEFINED Build_Tests (
     SET Build_Tests=1
     SET Build_BluePrints=1
     SET Build_CPP=1
+)
+
+IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 IF NOT DEFINED Build_Stitch IF DEFINED Build_Tests (
+    SET Build_Plane=1
+    SET Build_x360=1
 )
 
 CALL :fillDateTimeVariables CurrentYear CurrentMonth CurrentDay CurrentHour CurrentMinute CurrentSecond
@@ -177,7 +162,7 @@ IF DEFINED Build_4_19 (
 
 :usage
     @ECHO:
-    @ECHO Available commands: Build.bat [Engine] [Tests] [4.17] [4.18] [4.19] [Standard] [Amf] [Development] [Shipping] [BluePrints] [CPP] [Help] [Dirty] [Clean]
+    @ECHO Available commands: Build.bat [Engine] [Tests] [4.17] [4.18] [4.19] [Standard] [Amf] [Stitch] [Development] [Shipping] [BluePrints] [CPP] [Plane] [x360] [Help] [Dirty] [Clean]
     EXIT /B 0
 
 :error
@@ -219,7 +204,6 @@ IF DEFINED Build_4_19 (
     EXIT /B 0
 
 :runBuildProcess unreal_number configuration renderType
-  
     SET UE_VERSION=%~1
     SET AMF_VERSION=
     SET STITCH_VERSION=
@@ -307,23 +291,48 @@ IF DEFINED Build_4_19 (
         @ECHO Error! unsupported renderType
         EXIT /B 1
     )
-    
-    SET SceneSourceType=
-    IF DEFINED Build_BluePrints (
-        SET SceneSourceType=Blueprints
-        SET SceneConfigurationPrintableName=!SceneName!_!UE_VERSION!_!SceneConfiguration!_!SceneSourceType!
-        SET SceneBuildLogFile=!CD!\!LogFolderName!\!SceneConfigurationPrintableName!.log
-        
-        CALL :buildScene
-    )
-    
-    SET SceneSourceType=
-    IF DEFINED Build_CPP (
-        SET SceneSourceType=CPP
-        SET SceneConfigurationPrintableName=!SceneName!_!UE_VERSION!_!SceneConfiguration!_!SceneSourceType!
-        SET SceneBuildLogFile=!CD!\!LogFolderName!\!SceneConfigurationPrintableName!.log
 
-        CALL :buildScene
+    IF DEFINED Build_Tests (
+        CALL :runSceneBuilder %~1 %~2 %~3
+    )
+
+    EXIT /B 0
+    
+:runSceneBuilder unreal_number configuration renderType
+    SET SceneConfigurationPrintableName=
+
+    FOR %%s IN (Blueprints, CPP) DO (
+        SET SkipSourceType=
+        
+        IF ["%%s"] == ["Blueprints"] IF NOT DEFINED Build_BluePrints SET SkipSourceType=1
+        IF ["%%s"] == ["CPP"] IF NOT DEFINED Build_CPP SET SkipSourceType=1
+
+        IF NOT DEFINED SkipSourceType (
+            IF "%~3" == "Stitch" (
+                SET SceneName=StitchAmf
+                SET SceneSourceType=%%s
+                SET SceneConfigurationPrintableName=!SceneName!_!UE_VERSION!_!SceneConfiguration!_!SceneSourceType!
+                SET SceneBuildLogFile=!CD!\!LogFolderName!\!SceneConfigurationPrintableName!.log
+
+                CALL :buildScene
+            ) ELSE (
+                FOR %%t IN (Plane, x360) DO (
+                    SET SkipTestType=
+
+                    IF ["%%s"] == ["Plane"] IF NOT DEFINED Build_Plane SET SkipTestType=1
+                    IF ["%%s"] == ["x360"] IF NOT DEFINED Build_x360 SET SkipTestType=1
+
+                    IF NOT DEFINED SkipTestType (
+                        SET SceneName=%%t%~3
+                        SET SceneSourceType=%%s
+                        SET SceneConfigurationPrintableName=!SceneName!_!UE_VERSION!_!SceneConfiguration!_!SceneSourceType!
+                        SET SceneBuildLogFile=!CD!\!LogFolderName!\!SceneConfigurationPrintableName!.log
+
+                        CALL :buildScene
+                    )
+                )
+            )
+        )
     )
 
     EXIT /B 0
@@ -335,9 +344,6 @@ IF DEFINED Build_4_19 (
     @ECHO ResultsFileName: %ResultsFileName%
     @ECHO SceneBuildLogFile: %SceneBuildLogFile%
 
-    rem @echo scene built!
-    rem exit /b 0
-    
     SET returnCode=0
     SET buildResult=""
 

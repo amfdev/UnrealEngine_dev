@@ -1,5 +1,8 @@
 @ECHO %Verbose%
+
 SETLOCAL
+SETLOCAL EnableDelayedExpansion
+IF ERRORLEVEL 1 GOTO :error
 
 IF NOT DEFINED AMF_VERSION (
     @ECHO Error: AMF_VERSION variable undefined!
@@ -21,11 +24,15 @@ IF ["%AMF_VERSION%"] == ["4.17"] (
     git apply ..\Patches\AmfMedia_UE418.patch
     IF ERRORLEVEL 1 GOTO :error    
 ) ELSE IF ["%AMF_VERSION%"] == ["4.19"] (
+    SET result=
+
     git apply ..\Patches\AmfMedia_UE418.patch
-    IF ERRORLEVEL 1 GOTO :error    
-    
+    IF ERRORLEVEL 1 SET result=failed
+
     git apply ..\Patches\AmfMedia_UE419.patch
-    IF ERRORLEVEL 1 GOTO :error    
+    IF ERRORLEVEL 1 SET result=failed
+
+    IF ["failed"] == ["!result!"] GOTO :error
 )
 
 :done
