@@ -27,10 +27,10 @@ SET Platform=Win64
 
 SET SceneProjectName=%SceneName%
 
-IF /I ["%SceneSourceType%"] == ["BluePrints"] (    
+IF /I ["%SceneSourceType%"] == ["BluePrints"] (
     @ECHO Deploy blueprints scene
-    
-) ELSE IF /I ["%SceneSourceType%"] == ["CPP"] (    
+
+) ELSE IF /I ["%SceneSourceType%"] == ["CPP"] (
     @ECHO Deploy C++ scene
 
     SET SceneProjectName=%SceneProjectName%Cpp
@@ -60,7 +60,7 @@ IF NOT EXIST "%DeployHome%\Tests" (
 
 IF EXIST "%DeployHome%\Tests\%SceneProjectOutputName%" (
     @ECHO Delete old %SceneProjectOutputName% folder
-    
+
     RD /S /Q %DeployHome%\Tests\%SceneProjectOutputName%
     IF ERRORLEVEL 1 GOTO :error
 )
@@ -83,9 +83,11 @@ IF ERRORLEVEL 1 (
 )
 
 IF NOT DEFINED STITCH_VERSION (
-    @ECHO Copy sample 4K video file
-    COPY "%CD%\TestsProjects\%UE_VERSION%\%SceneProjectName%\Content\Video\1.mp4" "%CD%\Deploy\Tests\%SceneProjectOutputName%\%SceneProjectName%\Content\Video\1.mp4"
-    IF ERRORLEVEL 1 GOTO :error
+    IF EXIST "%CD%\TestsProjects\%UE_VERSION%\%SceneProjectName%\Content\Video\1.mp4" (
+        @ECHO Copy sample 4K video file
+        COPY "%CD%\TestsProjects\%UE_VERSION%\%SceneProjectName%\Content\Video\1.mp4" "%CD%\Deploy\Tests\%SceneProjectOutputName%\%SceneProjectName%\Content\Video\1.mp4"
+        IF ERRORLEVEL 1 GOTO :error
+    )
 )
 
 :done
