@@ -88,7 +88,7 @@ IF NOT DEFINED Build_4_17 IF NOT DEFINED Build_4_18 IF NOT DEFINED Build_4_19 (
 )
 
 IF NOT DEFINED Build_Standard IF NOT DEFINED Build_Amf IF NOT DEFINED Build_Stitch (
-    @ECHO No build type specified by args, standard, Amf and Stitch will be added 
+    @ECHO No build type specified by args, standard, Amf and Stitch will be added
     SET Build_Standard=1
     SET Build_Amf=1
     SET Build_Stitch=1
@@ -101,7 +101,8 @@ IF NOT DEFINED Build_Development IF NOT DEFINED Build_Shipping (
 )
 
 IF NOT DEFINED Build_BluePrints IF NOT DEFINED Build_CPP IF DEFINED Build_Tests (
-    @ECHO No tests type are specified by args, only blueprints will be built
+    rem @ECHO No tests type are specified by args, only blueprints will be built
+    @ECHO No tests type are specified by args, blueprints and c++ tests will be included
     SET Build_BluePrints=1
     SET Build_CPP=1
 )
@@ -122,6 +123,7 @@ IF NOT DEFINED Build_Engine IF NOT DEFINED Build_Tests (
 IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 IF NOT DEFINED Build_Stitch IF DEFINED Build_Tests (
     SET Build_Plane=1
     SET Build_x360=1
+    SET Build_Stitch=1
 )
 
 CALL :fillDateTimeVariables CurrentYear CurrentMonth CurrentDay CurrentHour CurrentMinute CurrentSecond
@@ -171,7 +173,7 @@ IF DEFINED Build_4_19 (
     EXIT /B 1
 
 :runBuildHelper unreal_number
-    IF DEFINED Build_Standard (        
+    IF DEFINED Build_Standard (
         IF DEFINED Build_Development (
             CALL :runBuildProcess %~1 Development Standard
         )
@@ -180,7 +182,7 @@ IF DEFINED Build_4_19 (
             CALL :runBuildProcess %~1 Shipping Standard
         )
     )
-    
+
     IF DEFINED Build_Amf (
         IF DEFINED Build_Development (
             CALL :runBuildProcess %~1 Development Amf
@@ -191,7 +193,7 @@ IF DEFINED Build_4_19 (
         )
     )
 
-    IF DEFINED Build_Stitch (        
+    IF DEFINED Build_Stitch (
         IF DEFINED Build_Development (
             CALL :runBuildProcess %~1 Development Stitch
         )
@@ -200,7 +202,7 @@ IF DEFINED Build_4_19 (
             CALL :runBuildProcess %~1 Shipping Stitch
         )
     )
-    
+
     EXIT /B 0
 
 :runBuildProcess unreal_number configuration renderType
@@ -217,7 +219,7 @@ IF DEFINED Build_4_19 (
             SET AMF_VERSION=4.18
         ) ELSE (
             SET AMF_VERSION=%~1
-        )        
+        )
     ) ELSE IF ["%~3"] == ["Stitch"] (
         SET STITCH_VERSION=4.18
     ) ELSE (
@@ -235,17 +237,17 @@ IF DEFINED Build_4_19 (
         REM Must be failed later
         SET UnrealConfiguration=
         SET SceneConfiguration=
-    )    
-    
+    )
+
     @ECHO:
-    
+
     SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%renderTypePrintable%
     SET UnrealBuildLogFile=%CD%\%LogFolderName%\%UnrealConfigurationPrintableName%.log
     SET returnCode=0
     SET buildResult=""
 
     CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
-    
+
     IF DEFINED Build_Engine (
         IF DEFINED Build_Clean (
             CALL Scripts\BuildUnrealCleanImplementation.bat
@@ -271,25 +273,11 @@ IF DEFINED Build_4_19 (
             )
         )
     )
-    
+
     CALL :fillDateTimeVariables endYear endMonth endDay endHour endMinute endSecond
 
     IF DEFINED Build_Engine (
         @ECHO %UnrealConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildResult%>>"%ResultsFileName%"
-    )
-
-    SET SceneConfigurationPrintableName=
-    SET SceneName=
-
-    IF "%~3" == "Standard" (
-        SET SceneName=PlaneStandard
-    ) ELSE IF "%~3" == "Amf" (
-        SET SceneName=PlaneAmf
-    ) ELSE IF "%~3" == "Stitch" (
-        SET SceneName=StitchAmf
-    ) ELSE (
-        @ECHO Error! unsupported renderType
-        EXIT /B 1
     )
 
     IF DEFINED Build_Tests (
@@ -297,18 +285,20 @@ IF DEFINED Build_4_19 (
     )
 
     EXIT /B 0
-    
+
 :runSceneBuilder unreal_number configuration renderType
     SET SceneConfigurationPrintableName=
 
     FOR %%s IN (Blueprints, CPP) DO (
+
         SET SkipSourceType=
-        
         IF ["%%s"] == ["Blueprints"] IF NOT DEFINED Build_BluePrints SET SkipSourceType=1
         IF ["%%s"] == ["CPP"] IF NOT DEFINED Build_CPP SET SkipSourceType=1
 
         IF NOT DEFINED SkipSourceType (
+
             IF "%~3" == "Stitch" (
+
                 SET SceneName=StitchAmf
                 SET SceneSourceType=%%s
                 SET SceneConfigurationPrintableName=!SceneName!_!UE_VERSION!_!SceneConfiguration!_!SceneSourceType!
@@ -316,11 +306,12 @@ IF DEFINED Build_4_19 (
 
                 CALL :buildScene
             ) ELSE (
-                FOR %%t IN (Plane, x360) DO (
-                    SET SkipTestType=
 
-                    IF ["%%s"] == ["Plane"] IF NOT DEFINED Build_Plane SET SkipTestType=1
-                    IF ["%%s"] == ["x360"] IF NOT DEFINED Build_x360 SET SkipTestType=1
+                FOR %%t IN (Plane, x360) DO (
+
+                    SET SkipTestType=
+                    IF ["%%t"] == ["Plane"] IF NOT DEFINED Build_Plane SET SkipTestType=1
+                    IF ["%%t"] == ["x360"] IF NOT DEFINED Build_x360 SET SkipTestType=1
 
                     IF NOT DEFINED SkipTestType (
                         SET SceneName=%%t%~3
@@ -349,7 +340,7 @@ IF DEFINED Build_4_19 (
 
     CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
     CALL Scripts\BuildSceneImplementation.bat
-    
+
     IF ERRORLEVEL 1 (
         @ECHO Error: failed to build scene %SceneConfigurationPrintableName%
         SET returnCode=1
@@ -367,14 +358,14 @@ IF DEFINED Build_4_19 (
     )
 
     @ECHO !SceneConfigurationPrintableName!,!startYear!/!startMonth!/!startDay!,!startHour!:!startMinute!:!startSecond!,!endYear!/!endMonth!/!endDay!,!endHour!:!endMinute!:!endSecond!,!buildResult!>>"!ResultsFileName!"
-    
+
     EXIT /B 0
 
 :fillDateTimeVariables yy mm dd hour minute second [/A]
     SETLOCAL ENABLEEXTENSIONS
-    
+
     IF "%date%A" LSS "A" (SET toks=1-3) ELSE (SET toks=2-4)
-    
+
     FOR /f "tokens=2-4 delims=(-)" %%a IN ('echo:^|date') DO (
         FOR /f "tokens=%toks% delims=.-/ " %%i IN ('date/t') DO (
             SET '%%a'=%%i
@@ -387,10 +378,10 @@ IF DEFINED Build_4_19 (
     IF /I "%'yy'%"=="" ( SET "'yy'=%'jj'%" & SET "'dd'=%'tt'%" )
     IF %'yy'% LSS 100 SET 'yy'=20%'yy'%
     ENDLOCAL&SET %1=%'yy'%&SET %7 %2=%'mm'%&SET %7 %3=%'dd'%
-    
+
     SET currentTimeValue=%TIME%
     IF "%currentTimeValue:~0,1%" == " " (SET currentTimeValue=0%currentTimeValue:~1,7%)
-    
+
     SET %4=%currentTimeValue:~0,2%
     SET %5=%currentTimeValue:~3,2%
     SET %6=%currentTimeValue:~6,2%
