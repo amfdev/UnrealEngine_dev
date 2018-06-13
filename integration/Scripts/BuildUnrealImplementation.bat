@@ -12,10 +12,10 @@ IF NOT DEFINED UE_VERSION (
 )
 
 IF DEFINED AMF_VERSION (
-    IF ["%AMF_VERSION%"] == ["%UNREAL_VERSION%"] (
+    IF ["%AMF_VERSION%"] == ["%UE_VERSION%"] (
         SET AmfHome=AmfMedia-%AMF_VERSION%
     ) ELSE (
-        SET AmfHome=AmfMedia-%UNREAL_VERSION%
+        SET AmfHome=AmfMedia-%UE_VERSION%
     )
 )
 
