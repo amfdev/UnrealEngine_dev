@@ -12,7 +12,11 @@ IF NOT DEFINED UE_VERSION (
 )
 
 IF DEFINED AMF_VERSION (
-    SET AmfHome=AmfMedia-%AMF_VERSION%
+    IF ["%AMF_VERSION%"] == ["%UNREAL_VERSION%"] (
+        SET AmfHome=AmfMedia-%AMF_VERSION%
+    ) ELSE (
+        SET AmfHome=AmfMedia-%UNREAL_VERSION%
+    )
 )
 
 IF NOT DEFINED UnrealConfiguration (
@@ -83,7 +87,7 @@ IF DEFINED STITCH_VERSION (
     SET PROJECT_BRANCH=AmfStitchMedia-4.18
     SET PROJECT_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs2015\AmfStitchMediaCommon.sln
     SET PROJECT_APPLY_PROGRAM=AmfStitchMediaInstall.bat
-    
+
     CALL Scripts\HelperClone.bat
     IF ERRORLEVEL 1 GOTO :error
 
@@ -92,7 +96,7 @@ IF DEFINED STITCH_VERSION (
         @ECHO Failed to apply patch!
         @ECHO It seems like the code is already patched,
         @ECHO try to build it...
-        )    
+        )
 
     CALL Scripts\HelperBuild.bat
     IF ERRORLEVEL 1 GOTO :error
