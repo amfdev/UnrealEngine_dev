@@ -342,7 +342,7 @@ IF DEFINED Build_4_19 (
     CALL Scripts\BuildSceneImplementation.bat
 
     IF ERRORLEVEL 1 (
-        @ECHO Error: failed to build scene %SceneConfigurationPrintableName%
+        @ECHO Error: failed to build scene %SceneConfigurationPrintableName%!
         SET returnCode=1
     ) ELSE (
         @ECHO Scene %SceneConfigurationPrintableName% built successfully!

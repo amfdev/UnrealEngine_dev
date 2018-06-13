@@ -35,7 +35,7 @@ IF ERRORLEVEL 1 GOTO :error
 @ECHO Start building UnrealEngine
 @ECHO:
 
-@ECHO MsBuild: %MSBUILD_EXE% 
+@ECHO MsBuild: %MSBUILD_EXE%
 @ECHO Target: %target%
 @ECHO Affinity: %maxcpucount%
 @ECHO Configuration: %UnrealConfiguration%
@@ -53,7 +53,7 @@ CD %CurrentDirectory%
 
 ROBOCOPY %CD%\%UnrealHome%\Engine\Extras\Redist\en-us\ %CD%\Deploy\Prerequirements\%UE_VERSION% /E
 IF ERRORLEVEL 1 (
-    @ECHO Error: failed to copy dependencies
+    @ECHO Error: failed to copy dependencies!
     rem GOTO :error
 )
 
@@ -62,5 +62,5 @@ IF ERRORLEVEL 1 (
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to build UnrealEngine
+    @ECHO Error: failed to build UnrealEngine!
     EXIT /B 1

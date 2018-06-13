@@ -8,7 +8,7 @@ IF NOT DEFINED UnrealHome (
 IF DEFINED MSBUILD_EXE  (
     GOTO :testMSBuild
     )
-    
+
 @ECHO MSBUILD_EXE variable with command to run MSBuild.exe not found!
 @ECHO Automation scripts will try to detects MSBuild.exe automatically:
 
@@ -22,13 +22,14 @@ REM fix issue in script
 @ECHO Test MSBuild:
 %MSBUILD_EXE% -version
 IF ERRORLEVEL 1 GOTO :error
-    
+
 :done
-    @ECHO Neccessary defines tested successfully!
-    
+    @ECHO:
+    @ECHO: Msbuild.exe found and tested successfully!
+
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to test defines
+    @ECHO Error: failed to test defines!
 
     EXIT /B 1

@@ -17,9 +17,10 @@ if %errorlevel% == 0 (
 )
 
 :done
-    @ECHO Neccessary defines tested successfully!
+    @ECHO:
+    @ECHO Neccessary defines tested successfully
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to test defines
+    @ECHO Error: failed to test defines!
     EXIT /B 1

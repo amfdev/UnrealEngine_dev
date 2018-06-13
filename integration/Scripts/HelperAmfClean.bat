@@ -22,5 +22,5 @@ RD /S /Q "%CD%/.git/rebase-apply"
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to clean Amf libraries
+    @ECHO Error: failed to clean Amf libraries!
     EXIT /B 1

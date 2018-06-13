@@ -25,5 +25,5 @@ IF ERRORLEVEL 1 GOTO :error
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to update UnrealEngine %UE_VERSION%
+    @ECHO Error: failed to update UnrealEngine %UE_VERSION%!
     EXIT /B 1

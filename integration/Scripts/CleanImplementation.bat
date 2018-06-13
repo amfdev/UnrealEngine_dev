@@ -43,7 +43,7 @@ IF DEFINED AMF_VERSION (
     @ECHO:
 )
 
-@ECHO: 
+@ECHO:
 @ECHO Cleanup finished
 @ECHO:
 
@@ -51,5 +51,5 @@ IF DEFINED AMF_VERSION (
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to clean before build
+    @ECHO Error: failed to clean before build!
     EXIT /B 1

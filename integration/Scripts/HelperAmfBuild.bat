@@ -13,7 +13,7 @@ CD %AmfHome%
 IF ERRORLEVEL 1 GOTO :error
 
 SET target=build
-SET maxcpucount=/maxcpucount 
+SET maxcpucount=/maxcpucount
 SET solution=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs2015\AmfMediaCommon.sln
 SET configuration=Release
 SET platform=x64
@@ -26,5 +26,5 @@ IF ERRORLEVEL 1 GOTO :error
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to build Amf libraries
+    @ECHO Error: failed to build Amf libraries!
     EXIT /B 1

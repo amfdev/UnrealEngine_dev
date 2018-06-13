@@ -70,9 +70,14 @@ MKDIR %DeployHome%\Tests\%SceneProjectOutputName%
 IF ERRORLEVEL 1 GOTO :error
 
 IF NOT DEFINED STITCH_VERSION (
-    @ECHO Create folder for video file
-    MKDIR "%CD%\Deploy\Tests\%SceneProjectOutputName%\%SceneProjectName%\Content\Video
-    IF ERRORLEVEL 1 GOTO :error
+    IF EXIST "%CD%\TestsProjects\%UE_VERSION%\%SceneProjectName%\Content\Video\1.mp4" (
+        @ECHO Create folder for video file
+        MKDIR "%CD%\Deploy\Tests\%SceneProjectOutputName%\%SceneProjectName%\Content\Video
+        IF ERRORLEVEL 1 GOTO :error
+    )
+
+    @ECHO Create folder for shared video files
+    IF NOT EXIST "%CD%\Deploy\Media" MKDIR "%CD%\Deploy\Media"
 )
 
 @ECHO Copy scene to deploy folder
@@ -88,6 +93,12 @@ IF NOT DEFINED STITCH_VERSION (
         COPY "%CD%\TestsProjects\%UE_VERSION%\%SceneProjectName%\Content\Video\1.mp4" "%CD%\Deploy\Tests\%SceneProjectOutputName%\%SceneProjectName%\Content\Video\1.mp4"
         IF ERRORLEVEL 1 GOTO :error
     )
+
+    IF EXIST "%CD%\TestsProjects\Media" (
+        @ECHO Copy shared video files
+        COPY "%CD%\TestsProjects\Media" "%CD%\Deploy\Media"
+        IF ERRORLEVEL 1 GOTO :error
+    )
 )
 
 :done
@@ -95,5 +106,5 @@ IF NOT DEFINED STITCH_VERSION (
     EXIT /B 0
 
 :error
-    @ECHO Error: failed deploy scene
+    @ECHO Error: failed deploy scene!
     EXIT /B 1

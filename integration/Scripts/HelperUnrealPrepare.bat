@@ -36,5 +36,5 @@ rem COLOR
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to create UnrealEngine project files
+    @ECHO Error: failed to create UnrealEngine project files!
     EXIT /B 1

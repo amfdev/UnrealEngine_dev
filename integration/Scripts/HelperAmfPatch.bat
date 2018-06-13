@@ -19,10 +19,10 @@ IF ERRORLEVEL 1 GOTO :error
 
 IF ["%AMF_VERSION%"] == ["4.17"] (
     git apply ..\Patches\CmdLogger.patch
-    IF ERRORLEVEL 1 GOTO :error    
+    IF ERRORLEVEL 1 GOTO :error
 ) ELSE IF ["%AMF_VERSION%"] == ["4.18"] (
     git apply ..\Patches\AmfMedia_UE418.patch
-    IF ERRORLEVEL 1 GOTO :error    
+    IF ERRORLEVEL 1 GOTO :error
 ) ELSE IF ["%AMF_VERSION%"] == ["4.19"] (
     SET result=
 
@@ -40,5 +40,5 @@ IF ["%AMF_VERSION%"] == ["4.17"] (
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to patch Amf libraries
+    @ECHO Error: failed to patch Amf libraries!
     EXIT /B 1

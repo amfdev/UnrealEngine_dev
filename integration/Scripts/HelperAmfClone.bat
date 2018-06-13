@@ -25,5 +25,5 @@ IF ERRORLEVEL 1 GOTO :error
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to update Amf libraries %AMF_VERSION%
+    @ECHO Error: failed to update Amf libraries %AMF_VERSION%!
     EXIT /B 1

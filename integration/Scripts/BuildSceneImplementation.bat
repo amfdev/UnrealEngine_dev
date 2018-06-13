@@ -31,9 +31,9 @@ CALL Scripts\HelperSceneDeploy.bat
 IF ERRORLEVEL 1 GOTO :error
 
 :done
-    @ECHO Build all finished!
+    @ECHO Scene built successfully
     EXIT /B 0
 
 :error
-    @ECHO Error found, break!
+    @ECHO Error: could not build scene!
     EXIT /B 1

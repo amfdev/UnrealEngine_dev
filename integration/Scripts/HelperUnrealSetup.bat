@@ -43,5 +43,5 @@ start /wait Engine\Extras\Redist\en-us\UE4PrereqSetup_x64.exe /quiet
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to setup UnrealEngine
+    @ECHO Error: failed to setup UnrealEngine!
     EXIT /B 1

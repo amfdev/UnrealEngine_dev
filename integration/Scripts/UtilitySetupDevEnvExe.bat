@@ -9,7 +9,7 @@ IF NOT DEFINED UnrealHome (
 IF DEFINED VSComnToolsPath  (
     GOTO :testVSComnToolsPath
     )
-    
+
 @ECHO VSComnToolsPath variable with path to run devenv.exe not found!
 @ECHO Automation scripts will try to detects devenv.exe automatically later
 
@@ -29,16 +29,16 @@ IF EXIST "%VSComnToolsPath%\..\ide\devenv.exe" (
     GOTO :error
 )
 @ECHO todo: test run devenv
-    
+
 :done
-    @ECHO
-    @ECHO Neccessary defines tested successfully!
-    
-    POPD %~dp0    
+    @ECHO:
+    @ECHO Devenv.exe found and tested successfully!
+
+    POPD %~dp0
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to test defines
+    @ECHO Error: failed to test defines!
 
     POPD %~dp0
     EXIT /B 1

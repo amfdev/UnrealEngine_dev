@@ -28,5 +28,5 @@ IF ERRORLEVEL 1 GOTO :error
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to apply Amf libraries to UnrealEngine
+    @ECHO Error: failed to apply Amf libraries to UnrealEngine!
     EXIT /B 1
