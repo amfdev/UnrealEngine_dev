@@ -250,7 +250,7 @@ IF DEFINED Build_4_19 (
 
     IF DEFINED Build_Engine (
         IF DEFINED Build_Clean (
-            CALL Scripts\BuildUnrealCleanImplementation.bat
+            CALL Scripts\CleanImplementation.bat
 
             IF ERRORLEVEL 1 (
                 @ECHO Clean for configuration "!UnrealConfigurationPrintableName!" finished with errors
