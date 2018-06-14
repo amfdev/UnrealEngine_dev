@@ -113,11 +113,25 @@ IF NOT DEFINED Build_Dirty IF NOT DEFINED Build_Clean (
 )
 
 IF NOT DEFINED Build_Engine IF NOT DEFINED Build_Tests (
-    @ECHO Engine and tests will be built
+    @ECHO Not engine or tests are defined, both engine and tests will be built
     SET Build_Engine=1
     SET Build_Tests=1
     SET Build_BluePrints=1
     SET Build_CPP=1
+)
+
+IF DEFINED Build_Tests (
+    IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 (
+        IF DEFINED Build_Standard (
+            SET Build_Plane=1
+            SET Build_x360=1
+        )
+
+        IF DEFINED Build_Amf (
+            SET Build_Plane=1
+            SET Build_x360=1
+        )
+    )
 )
 
 IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 IF NOT DEFINED Build_Stitch IF DEFINED Build_Tests (
@@ -125,6 +139,25 @@ IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 IF NOT DEFINED Build_Stitch
     SET Build_x360=1
     SET Build_Stitch=1
 )
+
+SET Build_4_17
+SET Build_4_18
+SET Build_4_19
+SET Build_Amf
+SET Build_Standard
+SET Build_Stitch
+SET Build_Development
+SET Build_Shipping
+SET Build_BluePrints
+SET Build_CPP
+SET Build_Plane
+SET Build_x360
+SET Build_Engine
+SET Build_Tests
+SET Build_Dirty
+SET Build_Clean
+SET Build_Verbose
+exit /b 0
 
 CALL :fillDateTimeVariables CurrentYear CurrentMonth CurrentDay CurrentHour CurrentMinute CurrentSecond
 rem @ECHO %CurrentYear%/%CurrentMonth%/%CurrentDay%

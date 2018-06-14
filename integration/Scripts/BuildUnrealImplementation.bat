@@ -82,7 +82,12 @@ SET PROJECT_SOLUTION=
 IF DEFINED STITCH_VERSION (
     @ECHO Prepare stitch plugin...
 
-    SET PROJECT_FOLDER=AmfStitchMedia-4.18
+    IF ["%UE_VERSION%"] == ["4.19"] (
+        SET PROJECT_FOLDER=AmfStitchMedia-4.19
+    ) ELSE IF ["%UE_VERSION%"] == ["4.18"] (
+        SET PROJECT_FOLDER=AmfStitchMedia-4.18
+    )
+
     SET PROJECT_URL=https://github.com/GPUOpenSoftware/UnrealEngine.git
     SET PROJECT_BRANCH=AmfStitchMedia-4.18
     SET PROJECT_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs2015\AmfStitchMediaCommon.sln
