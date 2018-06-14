@@ -12,15 +12,10 @@ IF NOT DEFINED PROJECT_FOLDER (
 )
 
 IF DEFINED AMF_VERSION (
-    IF /I ["%UE_VERSION%"] == ["4.17"] (    
-        CD %PROJECT_FOLDER%
-        IF ERRORLEVEL 1 GOTO :error
-
-        git apply ..\Patches\CmdLogger.patch
-        IF ERRORLEVEL 1 GOTO :error
-    )
+    @ECHO Error: not yet implemented
+    GOTO :error
 ) ELSE IF DEFINED STITCH_VERSION (
-    IF /I ["%UE_VERSION%"] == ["4.18"] (    
+    IF /I ["%STITCH_VERSION%"] == ["4.18"] (
         CD %PROJECT_FOLDER%
         IF ERRORLEVEL 1 GOTO :error
 

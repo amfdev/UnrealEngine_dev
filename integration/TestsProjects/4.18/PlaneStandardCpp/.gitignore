@@ -3,3 +3,6 @@
 /Intermediate
 /Saved
 /Binaries
+/.vs
+/PlaneStandardCpp.VC.db
+/*.opendb
