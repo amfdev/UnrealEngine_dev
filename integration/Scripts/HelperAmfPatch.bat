@@ -9,6 +9,11 @@ IF NOT DEFINED AMF_VERSION (
     GOTO :error
 )
 
+IF NOT DEFINED UE_VERSION (
+    @ECHO Error: UE_VERSION variable undefined!
+    GOTO :error
+)
+
 IF NOT DEFINED AmfHome (
     @ECHO Error: AmfHome variable undefined!
     GOTO :error
@@ -17,13 +22,15 @@ IF NOT DEFINED AmfHome (
 CD %AmfHome%
 IF ERRORLEVEL 1 GOTO :error
 
-IF ["%AMF_VERSION%"] == ["4.17"] (
+IF ["%UE_VERSION%"] == ["4.17"] (
+    @echo 1
     git apply ..\Patches\CmdLogger.patch
     IF ERRORLEVEL 1 GOTO :error
-) ELSE IF ["%AMF_VERSION%"] == ["4.18"] (
+) ELSE IF ["%UE_VERSION%"] == ["4.18"] (
+    @echo 1
     git apply ..\Patches\AmfMedia_UE418.patch
     IF ERRORLEVEL 1 GOTO :error
-) ELSE IF ["%AMF_VERSION%"] == ["4.19"] (
+) ELSE IF ["%UE_VERSION%"] == ["4.19"] (
     SET result=
 
     git apply ..\Patches\AmfMedia_UE418.patch
@@ -36,7 +43,7 @@ IF ["%AMF_VERSION%"] == ["4.17"] (
 )
 
 :done
-    @ECHO Amf libraries patched
+    @ECHO Amf libraries patched successfully
     EXIT /B 0
 
 :error

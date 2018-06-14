@@ -18,7 +18,7 @@ IF ERRORLEVEL 1 GOTO :error
 RD /S /Q "%CD%/.git/rebase-apply"
 
 :done
-    @ECHO Amf libraries cleaned
+    @ECHO Amf libraries cleaned successfully
     EXIT /B 0
 
 :error
