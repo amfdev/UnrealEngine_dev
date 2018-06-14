@@ -1,5 +1,5 @@
 diff --git "a/Engine/Plugins/Runtime/Sphere360/Source/Sphere360/Private/Sphere360MeshComponent.cpp" "b/Engine/Plugins/Runtime/Sphere360/Source/Sphere360/Private/Sphere360MeshComponent.cpp"
-index 7cf62fab7a..7301b0461d 100644
+index 7cf62fab7a..d5c29dc147 100644
 --- "a/Engine/Plugins/Runtime/Sphere360/Source/Sphere360/Private/Sphere360MeshComponent.cpp"
 +++ "b/Engine/Plugins/Runtime/Sphere360/Source/Sphere360/Private/Sphere360MeshComponent.cpp"
 @@ -109,7 +109,7 @@ public:
@@ -17,11 +17,28 @@ index 7cf62fab7a..7301b0461d 100644
  
 -	FSphere360MeshVertexFactory()
 +	FSphere360MeshVertexFactory():
-+		FLocalVertexFactory( ERHIFeatureLevel::SM4, "FSphere360MeshVertexFactory" )
++		FLocalVertexFactory( ERHIFeatureLevel::Num, "FSphere360MeshVertexFactory" )
  	{}
  
  	/** Init function that should only be called on render thread. */
-@@ -192,7 +193,8 @@ static void ConvertSphere360MeshToDynMeshVertex(FDynamicMeshVertex& Vert, const
+@@ -138,6 +139,8 @@ public:
+ 
+ 		// Initialize the vertex factory's stream components.
+ 		FDataType NewData;
++		FMemory::Memset(&NewData, 0, sizeof(FDataType));
++
+ 		NewData.PositionComponent = STRUCTMEMBER_VERTEXSTREAMCOMPONENT(VertexBuffer, FDynamicMeshVertex, Position, VET_Float3);
+ 		NewData.TextureCoordinates.Add(
+ 			FVertexStreamComponent(VertexBuffer, STRUCT_OFFSET(FDynamicMeshVertex, TextureCoordinate), sizeof(FDynamicMeshVertex), VET_Float2)
+@@ -145,6 +148,7 @@ public:
+ 		NewData.TangentBasisComponents[0] = STRUCTMEMBER_VERTEXSTREAMCOMPONENT(VertexBuffer, FDynamicMeshVertex, TangentX, VET_PackedNormal);
+ 		NewData.TangentBasisComponents[1] = STRUCTMEMBER_VERTEXSTREAMCOMPONENT(VertexBuffer, FDynamicMeshVertex, TangentZ, VET_PackedNormal);
+ 		NewData.ColorComponent = STRUCTMEMBER_VERTEXSTREAMCOMPONENT(VertexBuffer, FDynamicMeshVertex, Color, VET_Color);
++		
+ 		SetData(NewData);
+ 	}
+ 
+@@ -192,7 +196,8 @@ static void ConvertSphere360MeshToDynMeshVertex(FDynamicMeshVertex& Vert, const
  {
  	Vert.Position = ProcVert.Position;
  	Vert.Color = ProcVert.Color;
@@ -31,7 +48,7 @@ index 7cf62fab7a..7301b0461d 100644
  	Vert.TangentX = ProcVert.Tangent.TangentX;
  	Vert.TangentZ = ProcVert.Normal;
  	Vert.TangentZ.Vector.W = ProcVert.Tangent.bFlipTangentY ? 0 : 255;
-@@ -202,7 +204,6 @@ static void ConvertSphere360MeshToDynMeshVertex(FDynamicMeshVertex& Vert, const
+@@ -202,7 +207,6 @@ static void ConvertSphere360MeshToDynMeshVertex(FDynamicMeshVertex& Vert, const
  class Sphere360MeshSceneProxy : public FPrimitiveSceneProxy
  {
  public:
@@ -39,7 +56,7 @@ index 7cf62fab7a..7301b0461d 100644
  	Sphere360MeshSceneProxy(UProceduralMeshComponent* Component)
  		: FPrimitiveSceneProxy(Component)
  		, BodySetup(Component->GetBodySetup())
-@@ -272,6 +273,13 @@ public:
+@@ -272,6 +276,13 @@ public:
  		}
  	}
  
