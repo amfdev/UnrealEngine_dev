@@ -140,6 +140,7 @@ IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 IF NOT DEFINED Build_Stitch
     SET Build_Stitch=1
 )
 
+@ECHO:
 SET Build_4_17
 SET Build_4_18
 SET Build_4_19
@@ -157,7 +158,7 @@ SET Build_Tests
 SET Build_Dirty
 SET Build_Clean
 SET Build_Verbose
-exit /b 0
+@ECHO:
 
 CALL :fillDateTimeVariables CurrentYear CurrentMonth CurrentDay CurrentHour CurrentMinute CurrentSecond
 rem @ECHO %CurrentYear%/%CurrentMonth%/%CurrentDay%
