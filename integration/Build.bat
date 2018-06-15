@@ -228,12 +228,14 @@ IF DEFINED Build_4_19 (
     )
 
     IF DEFINED Build_Stitch (
-        IF DEFINED Build_Development (
-            CALL :runBuildProcess %~1 Development Stitch
-        )
+        IF NOT ["%~1"] == ["4.17"] (
+            IF DEFINED Build_Development (
+                CALL :runBuildProcess %~1 Development Stitch
+            )
 
-        IF DEFINED Build_Shipping (
-            CALL :runBuildProcess %~1 Shipping Stitch
+            IF DEFINED Build_Shipping (
+                CALL :runBuildProcess %~1 Shipping Stitch
+            )
         )
     )
 
@@ -273,8 +275,6 @@ IF DEFINED Build_4_19 (
         SET SceneConfiguration=
     )
 
-    @ECHO:
-
     SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%renderTypePrintable%
     SET UnrealBuildLogFile=%CD%\%LogFolderName%\%UnrealConfigurationPrintableName%.log
     SET returnCode=0
@@ -282,7 +282,14 @@ IF DEFINED Build_4_19 (
 
     CALL :fillDateTimeVariables startYear startMonth startDay startHour startMinute startSecond
 
+    @ECHO:
+
     IF DEFINED Build_Engine (
+
+        @ECHO Build unreal engine configuration
+        @ECHO Configuration name: !UnrealConfigurationPrintableName!
+        @ECHO Log file: !UnrealBuildLogFile!
+
         IF DEFINED Build_Clean (
             CALL Scripts\CleanImplementation.bat
 
@@ -311,6 +318,7 @@ IF DEFINED Build_4_19 (
     CALL :fillDateTimeVariables endYear endMonth endDay endHour endMinute endSecond
 
     IF DEFINED Build_Engine (
+        @ECHO ,,,,,>>"%ResultsFileName%"
         @ECHO %UnrealConfigurationPrintableName%,%startYear%/%startMonth%/%startDay%,%startHour%:%startMinute%:%startSecond%,%endYear%/%endMonth%/%endDay%,%endHour%:%endMinute%:%endSecond%,%buildResult%>>"%ResultsFileName%"
     )
 
