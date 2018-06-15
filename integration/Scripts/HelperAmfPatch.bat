@@ -23,11 +23,9 @@ CD %AmfHome%
 IF ERRORLEVEL 1 GOTO :error
 
 IF ["%UE_VERSION%"] == ["4.17"] (
-    @echo 1
     git apply ..\Patches\AmfMedia_UE417.patch
     IF ERRORLEVEL 1 GOTO :error
 ) ELSE IF ["%UE_VERSION%"] == ["4.18"] (
-    @echo 1
     git apply ..\Patches\AmfMedia_UE418.patch
     IF ERRORLEVEL 1 GOTO :error
 ) ELSE IF ["%UE_VERSION%"] == ["4.19"] (
