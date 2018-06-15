@@ -16,8 +16,11 @@ IF NOT DEFINED UE_VERSION (
 SET AmfHome=
 
 IF DEFINED AMF_VERSION (
-    SET AmfHome=AmfMedia-%AMF_VERSION%
-    @ECHO Amf variable defined, AmfHome: AmfMedia-%AMF_VERSION%
+    IF ["%AMF_VERSION%"] == ["%UE_VERSION%"] (
+        SET AmfHome=AmfMedia-%AMF_VERSION%
+    ) ELSE (
+        SET AmfHome=AmfMedia-%UE_VERSION%
+    )
 )
 
 @ECHO Prepare UnrealEngine...
