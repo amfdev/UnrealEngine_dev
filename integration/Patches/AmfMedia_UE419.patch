@@ -1,72 +1,306 @@
 diff --git "a/Engine/Plugins/Runtime/Sphere360/Source/Sphere360/Private/Sphere360MeshComponent.cpp" "b/Engine/Plugins/Runtime/Sphere360/Source/Sphere360/Private/Sphere360MeshComponent.cpp"
-index 7cf62fab7a..d5c29dc147 100644
+index 7cf62fab7a..ea4c992b84 100644
 --- "a/Engine/Plugins/Runtime/Sphere360/Source/Sphere360/Private/Sphere360MeshComponent.cpp"
 +++ "b/Engine/Plugins/Runtime/Sphere360/Source/Sphere360/Private/Sphere360MeshComponent.cpp"
-@@ -109,7 +109,7 @@ public:
- class FSphere360MeshIndexBuffer : public FIndexBuffer
- {
- public:
+@@ -48,6 +48,7 @@
+ #include "PhysicsEngine/PhysicsSettings.h"
+ #include "Stats/Stats.h"
+ #include "MediaTexture.h"
++#include "StaticMeshResources.h"
+ 
+ 
+ DECLARE_STATS_GROUP(TEXT("Sphere360Mesh"), STATGROUP_Sphere360Mesh, STATCAT_Advanced);
+@@ -88,85 +89,7 @@ private:
+ 	uint32 Size;
+ };
+ 
+-/** Vertex Buffer */
+-class FSphere360MeshVertexBuffer : public FVertexBuffer
+-{
+-public:
+-	TArray<FDynamicMeshVertex> Vertices;
+-
+-	virtual void InitRHI() override
+-	{
+-		const uint32 SizeInBytes = Vertices.Num() * sizeof(FDynamicMeshVertex);
+-
+-		FSphere360MeshVertexResourceArray ResourceArray(Vertices.GetData(), SizeInBytes);
+-		FRHIResourceCreateInfo CreateInfo(&ResourceArray);
+-		VertexBufferRHI = RHICreateVertexBuffer(SizeInBytes, BUF_Static, CreateInfo);
+-	}
+-
+-};
+-
+-/** Index Buffer */
+-class FSphere360MeshIndexBuffer : public FIndexBuffer
+-{
+-public:
 -	TArray<int32> Indices;
-+	TArray<uint32> Indices;
- 
- 	virtual void InitRHI() override
- 	{
-@@ -128,7 +128,8 @@ class FSphere360MeshVertexFactory : public FLocalVertexFactory
- {
- public:
- 
+-
+-	virtual void InitRHI() override
+-	{
+-		FRHIResourceCreateInfo CreateInfo;
+-		void* Buffer = nullptr;
+-		IndexBufferRHI = RHICreateAndLockIndexBuffer(sizeof(int32), Indices.Num() * sizeof(int32), BUF_Static, CreateInfo, Buffer);
+-
+-		// Write the indices to the index buffer.		
+-		FMemory::Memcpy(Buffer, Indices.GetData(), Indices.Num() * sizeof(int32));
+-		RHIUnlockIndexBuffer(IndexBufferRHI);
+-	}
+-};
+-
+-/** Vertex Factory */
+-class FSphere360MeshVertexFactory : public FLocalVertexFactory
+-{
+-public:
+-
 -	FSphere360MeshVertexFactory()
-+	FSphere360MeshVertexFactory():
-+		FLocalVertexFactory( ERHIFeatureLevel::Num, "FSphere360MeshVertexFactory" )
+-	{}
+-
+-	/** Init function that should only be called on render thread. */
+-	void Init_RenderThread(const FSphere360MeshVertexBuffer* VertexBuffer)
+-	{
+-		check(IsInRenderingThread());
+-
+-		// Initialize the vertex factory's stream components.
+-		FDataType NewData;
+-		NewData.PositionComponent = STRUCTMEMBER_VERTEXSTREAMCOMPONENT(VertexBuffer, FDynamicMeshVertex, Position, VET_Float3);
+-		NewData.TextureCoordinates.Add(
+-			FVertexStreamComponent(VertexBuffer, STRUCT_OFFSET(FDynamicMeshVertex, TextureCoordinate), sizeof(FDynamicMeshVertex), VET_Float2)
+-		);
+-		NewData.TangentBasisComponents[0] = STRUCTMEMBER_VERTEXSTREAMCOMPONENT(VertexBuffer, FDynamicMeshVertex, TangentX, VET_PackedNormal);
+-		NewData.TangentBasisComponents[1] = STRUCTMEMBER_VERTEXSTREAMCOMPONENT(VertexBuffer, FDynamicMeshVertex, TangentZ, VET_PackedNormal);
+-		NewData.ColorComponent = STRUCTMEMBER_VERTEXSTREAMCOMPONENT(VertexBuffer, FDynamicMeshVertex, Color, VET_Color);
+-		SetData(NewData);
+-	}
+ 
+-	/** Init function that can be called on any thread, and will do the right thing (enqueue command if called on main thread) */
+-	void Init(const FSphere360MeshVertexBuffer* VertexBuffer)
+-	{
+-		if (IsInRenderingThread())
+-		{
+-			Init_RenderThread(VertexBuffer);
+-		}
+-		else
+-		{
+-			ENQUEUE_UNIQUE_RENDER_COMMAND_TWOPARAMETER(
+-				InitProcMeshVertexFactory,
+-				FSphere360MeshVertexFactory*, VertexFactory, this,
+-				const FSphere360MeshVertexBuffer*, VertexBuffer, VertexBuffer,
+-				{
+-					VertexFactory->Init_RenderThread(VertexBuffer);
+-				});
+-		}
+-	}
+-};
+ /** Class representing a single section of the proc mesh */
+ class FSphere360MeshProxySection
+ {
+@@ -174,16 +97,17 @@ public:
+ 	/** Material applied to this section */
+ 	UMaterialInterface* Material;
+ 	/** Vertex buffer for this section */
+-	FSphere360MeshVertexBuffer VertexBuffer;
++	FStaticMeshVertexBuffers VertexBuffers;
+ 	/** Index buffer for this section */
+-	FSphere360MeshIndexBuffer IndexBuffer;
++	FDynamicMeshIndexBuffer32 IndexBuffer;
+ 	/** Vertex factory for this section */
+-	FSphere360MeshVertexFactory VertexFactory;
++	FLocalVertexFactory VertexFactory;
+ 	/** Whether this section is currently visible */
+ 	bool bSectionVisible;
+ 
+-	FSphere360MeshProxySection()
++	FSphere360MeshProxySection(ERHIFeatureLevel::Type InFeatureLevel)
+ 		: Material(NULL)
++		, VertexFactory(InFeatureLevel, "FSphere360MeshProxySection")
+ 		, bSectionVisible(true)
  	{}
- 
- 	/** Init function that should only be called on render thread. */
-@@ -138,6 +139,8 @@ public:
- 
- 		// Initialize the vertex factory's stream components.
- 		FDataType NewData;
-+		FMemory::Memset(&NewData, 0, sizeof(FDataType));
-+
- 		NewData.PositionComponent = STRUCTMEMBER_VERTEXSTREAMCOMPONENT(VertexBuffer, FDynamicMeshVertex, Position, VET_Float3);
- 		NewData.TextureCoordinates.Add(
- 			FVertexStreamComponent(VertexBuffer, STRUCT_OFFSET(FDynamicMeshVertex, TextureCoordinate), sizeof(FDynamicMeshVertex), VET_Float2)
-@@ -145,6 +148,7 @@ public:
- 		NewData.TangentBasisComponents[0] = STRUCTMEMBER_VERTEXSTREAMCOMPONENT(VertexBuffer, FDynamicMeshVertex, TangentX, VET_PackedNormal);
- 		NewData.TangentBasisComponents[1] = STRUCTMEMBER_VERTEXSTREAMCOMPONENT(VertexBuffer, FDynamicMeshVertex, TangentZ, VET_PackedNormal);
- 		NewData.ColorComponent = STRUCTMEMBER_VERTEXSTREAMCOMPONENT(VertexBuffer, FDynamicMeshVertex, Color, VET_Color);
-+		
- 		SetData(NewData);
- 	}
- 
-@@ -192,7 +196,8 @@ static void ConvertSphere360MeshToDynMeshVertex(FDynamicMeshVertex& Vert, const
+ };
+@@ -192,7 +116,7 @@ static void ConvertSphere360MeshToDynMeshVertex(FDynamicMeshVertex& Vert, const
  {
  	Vert.Position = ProcVert.Position;
  	Vert.Color = ProcVert.Color;
 -	Vert.TextureCoordinate = ProcVert.UV0;
-+	//Vert.TextureCoordinate = ProcVert.UV0;
 +	Vert.TextureCoordinate[0] = ProcVert.UV0;
  	Vert.TangentX = ProcVert.Tangent.TangentX;
  	Vert.TangentZ = ProcVert.Normal;
  	Vert.TangentZ.Vector.W = ProcVert.Tangent.bFlipTangentY ? 0 : 255;
-@@ -202,7 +207,6 @@ static void ConvertSphere360MeshToDynMeshVertex(FDynamicMeshVertex& Vert, const
+@@ -202,6 +126,11 @@ static void ConvertSphere360MeshToDynMeshVertex(FDynamicMeshVertex& Vert, const
  class Sphere360MeshSceneProxy : public FPrimitiveSceneProxy
  {
  public:
--
- 	Sphere360MeshSceneProxy(UProceduralMeshComponent* Component)
- 		: FPrimitiveSceneProxy(Component)
- 		, BodySetup(Component->GetBodySetup())
-@@ -272,6 +276,13 @@ public:
- 		}
- 	}
- 
-+	/** Return a type (or subtype) specific hash for sorting purposes */
 +	SIZE_T GetTypeHash() const override
 +	{
 +		static size_t UniquePointer;
 +		return reinterpret_cast<size_t>(&UniquePointer);
 +	}
+ 
+ 	Sphere360MeshSceneProxy(UProceduralMeshComponent* Component)
+ 		: FPrimitiveSceneProxy(Component)
+@@ -216,29 +145,32 @@ public:
+ 			FProcMeshSection& SrcSection = *Component->GetProcMeshSection(SectionIdx);
+ 			if (SrcSection.ProcIndexBuffer.Num() > 0 && SrcSection.ProcVertexBuffer.Num() > 0)
+ 			{
+-				FSphere360MeshProxySection* NewSection = new FSphere360MeshProxySection();
++				FSphere360MeshProxySection* NewSection = new FSphere360MeshProxySection(GetScene().GetFeatureLevel());
+ 
+ 				// Copy data from vertex buffer
+ 				const int32 NumVerts = SrcSection.ProcVertexBuffer.Num();
+ 
+ 				// Allocate verts
+-				NewSection->VertexBuffer.Vertices.SetNumUninitialized(NumVerts);
++				TArray<FDynamicMeshVertex> Vertices;
++				Vertices.SetNumUninitialized(NumVerts);
 +
- 	/** Called on render thread to assign new dynamic data */
- 	void UpdateSection_RenderThread(FSphere360MeshSectionUpdateData* SectionData)
- 	{
+ 				// Copy verts
+ 				for (int VertIdx = 0; VertIdx < NumVerts; VertIdx++)
+ 				{
+ 					const FProcMeshVertex& ProcVert = SrcSection.ProcVertexBuffer[VertIdx];
+-					FDynamicMeshVertex& Vert = NewSection->VertexBuffer.Vertices[VertIdx];
++					FDynamicMeshVertex& Vert = Vertices[VertIdx];
+ 					ConvertSphere360MeshToDynMeshVertex(Vert, ProcVert);
+ 				}
+ 
+ 				// Copy index buffer
+ 				NewSection->IndexBuffer.Indices = SrcSection.ProcIndexBuffer;
+ 
+-				// Init vertex factory
+-				NewSection->VertexFactory.Init(&NewSection->VertexBuffer);
++				NewSection->VertexBuffers.InitFromDynamicVertex(&NewSection->VertexFactory, Vertices);
+ 
+ 				// Enqueue initialization of render resource
+-				BeginInitResource(&NewSection->VertexBuffer);
++				BeginInitResource(&NewSection->VertexBuffers.PositionVertexBuffer);
++				BeginInitResource(&NewSection->VertexBuffers.StaticMeshVertexBuffer);
++				BeginInitResource(&NewSection->VertexBuffers.ColorVertexBuffer);
+ 				BeginInitResource(&NewSection->IndexBuffer);
+ 				BeginInitResource(&NewSection->VertexFactory);
+ 
+@@ -264,7 +196,9 @@ public:
+ 		{
+ 			if (Section != nullptr)
+ 			{
+-				Section->VertexBuffer.ReleaseResource();
++				Section->VertexBuffers.PositionVertexBuffer.ReleaseResource();
++				Section->VertexBuffers.StaticMeshVertexBuffer.ReleaseResource();
++				Section->VertexBuffers.ColorVertexBuffer.ReleaseResource();
+ 				Section->IndexBuffer.ReleaseResource();
+ 				Section->VertexFactory.ReleaseResource();
+ 				delete Section;
+@@ -290,18 +224,47 @@ public:
+ 
+ 				// Lock vertex buffer
+ 				const int32 NumVerts = SectionData->NewVertexBuffer.Num();
+-				FDynamicMeshVertex* VertexBufferData = (FDynamicMeshVertex*)RHILockVertexBuffer(Section->VertexBuffer.VertexBufferRHI, 0, NumVerts * sizeof(FDynamicMeshVertex), RLM_WriteOnly);
+ 
+ 				// Iterate through vertex data, copying in new info
+ 				for (int32 VertIdx = 0; VertIdx<NumVerts; VertIdx++)
+ 				{
+ 					const FProcMeshVertex& ProcVert = SectionData->NewVertexBuffer[VertIdx];
+-					FDynamicMeshVertex& Vert = VertexBufferData[VertIdx];
+-					ConvertSphere360MeshToDynMeshVertex(Vert, ProcVert);
++					FDynamicMeshVertex Vertex;
++					ConvertSphere360MeshToDynMeshVertex(Vertex, ProcVert);
++
++					Section->VertexBuffers.PositionVertexBuffer.VertexPosition(VertIdx) = Vertex.Position;
++					Section->VertexBuffers.StaticMeshVertexBuffer.SetVertexTangents(VertIdx, Vertex.TangentX, Vertex.GetTangentY(), Vertex.TangentZ);
++					Section->VertexBuffers.StaticMeshVertexBuffer.SetVertexUV(VertIdx, 0, Vertex.TextureCoordinate[0]);
++					Section->VertexBuffers.ColorVertexBuffer.VertexColor(VertIdx) = Vertex.Color;
++				}
++
++				{
++					auto& VertexBuffer = Section->VertexBuffers.PositionVertexBuffer;
++					void* VertexBufferData = RHILockVertexBuffer(VertexBuffer.VertexBufferRHI, 0, VertexBuffer.GetNumVertices() * VertexBuffer.GetStride(), RLM_WriteOnly);
++					FMemory::Memcpy(VertexBufferData, VertexBuffer.GetVertexData(), VertexBuffer.GetNumVertices() * VertexBuffer.GetStride());
++					RHIUnlockVertexBuffer(VertexBuffer.VertexBufferRHI);
++				}
++
++				{
++					auto& VertexBuffer = Section->VertexBuffers.ColorVertexBuffer;
++					void* VertexBufferData = RHILockVertexBuffer(VertexBuffer.VertexBufferRHI, 0, VertexBuffer.GetNumVertices() * VertexBuffer.GetStride(), RLM_WriteOnly);
++					FMemory::Memcpy(VertexBufferData, VertexBuffer.GetVertexData(), VertexBuffer.GetNumVertices() * VertexBuffer.GetStride());
++					RHIUnlockVertexBuffer(VertexBuffer.VertexBufferRHI);
++				}
++
++				{
++					auto& VertexBuffer = Section->VertexBuffers.StaticMeshVertexBuffer;
++					void* VertexBufferData = RHILockVertexBuffer(VertexBuffer.TangentsVertexBuffer.VertexBufferRHI, 0, VertexBuffer.GetTangentSize(), RLM_WriteOnly);
++					FMemory::Memcpy(VertexBufferData, VertexBuffer.GetTangentData(), VertexBuffer.GetTangentSize());
++					RHIUnlockVertexBuffer(VertexBuffer.TangentsVertexBuffer.VertexBufferRHI);
+ 				}
+ 
+-				// Unlock vertex buffer
+-				RHIUnlockVertexBuffer(Section->VertexBuffer.VertexBufferRHI);
++				{
++					auto& VertexBuffer = Section->VertexBuffers.StaticMeshVertexBuffer;
++					void* VertexBufferData = RHILockVertexBuffer(VertexBuffer.TexCoordVertexBuffer.VertexBufferRHI, 0, VertexBuffer.GetTexCoordSize(), RLM_WriteOnly);
++					FMemory::Memcpy(VertexBufferData, VertexBuffer.GetTexCoordData(), VertexBuffer.GetTexCoordSize());
++					RHIUnlockVertexBuffer(VertexBuffer.TexCoordVertexBuffer.VertexBufferRHI);
++				}
+ 			}
+ 
+ 			// Free data sent from game thread
+@@ -340,7 +303,6 @@ public:
+ 		}
+ 
+ 		// Iterate over sections
+-		int SectionIndex = 0;
+ 		for (const FSphere360MeshProxySection* Section : Sections)
+ 		{
+ 			if (Section != nullptr && Section->bSectionVisible)
+@@ -353,36 +315,26 @@ public:
+ 					if (VisibilityMap & (1 << ViewIndex))
+ 					{
+ 						const FSceneView* View = Views[ViewIndex];
+-						
+-						if ((Views.Num() == 1 && SectionIndex == 0) ||
+-							(Views.Num() == 2 && 
+-												 (View->StereoPass == eSSP_LEFT_EYE && SectionIndex == 1) ||
+-												 (View->StereoPass == eSSP_RIGHT_EYE && SectionIndex == 0)
+-							)
+-						   )
+-						{
+-							// Draw the mesh.
+-							FMeshBatch& Mesh = Collector.AllocateMesh();
+-							FMeshBatchElement& BatchElement = Mesh.Elements[0];
+-							BatchElement.IndexBuffer = &Section->IndexBuffer;
+-							Mesh.bWireframe = bWireframe;
+-							Mesh.VertexFactory = &Section->VertexFactory;
+-							Mesh.MaterialRenderProxy = MaterialProxy;
+-							BatchElement.PrimitiveUniformBuffer = CreatePrimitiveUniformBufferImmediate(GetLocalToWorld(), GetBounds(), GetLocalBounds(), true, UseEditorDepthTest());
+-							BatchElement.FirstIndex = 0;
+-							BatchElement.NumPrimitives = Section->IndexBuffer.Indices.Num() / 3;
+-							BatchElement.MinVertexIndex = 0;
+-							BatchElement.MaxVertexIndex = Section->VertexBuffer.Vertices.Num() - 1;
+-							Mesh.ReverseCulling = IsLocalToWorldDeterminantNegative();
+-							Mesh.Type = PT_TriangleList;
+-							Mesh.DepthPriorityGroup = SDPG_World;
+-							Mesh.bCanApplyViewModeOverrides = false;
+-							Collector.AddMesh(ViewIndex, Mesh);
+-						}
++						// Draw the mesh.
++						FMeshBatch& Mesh = Collector.AllocateMesh();
++						FMeshBatchElement& BatchElement = Mesh.Elements[0];
++						BatchElement.IndexBuffer = &Section->IndexBuffer;
++						Mesh.bWireframe = bWireframe;
++						Mesh.VertexFactory = &Section->VertexFactory;
++						Mesh.MaterialRenderProxy = MaterialProxy;
++						BatchElement.PrimitiveUniformBuffer = CreatePrimitiveUniformBufferImmediate(GetLocalToWorld(), GetBounds(), GetLocalBounds(), true, UseEditorDepthTest());
++						BatchElement.FirstIndex = 0;
++						BatchElement.NumPrimitives = Section->IndexBuffer.Indices.Num() / 3;
++						BatchElement.MinVertexIndex = 0;
++						BatchElement.MaxVertexIndex = Section->VertexBuffers.PositionVertexBuffer.GetNumVertices() - 1;
++						Mesh.ReverseCulling = IsLocalToWorldDeterminantNegative();
++						Mesh.Type = PT_TriangleList;
++						Mesh.DepthPriorityGroup = SDPG_World;
++						Mesh.bCanApplyViewModeOverrides = false;
++						Collector.AddMesh(ViewIndex, Mesh);
+ 					}
+ 				}
+ 			}
+-			SectionIndex++;
+ 		}
+ 
+ 		// Draw bounds
