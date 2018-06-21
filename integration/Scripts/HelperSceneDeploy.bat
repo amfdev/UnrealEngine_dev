@@ -42,7 +42,7 @@ IF /I ["%SceneSourceType%"] == ["BluePrints"] (
 
 @ECHO Project name to deploy: %SceneProjectName%
 
-SET SceneProjectOutputName=%SceneProjectName%_%UE_VERSION%_%Configuration%_%Platform%
+SET SceneProjectOutputName=%UE_VERSION%_%Configuration%_%Platform%_%SceneProjectName%
 @ECHO Scene project output name: %SceneProjectOutputName%
 
 IF NOT EXIST "%DeployHome%" (
