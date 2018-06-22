@@ -23,6 +23,7 @@ SET Build_Engine=
 SET Build_Tests=
 SET Build_Dirty=
 SET Build_Clean=
+SET Build_CleanOnly=
 SET Build_Verbose=
 
 FOR %%x IN (%*) DO (
@@ -62,6 +63,8 @@ FOR %%x IN (%*) DO (
         SET Build_Dirty=1
     ) ELSE IF /i "%%~x"=="Clean" (
         SET Build_Clean=1
+    ) ELSE IF /i "%%~x"=="CleanOnly" (
+        SET Build_CleanOnly=1
     ) ELSE IF /i "%%~x"=="Verbose" (
         SET Build_Verbose=1
     ) ELSE IF /i "%%~x"=="Help" (
@@ -198,7 +201,7 @@ IF DEFINED Build_4_19 (
 
 :usage
     @ECHO:
-    @ECHO Available commands: Build.bat [Engine] [Tests] [4.17] [4.18] [4.19] [Standard] [Amf] [Stitch] [Development] [Shipping] [BluePrints] [CPP] [Plane] [x360] [Help] [Dirty] [Clean]
+    @ECHO Available commands: Build.bat [Engine] [Tests] [4.17] [4.18] [4.19] [Standard] [Amf] [Stitch] [Development] [Shipping] [BluePrints] [CPP] [Plane] [x360] [Dirty] [Clean] [CleanOnly] [Help]
     EXIT /B 0
 
 :error
@@ -284,13 +287,17 @@ IF DEFINED Build_4_19 (
 
     @ECHO:
 
-    IF DEFINED Build_Engine (
+    SET BuildOrCleanEngine=!Build_Engine!!Build_CleanOnly!
+
+    IF DEFINED BuildOrCleanEngine (
 
         @ECHO Build unreal engine configuration
         @ECHO Configuration name: !UnrealConfigurationPrintableName!
         @ECHO Log file: !UnrealBuildLogFile!
 
-        IF DEFINED Build_Clean (
+        SET CleanFirst=!Build_Clean!!Build_CleanOnly!
+
+        IF DEFINED CleanFirst (
             CALL Scripts\CleanImplementation.bat
 
             IF ERRORLEVEL 1 (
@@ -302,7 +309,7 @@ IF DEFINED Build_4_19 (
             )
         )
 
-        IF NOT ["failed"] == ["%buildResult%"] (
+        IF DEFINED Build_Engine IF NOT ["failed"] == ["%buildResult%"] (
             CALL Scripts\BuildUnrealImplementation.bat
 
             IF ERRORLEVEL 1 (

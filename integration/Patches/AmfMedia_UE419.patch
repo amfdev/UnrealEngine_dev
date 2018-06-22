@@ -1,5 +1,5 @@
 diff --git "a/Engine/Plugins/Runtime/Sphere360/Source/Sphere360/Private/Sphere360MeshComponent.cpp" "b/Engine/Plugins/Runtime/Sphere360/Source/Sphere360/Private/Sphere360MeshComponent.cpp"
-index 7cf62fab7a..ea4c992b84 100644
+index 7cf62fab7a..f0935d7836 100644
 --- "a/Engine/Plugins/Runtime/Sphere360/Source/Sphere360/Private/Sphere360MeshComponent.cpp"
 +++ "b/Engine/Plugins/Runtime/Sphere360/Source/Sphere360/Private/Sphere360MeshComponent.cpp"
 @@ -48,6 +48,7 @@
@@ -242,65 +242,12 @@ index 7cf62fab7a..ea4c992b84 100644
  			}
  
  			// Free data sent from game thread
-@@ -340,7 +303,6 @@ public:
- 		}
- 
- 		// Iterate over sections
--		int SectionIndex = 0;
- 		for (const FSphere360MeshProxySection* Section : Sections)
- 		{
- 			if (Section != nullptr && Section->bSectionVisible)
-@@ -353,36 +315,26 @@ public:
- 					if (VisibilityMap & (1 << ViewIndex))
- 					{
- 						const FSceneView* View = Views[ViewIndex];
--						
--						if ((Views.Num() == 1 && SectionIndex == 0) ||
--							(Views.Num() == 2 && 
--												 (View->StereoPass == eSSP_LEFT_EYE && SectionIndex == 1) ||
--												 (View->StereoPass == eSSP_RIGHT_EYE && SectionIndex == 0)
--							)
--						   )
--						{
--							// Draw the mesh.
--							FMeshBatch& Mesh = Collector.AllocateMesh();
--							FMeshBatchElement& BatchElement = Mesh.Elements[0];
--							BatchElement.IndexBuffer = &Section->IndexBuffer;
--							Mesh.bWireframe = bWireframe;
--							Mesh.VertexFactory = &Section->VertexFactory;
--							Mesh.MaterialRenderProxy = MaterialProxy;
--							BatchElement.PrimitiveUniformBuffer = CreatePrimitiveUniformBufferImmediate(GetLocalToWorld(), GetBounds(), GetLocalBounds(), true, UseEditorDepthTest());
--							BatchElement.FirstIndex = 0;
--							BatchElement.NumPrimitives = Section->IndexBuffer.Indices.Num() / 3;
--							BatchElement.MinVertexIndex = 0;
+@@ -372,7 +335,7 @@ public:
+ 							BatchElement.FirstIndex = 0;
+ 							BatchElement.NumPrimitives = Section->IndexBuffer.Indices.Num() / 3;
+ 							BatchElement.MinVertexIndex = 0;
 -							BatchElement.MaxVertexIndex = Section->VertexBuffer.Vertices.Num() - 1;
--							Mesh.ReverseCulling = IsLocalToWorldDeterminantNegative();
--							Mesh.Type = PT_TriangleList;
--							Mesh.DepthPriorityGroup = SDPG_World;
--							Mesh.bCanApplyViewModeOverrides = false;
--							Collector.AddMesh(ViewIndex, Mesh);
--						}
-+						// Draw the mesh.
-+						FMeshBatch& Mesh = Collector.AllocateMesh();
-+						FMeshBatchElement& BatchElement = Mesh.Elements[0];
-+						BatchElement.IndexBuffer = &Section->IndexBuffer;
-+						Mesh.bWireframe = bWireframe;
-+						Mesh.VertexFactory = &Section->VertexFactory;
-+						Mesh.MaterialRenderProxy = MaterialProxy;
-+						BatchElement.PrimitiveUniformBuffer = CreatePrimitiveUniformBufferImmediate(GetLocalToWorld(), GetBounds(), GetLocalBounds(), true, UseEditorDepthTest());
-+						BatchElement.FirstIndex = 0;
-+						BatchElement.NumPrimitives = Section->IndexBuffer.Indices.Num() / 3;
-+						BatchElement.MinVertexIndex = 0;
-+						BatchElement.MaxVertexIndex = Section->VertexBuffers.PositionVertexBuffer.GetNumVertices() - 1;
-+						Mesh.ReverseCulling = IsLocalToWorldDeterminantNegative();
-+						Mesh.Type = PT_TriangleList;
-+						Mesh.DepthPriorityGroup = SDPG_World;
-+						Mesh.bCanApplyViewModeOverrides = false;
-+						Collector.AddMesh(ViewIndex, Mesh);
- 					}
- 				}
- 			}
--			SectionIndex++;
- 		}
- 
- 		// Draw bounds
++							BatchElement.MaxVertexIndex = Section->VertexBuffers.PositionVertexBuffer.GetNumVertices() - 1;
+ 							Mesh.ReverseCulling = IsLocalToWorldDeterminantNegative();
+ 							Mesh.Type = PT_TriangleList;
+ 							Mesh.DepthPriorityGroup = SDPG_World;
