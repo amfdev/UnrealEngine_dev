@@ -14,7 +14,7 @@ IF NOT DEFINED PROJECT_URL (
 IF NOT EXIST %PROJECT_FOLDER% (
     @ECHO Clone project %PROJECT_URL% %PROJECT_BRANCH%
 
-    git clone -b %PROJECT_BRANCH% --single-branch %PROJECT_URL%
+    git clone -b "%PROJECT_BRANCH%" --single-branch "%PROJECT_URL%" "%PROJECT_FOLDER%"
     IF ERRORLEVEL 1 (
         @ECHO:
         @ECHO Unable to clone %PROJECT_URL% %PROJECT_BRANCH%
