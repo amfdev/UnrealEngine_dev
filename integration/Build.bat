@@ -348,12 +348,15 @@ IF DEFINED Build_4_19 (
 
             IF "%~3" == "Stitch" (
 
-                SET SceneName=StitchAmf
-                SET SceneSourceType=%%s
-                SET SceneConfigurationPrintableName=!SceneName!_!UE_VERSION!_!SceneConfiguration!_!SceneSourceType!
-                SET SceneBuildLogFile=!CD!\!LogFolderName!\!SceneConfigurationPrintableName!.log
+                IF ["%%s"] == ["Blueprints"] (
 
-                CALL :buildScene
+                    SET SceneName=StitchAmf
+                    SET SceneSourceType=%%s
+                    SET SceneConfigurationPrintableName=!UE_VERSION!_!SceneConfiguration!_!SceneName!_!SceneSourceType!
+                    SET SceneBuildLogFile=!CD!\!LogFolderName!\!SceneConfigurationPrintableName!.log
+
+                    CALL :buildScene
+                )
             ) ELSE (
 
                 FOR %%t IN (Plane, x360) DO (
