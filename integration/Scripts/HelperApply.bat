@@ -1,8 +1,8 @@
 @ECHO %Verbose%
 SETLOCAL
 
-IF NOT DEFINED PROJECT_FOLDER (
-    @ECHO Error: PROJECT_FOLDER variable undefined!
+IF NOT DEFINED PLUGIN_FOLDER (
+    @ECHO Error: PLUGIN_FOLDER variable undefined!
     GOTO :error
 )
 
@@ -23,7 +23,7 @@ IF ERRORLEVEL 1 GOTO :error
 
 CD %CurrentDirectory%
 
-CD %PROJECT_FOLDER%
+CD %PLUGIN_FOLDER%
 IF ERRORLEVEL 1 GOTO :error
 
 CALL %PROJECT_APPLY_PROGRAM% "..\%UnrealHome%"

@@ -1,8 +1,8 @@
 @ECHO %Verbose%
 SETLOCAL
 
-IF NOT DEFINED PROJECT_FOLDER (
-    @ECHO Error: PROJECT_FOLDER variable undefined!
+IF NOT DEFINED PLUGIN_FOLDER (
+    @ECHO Error: PLUGIN_FOLDER variable undefined!
     GOTO :error
 )
 
@@ -11,10 +11,10 @@ IF NOT DEFINED PROJECT_URL (
     GOTO :error
 )
 
-IF NOT EXIST %PROJECT_FOLDER% (
+IF NOT EXIST %PLUGIN_FOLDER% (
     @ECHO Clone project %PROJECT_URL% %PROJECT_BRANCH%
 
-    git clone -b "%PROJECT_BRANCH%" --single-branch "%PROJECT_URL%" "%PROJECT_FOLDER%"
+    git clone -b "%PROJECT_BRANCH%" --single-branch "%PROJECT_URL%" "%PLUGIN_FOLDER%"
     IF ERRORLEVEL 1 (
         @ECHO:
         @ECHO Unable to clone %PROJECT_URL% %PROJECT_BRANCH%
@@ -25,7 +25,7 @@ IF NOT EXIST %PROJECT_FOLDER% (
 ) ELSE (
     @ECHO Update project %PROJECT_URL% %PROJECT_BRANCH%
 
-    CD %PROJECT_FOLDER%
+    CD %PLUGIN_FOLDER%
     IF ERRORLEVEL 1 GOTO :error
 
     @ECHO Git init

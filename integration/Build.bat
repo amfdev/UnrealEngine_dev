@@ -411,6 +411,8 @@ IF DEFINED Build_4_19 (
     EXIT /B 0
 
 :fillDateTimeVariables yy mm dd hour minute second [/A]
+    @ECHO OFF
+
     SETLOCAL ENABLEEXTENSIONS
 
     IF "%date%A" LSS "A" (SET toks=1-3) ELSE (SET toks=2-4)
@@ -434,5 +436,7 @@ IF DEFINED Build_4_19 (
     SET %4=%currentTimeValue:~0,2%
     SET %5=%currentTimeValue:~3,2%
     SET %6=%currentTimeValue:~6,2%
+
+    @ECHO %Verbose%
 
     EXIT /b 0

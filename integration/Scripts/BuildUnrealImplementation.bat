@@ -74,7 +74,7 @@ IF DEFINED AMF_VERSION (
 
 )
 
-SET PROJECT_FOLDER=
+SET PLUGIN_FOLDER=
 SET PROJECT_URL=
 SET PROJECT_BRANCH=
 SET PROJECT_SOLUTION=
@@ -83,9 +83,9 @@ IF DEFINED STITCH_VERSION (
     @ECHO Prepare stitch plugin...
 
     IF ["%UE_VERSION%"] == ["4.19"] (
-        SET PROJECT_FOLDER=AmfStitchMedia-4.19
+        SET PLUGIN_FOLDER=AmfStitchMedia-4.19
     ) ELSE IF ["%UE_VERSION%"] == ["4.18"] (
-        SET PROJECT_FOLDER=AmfStitchMedia-4.18
+        SET PLUGIN_FOLDER=AmfStitchMedia-4.18
     )
 
     SET PROJECT_URL=https://github.com/GPUOpenSoftware/UnrealEngine.git
