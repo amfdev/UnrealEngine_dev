@@ -105,6 +105,20 @@ FOR %%x IN (%*) DO (
         ) ELSE (
             SET Command_StitchBranch=1
         )
+    ) ELSE IF /I "%%~x"=="GitLogin:" (
+
+        IF DEFINED Command_StitchBranch (
+            @ECHO Error: stitch branch parameter already specified!
+        ) ELSE (
+            SET Command_StitchBranch=1
+        )
+    ) ELSE IF /I "%%~x"=="StitchBranch:" (
+
+        IF DEFINED Command_StitchBranch (
+            @ECHO Error: stitch branch parameter already specified!
+        ) ELSE (
+            SET Command_StitchBranch=1
+        )
 
     ) ELSE IF /I "%%~x"=="Verbose" (
         SET Build_Verbose=1
@@ -246,7 +260,29 @@ IF DEFINED Build_4_19 (
 
 :usage
     @ECHO:
-    @ECHO Available commands: Build.bat [Engine] [Tests] [4.17] [4.18] [4.19] [Standard] [Amf] [Stitch] [Development] [Shipping] [BluePrints] [CPP] [Plane] [x360] [Dirty] [Clean] [CleanOnly] [Help]
+    @ECHO Build.bat [Command1] [Command2] [Command3] ...
+    @ECHO:
+    @ECHO Available commands:
+    @ECHO     Engine - build Unreal Engine
+    @ECHO     Tests - build tests
+    @ECHO     4.17 4.18 4.19 - specify Unreal Engine version
+    @ECHO     Standard - build Unreal Engine and related tests with standard media playback
+    @ECHO     Amf - build Unreal Engine and related tests with accelerated AMF media playback
+    @ECHO     Stitch - build Unreal Engine and related tests with stitch media playback
+    @ECHO     Development - Unreal Engine and related tests with development configuration
+    @ECHO     Shipping - Unreal Engine and related tests with shipping configuration
+    @ECHO     BluePrints - build blueprints variant of the related tests
+    @ECHO     CPP - build c++ variant of the related tests
+    @ECHO     Plane, X360 - specify name of the test for standard and amf configuration
+    @ECHO     Clean - clean up Unreal Engine and plugin repository before build
+    @ECHO     Dirty - don't clean Unreal Engine and plugin repository before build
+    @ECHO     PatchPlugin - use test repository, download branch, then patch it with our patches
+    @ECHO                   Attention: not-patched plugin will be used if this command are not specified!
+    @ECHO     AmfBranch: branch_name - download specified branch of AMF plugin
+    @ECHO     StitchBranch: branch_name - download specified branch of Stitch plugin
+    @ECHO     Verbose - show extended information
+    @ECHO     Help - show this help
+
     EXIT /B 0
 
 :error
