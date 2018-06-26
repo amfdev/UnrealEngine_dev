@@ -1,5 +1,4 @@
 @ECHO %Verbose%
-SETLOCAL
 
 IF NOT DEFINED UE_VERSION (
     @ECHO Error: UE_VERSION variable undefined!
@@ -16,7 +15,11 @@ IF NOT DEFINED PLUGIN_FOLDER (
     GOTO :error
 )
 
+SETLOCAL
+
 IF DEFINED AMF_VERSION (
+    CD %PLUGIN_FOLDER%
+    IF ERRORLEVEL 1 GOTO :error
 
     IF ["%UE_VERSION%"] == ["4.17"] (
 

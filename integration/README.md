@@ -1,12 +1,12 @@
 # Build.bat
 
-Build.bat is building and testing utility to works with UnrealEngine and Amf library. 
+Build.bat is building and testing utility to works with UnrealEngine and Amf library.
 It provides building a list of the specified versions of Unreal Engine with diffrent configurations and to automatically apply
 related Amf patches to the Unreal Engine. In additional it provides building if the demostration projects witch are specialy designed to
 play 4k video to tests media playback inside Unreal Engine.
 
 ## Supported versions
-Unreal Engine 4.17 
+Unreal Engine 4.17
 Unreal Engine 4.18
 Unreal Engine 4.19
 
@@ -32,25 +32,30 @@ builds Unreal Engine itself or with related tests projects, and separatly tests 
 are already built and placed in the correct folder).
 
 # Usage
-Build.bat supports of the followings params:
-  
-  - Engine - build Unreal Engine
-  - Tests - build tests projects
+Build.bat [Command1] [Command2] [Command3] ...
 
-  - 4.17 - specify Unreal Engine version 4.17
-  - 4.18 - specify Unreal Engine version 4.18
-  - 4.19 - specify Unreal Engine version 4.19
+    Available commands:
+        Engine - build Unreal Engine
+        Tests - build tests
+        4.17 4.18 4.19 - specify Unreal Engine version
+        Standard - build Unreal Engine and related tests with standard media playback
+        Amf - build Unreal Engine and related tests with accelerated AMF media playback
+        Stitch - build Unreal Engine and related tests with stitch media playback
+        Development - Unreal Engine and related tests with development configuration
+        Shipping - Unreal Engine and related tests with shipping configuration
+        BluePrints - build blueprints variant of the related tests
+        CPP - build c++ variant of the related tests
+        Plane, X360 - specify name of the test for standard and amf configuration
+        Clean - clean up Unreal Engine and plugin repository before build
+        Dirty - don't clean Unreal Engine and plugin repository before build
+        PatchPlugin - use test repository, download branch, then patch it with our patches
+                      Attention: not-patched plugin will be used if this command are not specified!
+        AmfBranch: branch_name - download specified branch of AMF plugin
+        StitchBranch: branch_name - download specified branch of Stitch plugin
+        Verbose - show extended information
+        Help - show this help
 
-  - Amf - use Unreal Engine with Amf support (and patches)
-  - Standard - use standard Unreal Engine without Amf patches
-  - Stitch - use Stitch amf plugin for Unreal Engine without Amf patches
-
-  - CPP - Build C++ based tests
-  - BluePrints - Build blueprints based tests
-
-  - Help - show short usage help
-
-  An order of the arguments are not sencitive.
+  An order of the arguments are not sensitive.
 
   *If no one of the Engine or Tests params specified, both will be built (Engine first, then related tests).
   *If no one of the versions specified both will be built (4.17, then 4.18).
