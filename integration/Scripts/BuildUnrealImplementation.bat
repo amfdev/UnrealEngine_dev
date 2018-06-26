@@ -68,7 +68,12 @@ IF DEFINED AMF_VERSION (
 
         SET PLUGIN_FOLDER=AmfMedia-%AMF_VERSION%-amfdev
         SET PLUGIN_URL=https://github.com/amfdev/UnrealEngine_AMF
-        SET PLUGIN_BRANCH=AmfMedia-%AMF_VERSION%
+
+        IF DEFINED Param_AmfBranch (
+            SET PLUGIN_BRANCH=%Param_AmfBranch%
+        ) ELSE (
+            SET PLUGIN_BRANCH=AmfMedia-%AMF_VERSION%
+        )
 
     )
 
@@ -99,7 +104,12 @@ IF DEFINED AMF_VERSION (
 
         SET PLUGIN_FOLDER=AmfStitchMedia-%STITCH_VERSION%-amfdev
         SET PLUGIN_URL=https://github.com/amfdev/UnrealEngine_AMF
-        SET PLUGIN_BRANCH=AmfStitchMedia-%STITCH_VERSION%
+
+        IF DEFINED Param_StitchBranch (
+            SET PLUGIN_BRANCH=%Param_StitchBranch%
+        ) ELSE (
+            SET PLUGIN_BRANCH=AmfStitchMedia-%STITCH_VERSION%
+        )
     )
 
     SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs2015\AmfStitchMediaCommon.sln

@@ -192,6 +192,9 @@ SET Build_Dirty
 SET Build_Clean
 SET Build_PatchPlugin
 SET Build_Verbose
+SET Param_AmfBranch
+SET Param_StitchBranch
+
 @ECHO:
 
 CALL :fillDateTimeVariables CurrentYear CurrentMonth CurrentDay CurrentHour CurrentMinute CurrentSecond
