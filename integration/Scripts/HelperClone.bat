@@ -12,7 +12,12 @@ IF NOT DEFINED PLUGIN_URL (
 )
 
 IF NOT EXIST %PLUGIN_FOLDER% (
-    @ECHO Clone project %PLUGIN_URL% %PLUGIN_BRANCH%
+
+    @ECHO:
+    @ECHO git clone:
+    @ECHO url: %PLUGIN_URL%
+    @ECHO branch: %PLUGIN_BRANCH%
+    @ECHO folder: %PLUGIN_FOLDER%
 
     git clone -b "%PLUGIN_BRANCH%" --single-branch "%PLUGIN_URL%" "%PLUGIN_FOLDER%"
     IF ERRORLEVEL 1 (

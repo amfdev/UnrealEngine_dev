@@ -32,6 +32,11 @@ SET Param_AmfBranch=
 SET Command_StitchBranch=
 SET Param_StitchBranch=
 
+SET Command_GitLogin=
+SET Param_GitLogin=
+SET Command_GitPassword=
+SET Param_GitPassword=
+
 FOR %%x IN (%*) DO (
     IF DEFINED Command_AmfBranch (
         SET Param_AmfBranch=%%~x
@@ -39,6 +44,12 @@ FOR %%x IN (%*) DO (
     ) ELSE IF DEFINED Command_StitchBranch (
         SET Param_StitchBranch=%%~x
         SET Command_StitchBranch=
+    ) ELSE IF DEFINED Command_GitLogin (
+        SET Param_GitLogin=%%~x
+        SET Command_GitLogin=
+    ) ELSE IF DEFINED Command_GitPassword (
+        SET Param_GitPassword=%%~x
+        SET Command_GitPassword=
     ) ELSE IF /I "%%~x"=="4.17" (
         SET Build_4_17=1
     ) ELSE IF /I "%%~x"=="4.18" (
