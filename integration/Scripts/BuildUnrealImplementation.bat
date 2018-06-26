@@ -16,12 +16,12 @@ IF NOT DEFINED UnrealConfiguration (
     GOTO :error
 )
 
-if DEFINED bbb (
 @ECHO:
 @ECHO Prepare UnrealEngine...
 IF NOT EXIST "%UnrealHome%" (
     @ECHO No UnrealEngine folder found, create it
     MKDIR "%UnrealHome%"
+    IF ERRORLEVEL 1 GOTO :error
 )
 
 CALL Scripts\HelperUnrealClone.bat
@@ -33,7 +33,9 @@ IF ERRORLEVEL 1 GOTO :error
 @ECHO Setup UnrealEngine
 CALL Scripts\HelperUnrealSetup.bat
 IF ERRORLEVEL 1 GOTO :error
-)
+
+@ECHO:
+@ECHO Prepare UnrealEngine plugins...
 
 SET PLUGIN_TYPE=
 SET PLUGIN_FOLDER=
@@ -43,7 +45,6 @@ SET PLUGIN_SOLUTION=
 SET PLUGIN_APPLY_PROGRAM=
 
 IF DEFINED AMF_VERSION (
-    @ECHO:
     @ECHO Prepare amf plugin...
 
     SET PLUGIN_TYPE=AMF
@@ -71,7 +72,6 @@ IF DEFINED AMF_VERSION (
     SET PLUGIN_APPLY_PROGRAM=AmfMediaInstall.bat
 
 ) ELSE IF DEFINED STITCH_VERSION (
-    @ECHO:
     @ECHO Prepare stitch plugin...
 
     SET PLUGIN_TYPE=Stitch
@@ -93,7 +93,6 @@ IF DEFINED AMF_VERSION (
         SET PLUGIN_BRANCH=AmfStitchMedia-%STITCH_VERSION%
     )
 
-    SET PLUGIN_FOLDER=AmfStitchMedia-%STITCH_VERSION%-amfdev
     SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs2015\AmfStitchMediaCommon.sln
     SET PLUGIN_APPLY_PROGRAM=AmfStitchMediaInstall.bat
 )

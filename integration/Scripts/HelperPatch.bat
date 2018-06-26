@@ -38,7 +38,7 @@ IF DEFINED AMF_VERSION (
         git apply ..\Patches\AmfMedia_UE419.patch
         IF ERRORLEVEL 1 SET result=failed
 
-        IF /I ["failed"] == ["!result!"] GOTO :error
+        IF /I ["failed"] == ["%result%"] GOTO :error
     )
 )
 
@@ -64,7 +64,7 @@ IF DEFINED STITCH_VERSION (
         git am ..\Patches\AmfStitchMedia_UE418.patch
         IF ERRORLEVEL 1 SET result=failed
 
-        IF ["failed"] == ["!result!"] GOTO :error
+        IF /I ["failed"] == ["%result%"] GOTO :error
     )
 )
 

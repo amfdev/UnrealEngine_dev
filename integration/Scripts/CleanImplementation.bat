@@ -23,28 +23,57 @@ IF DEFINED AMF_VERSION (
     )
 )
 
-@ECHO Prepare UnrealEngine...
+@ECHO:
+
 IF EXIST "%UnrealHome%" (
+
     @ECHO UnrealEngine folder found, clear it
     CALL Scripts\HelperUnrealClean.bat
-    IF ERRORLEVEL 1 GOTO :error
+    IF ERRORLEVEL 1 SET result=failed
+
 )
 
+SET PLUGIN_TYPE=
+SET PLUGIN_FOLDER=
+
 IF DEFINED AMF_VERSION (
-    @ECHO Clean Amf...
-    IF EXIST "%AmfHome%" (
-        @ECHO Reset Amf libraries repository
-        CALL Scripts\HelperAmfClean.bat
-        IF ERRORLEVEL 1 GOTO :error
+
+    SET PLUGIN_TYPE=AMF
+
+    IF DEFINED Build_PatchPlugin (
+
+        SET PLUGIN_FOLDER=AmfMedia-%AMF_VERSION%
+
+    ) ELSE (
+
+        SET PLUGIN_FOLDER=AmfMedia-%AMF_VERSION%-amfdev
+
     )
+
 ) ELSE IF DEFINED STITCH_VERSION (
-    @ECHO Clean Stitch...
-    @ECHO:
-    @ECHO:
-    @ECHO TODO: Implement clean of Stitch plugin sources
-    @ECHO:
-    @ECHO:
+
+    SET PLUGIN_TYPE=Stitch
+
+    IF DEFINED Build_PatchPlugin (
+
+        SET PLUGIN_FOLDER=AmfStitchMedia-%STITCH_VERSION%
+
+    ) ELSE (
+
+        SET PLUGIN_FOLDER=AmfStitchMedia-%STITCH_VERSION%-amfdev
+
+    )
 )
+
+IF DEFINED PLUGIN_TYPE (
+
+    @ECHO:
+    CALL Scripts\HelperClean.bat
+    IF ERRORLEVEL 1 SET result=failed
+
+)
+
+IF /I ["failed"] == ["%result%"] GOTO :error
 
 @ECHO:
 @ECHO Cleanup finished

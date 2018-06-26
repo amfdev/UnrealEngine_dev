@@ -309,7 +309,7 @@ IF DEFINED Build_4_19 (
             )
         )
 
-        IF DEFINED Build_Engine IF NOT ["failed"] == ["%buildResult%"] (
+        IF DEFINED Build_Engine IF /I NOT ["failed"] == ["%buildResult%"] (
             CALL Scripts\BuildUnrealImplementation.bat
 
             IF ERRORLEVEL 1 (
