@@ -46,9 +46,9 @@ IF DEFINED AMF_VERSION (
     SET PLUGIN_TYPE=AMF
 
     IF ["%AMF_VERSION%"] == ["%UE_VERSION%"] (
-        SET AmfHome=AmfMedia-%AMF_VERSION%-amfdev
+        SET PLUGIN_FOLDER=AmfMedia-%AMF_VERSION%-amfdev
     ) ELSE (
-        SET AmfHome=AmfMedia-%UE_VERSION%-amfdev
+        SET PLUGIN_FOLDER=AmfMedia-%UE_VERSION%-amfdev
     )
 
     REM SET PLUGIN_URL=https://github.com/GPUOpenSoftware/UnrealEngine.git
