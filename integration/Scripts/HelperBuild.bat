@@ -6,8 +6,8 @@ IF NOT DEFINED PLUGIN_FOLDER (
     GOTO :error
 )
 
-IF NOT DEFINED PROJECT_SOLUTION (
-    @ECHO Error: PROJECT_SOLUTION variable undefined!
+IF NOT DEFINED PLUGIN_SOLUTION (
+    @ECHO Error: PLUGIN_SOLUTION variable undefined!
     GOTO :error
 )
 
@@ -22,13 +22,13 @@ SET maxcpucount=/maxcpucount
 SET configuration=Release
 SET platform=x64
 
-%MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %PROJECT_SOLUTION%
+%MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %PLUGIN_SOLUTION%
 IF ERRORLEVEL 1 GOTO :error
 
 :done
-    @ECHO Solution %PLUGIN_FOLDER%\%PROJECT_SOLUTION% built successfully
+    @ECHO Solution %PLUGIN_FOLDER%\%PLUGIN_SOLUTION% built successfully
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to build solution %PLUGIN_FOLDER%\%PROJECT_SOLUTION%
+    @ECHO Error: failed to build solution %PLUGIN_FOLDER%\%PLUGIN_SOLUTION%
     EXIT /B 1

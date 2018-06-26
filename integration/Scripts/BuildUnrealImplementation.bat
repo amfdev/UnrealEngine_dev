@@ -11,14 +11,6 @@ IF NOT DEFINED UE_VERSION (
     SET UnrealHome=UnrealEngine-%UE_VERSION%
 )
 
-IF DEFINED AMF_VERSION (
-    IF ["%AMF_VERSION%"] == ["%UE_VERSION%"] (
-        SET AmfHome=AmfMedia-%AMF_VERSION%
-    ) ELSE (
-        SET AmfHome=AmfMedia-%UE_VERSION%
-    )
-)
-
 IF NOT DEFINED UnrealConfiguration (
     @ECHO Error: UnrealConfiguration variable undefined!
     GOTO :error
@@ -40,72 +32,75 @@ IF ERRORLEVEL 1 GOTO :error
 CALL Scripts\HelperUnrealSetup.bat
 IF ERRORLEVEL 1 GOTO :error
 
-IF DEFINED AMF_VERSION (
-    @ECHO Prepare Amf...
-    IF NOT EXIST "%AmfHome%" (
-        @ECHO No Amf folder found, create it
-        MKDIR "%AmfHome%"
-        IF ERRORLEVEL 1 GOTO :error
-    )
-
-    CALL Scripts\HelperAmfClone.bat
-    IF ERRORLEVEL 1 GOTO :error
-
-    @ECHO Patch Amf libraries
-    CALL Scripts\HelperAmfPatch.bat
-    IF ERRORLEVEL 1 (
-        @ECHO:
-        @ECHO Failed to apply Amf library patch
-        @ECHO It seems that Amf libraries is already patched!
-        @ECHO Automation will try to build it
-        @ECHO:
-    )
-
-    @ECHO Build Amf libraries
-    CALL Scripts\HelperAmfBuild.bat
-    IF ERRORLEVEL 1 GOTO :error
-
-    @ECHO Apply Amf libraries
-    CALL Scripts\HelperAmfApply.bat
-    IF ERRORLEVEL 1 (
-        @ECHO ToDo: investigate why error returned here
-        rem GOTO :error
-    )
-
-)
-
+SET PLUGIN_TYPE=
 SET PLUGIN_FOLDER=
-SET PROJECT_URL=
-SET PROJECT_BRANCH=
-SET PROJECT_SOLUTION=
+SET PLUGIN_URL=
+SET PLUGIN_BRANCH=
+SET PLUGIN_SOLUTION=
+SET PLUGIN_APPLY_PROGRAM=
 
-IF DEFINED STITCH_VERSION (
+IF DEFINED AMF_VERSION (
+    @ECHO:
+    @ECHO Prepare amf plugin...
+
+    SET PLUGIN_TYPE=AMF
+
+    IF ["%AMF_VERSION%"] == ["%UE_VERSION%"] (
+        SET AmfHome=AmfMedia-%AMF_VERSION%-amfdev
+    ) ELSE (
+        SET AmfHome=AmfMedia-%UE_VERSION%-amfdev
+    )
+
+    REM SET PLUGIN_URL=https://github.com/GPUOpenSoftware/UnrealEngine.git
+    SET PLUGIN_FOLDER=AmfStitchMedia-4.19-amfdev
+    SET PLUGIN_URL=https://github.com/amfdev/UnrealEngine_AMF
+    SET PLUGIN_BRANCH=AmfStitchMedia-4.18
+    SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs2015\AmfStitchMediaCommon.sln
+    SET PLUGIN_APPLY_PROGRAM=AmfStitchMediaInstall.bat
+
+) ELSE IF DEFINED STITCH_VERSION (
+    @ECHO:
     @ECHO Prepare stitch plugin...
 
+    SET PLUGIN_TYPE=Stitch
+
     IF ["%UE_VERSION%"] == ["4.19"] (
-        SET PLUGIN_FOLDER=AmfStitchMedia-4.19
+        SET PLUGIN_FOLDER=AmfStitchMedia-4.19-amfdev
     ) ELSE IF ["%UE_VERSION%"] == ["4.18"] (
-        SET PLUGIN_FOLDER=AmfStitchMedia-4.18
+        SET PLUGIN_FOLDER=AmfStitchMedia-4.18-amfdev
     )
 
-    SET PROJECT_URL=https://github.com/GPUOpenSoftware/UnrealEngine.git
-    SET PROJECT_BRANCH=AmfStitchMedia-4.18
-    SET PROJECT_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs2015\AmfStitchMediaCommon.sln
-    SET PROJECT_APPLY_PROGRAM=AmfStitchMediaInstall.bat
+    REM SET PLUGIN_URL=https://github.com/GPUOpenSoftware/UnrealEngine.git
+    SET PLUGIN_URL=https://github.com/amfdev/UnrealEngine_AMF
+    SET PLUGIN_BRANCH=AmfStitchMedia-4.18
+    SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs2015\AmfStitchMediaCommon.sln
+    SET PLUGIN_APPLY_PROGRAM=AmfStitchMediaInstall.bat
+)
 
+IF DEFINED PLUGIN_TYPE (
+    @ECHO:
+    CALL Scripts\HelperClean.bat
+    IF ERRORLEVEL 1 GOTO :error
+
+    @ECHO:
     CALL Scripts\HelperClone.bat
     IF ERRORLEVEL 1 GOTO :error
 
-    CALL Scripts\HelperPatch.bat
-    IF ERRORLEVEL 1 (
-        @ECHO Failed to apply patch!
-        @ECHO It seems like the code is already patched,
-        @ECHO try to build it...
-        )
+    IF DEFINED Build_PatchPlugin (
+        @ECHO:
+        CALL Scripts\HelperPatch.bat
+        IF ERRORLEVEL 1 (
+            @ECHO Failed to apply patch!
+            @ECHO It seems like the code is already patched,
+            @ECHO try to build it...
+            )
+    )
 
+    @ECHO:
     CALL Scripts\HelperBuild.bat
     IF ERRORLEVEL 1 GOTO :error
 
+    @ECHO:
     CALL Scripts\HelperApply.bat
     IF ERRORLEVEL 1 (
         @ECHO ToDo: investigate why error returned here
@@ -113,10 +108,12 @@ IF DEFINED STITCH_VERSION (
     )
 )
 
+@ECHO:
 @ECHO Prepare UnrealEngine solution
 CALL Scripts\HelperUnrealPrepare.bat
 IF ERRORLEVEL 1 GOTO :error
 
+@ECHO:
 @ECHO Build UnrealEngine solution
 CALL Scripts\HelperUnrealBuild.bat
 IF ERRORLEVEL 1 GOTO :error

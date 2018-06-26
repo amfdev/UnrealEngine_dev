@@ -17,16 +17,39 @@ IF NOT DEFINED PLUGIN_FOLDER (
 )
 
 IF DEFINED AMF_VERSION (
-    @ECHO Error: not yet implemented
-    GOTO :error
-) ELSE IF DEFINED STITCH_VERSION (
-    IF /I ["%STITCH_VERSION%"] == ["4.18"] (
+
+    IF ["%UE_VERSION%"] == ["4.17"] (
+
+        git apply ..\Patches\AmfMedia_UE417.patch
+        IF ERRORLEVEL 1 GOTO :error
+
+    ) ELSE IF ["%UE_VERSION%"] == ["4.18"] (
+
+        git apply ..\Patches\AmfMedia_UE418.patch
+        IF ERRORLEVEL 1 GOTO :error
+
+    ) ELSE IF ["%UE_VERSION%"] == ["4.19"] (
+
+        SET result=
+
+        git apply ..\Patches\AmfMedia_UE418.patch
+        IF ERRORLEVEL 1 SET result=failed
+
+        git apply ..\Patches\AmfMedia_UE419.patch
+        IF ERRORLEVEL 1 SET result=failed
+
+        IF /I ["failed"] == ["!result!"] GOTO :error
+    )
+)
+
+IF DEFINED STITCH_VERSION (
+    IF ["%STITCH_VERSION%"] == ["4.18"] (
         CD %UnrealHome%
         IF ERRORLEVEL 1 GOTO :error
 
         git am ..\Patches\AmfStitchMedia_UE418.patch
         IF ERRORLEVEL 1 GOTO :error
-    ) ELSE IF /I ["%STITCH_VERSION%"] == ["4.19"] (
+    ) ELSE IF ["%STITCH_VERSION%"] == ["4.19"] (
         SET result=
 
         CD %PLUGIN_FOLDER%
@@ -43,9 +66,6 @@ IF DEFINED AMF_VERSION (
 
         IF ["failed"] == ["!result!"] GOTO :error
     )
-) ELSE (
-    @ECHO Error: not yet implemented
-    GOTO :error
 )
 
 :done

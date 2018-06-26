@@ -6,8 +6,8 @@ IF NOT DEFINED PLUGIN_FOLDER (
     GOTO :error
 )
 
-IF NOT DEFINED PROJECT_APPLY_PROGRAM (
-    @ECHO Error: PROJECT_APPLY_PROGRAM variable undefined!
+IF NOT DEFINED PLUGIN_APPLY_PROGRAM (
+    @ECHO Error: PLUGIN_APPLY_PROGRAM variable undefined!
     GOTO :error
 )
 
@@ -26,7 +26,7 @@ CD %CurrentDirectory%
 CD %PLUGIN_FOLDER%
 IF ERRORLEVEL 1 GOTO :error
 
-CALL %PROJECT_APPLY_PROGRAM% "..\%UnrealHome%"
+CALL %PLUGIN_APPLY_PROGRAM% "..\%UnrealHome%"
 IF ERRORLEVEL 1 GOTO :error
 
 :done

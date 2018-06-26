@@ -24,6 +24,7 @@ SET Build_Tests=
 SET Build_Dirty=
 SET Build_Clean=
 SET Build_CleanOnly=
+SET Build_PatchPlugin=
 SET Build_Verbose=
 
 FOR %%x IN (%*) DO (
@@ -65,6 +66,8 @@ FOR %%x IN (%*) DO (
         SET Build_Clean=1
     ) ELSE IF /i "%%~x"=="CleanOnly" (
         SET Build_CleanOnly=1
+    ) ELSE IF /i "%%~x"=="PatchPlugin" (
+        SET Build_PatchPlugin=1
     ) ELSE IF /i "%%~x"=="Verbose" (
         SET Build_Verbose=1
     ) ELSE IF /i "%%~x"=="Help" (
@@ -160,6 +163,7 @@ SET Build_Engine
 SET Build_Tests
 SET Build_Dirty
 SET Build_Clean
+SET Build_PatchPlugin
 SET Build_Verbose
 @ECHO:
 
