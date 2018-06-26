@@ -258,13 +258,9 @@ IF DEFINED Build_4_19 (
     IF ["%~3"] == ["Standard"] (
         REM default values
     ) ELSE IF ["%~3"] == ["Amf"] (
-        IF ["%UE_VERSION%"] == ["4.19"] (
-            SET AMF_VERSION=4.18
-        ) ELSE (
-            SET AMF_VERSION=%~1
-        )
+        SET AMF_VERSION=!UE_VERSION!
     ) ELSE IF ["%~3"] == ["Stitch"] (
-        SET STITCH_VERSION=4.18
+        SET STITCH_VERSION=!UE_VERSION!
     ) ELSE (
         @ECHO Error! unsupported renderType
         EXIT /B 1
