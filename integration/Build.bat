@@ -27,50 +27,77 @@ SET Build_CleanOnly=
 SET Build_PatchPlugin=
 SET Build_Verbose=
 
+SET Command_AmfBranch=
+SET Param_AmfBranch=
+SET Command_StitchBranch=
+SET Param_StitchBranch=
+
 FOR %%x IN (%*) DO (
-   IF /i "%%~x"=="4.17" (
+    IF DEFINED Command_AmfBranch (
+        SET Param_AmfBranch=%%~x
+        SET Command_AmfBranch=
+    ) ELSE IF DEFINED Command_StitchBranch (
+        SET Param_StitchBranch=%%~x
+        SET Command_StitchBranch=
+    ) ELSE IF /I "%%~x"=="4.17" (
         SET Build_4_17=1
-    ) ELSE IF /i "%%~x"=="4.18" (
+    ) ELSE IF /I "%%~x"=="4.18" (
         SET Build_4_18=1
-    ) ELSE IF /i "%%~x"=="4.19" (
+    ) ELSE IF /I "%%~x"=="4.19" (
         SET Build_4_19=1
-    ) ELSE IF /i "%%~x"=="Amf" (
+    ) ELSE IF /I "%%~x"=="Amf" (
         SET Build_Amf=1
-    ) ELSE IF /i "%%~x"=="Stitch" (
+    ) ELSE IF /I "%%~x"=="Stitch" (
         SET Build_Stitch=1
-    ) ELSE IF /i "%%~x"=="Standard" (
+    ) ELSE IF /I "%%~x"=="Standard" (
         SET Build_Standard=1
-    ) ELSE IF /i "%%~x"=="Development" (
+    ) ELSE IF /I "%%~x"=="Development" (
         SET Build_Development=1
-    ) ELSE IF /i "%%~x"=="Shipping" (
+    ) ELSE IF /I "%%~x"=="Shipping" (
         SET Build_Shipping=1
-    ) ELSE IF /i "%%~x"=="BluePrints" (
+    ) ELSE IF /I "%%~x"=="BluePrints" (
         SET Build_BluePrints=1
         SET Build_Tests=1
-    ) ELSE IF /i "%%~x"=="CPP" (
+    ) ELSE IF /I "%%~x"=="CPP" (
         SET Build_CPP=1
         SET Build_Tests=1
-    ) ELSE IF /i "%%~x"=="Plane" (
+    ) ELSE IF /I "%%~x"=="Plane" (
         SET Build_Tests=1
         SET Build_Plane=1
-    ) ELSE IF /i "%%~x"=="x360" (
+    ) ELSE IF /I "%%~x"=="x360" (
         SET Build_Tests=1
         SET Build_x360=1
-    ) ELSE IF /i "%%~x"=="Engine" (
+    ) ELSE IF /I "%%~x"=="Engine" (
         SET Build_Engine=1
-    ) ELSE IF /i "%%~x"=="Tests" (
+    ) ELSE IF /I "%%~x"=="Tests" (
         SET Build_Tests=1
-    ) ELSE IF /i "%%~x"=="Dirty" (
+    ) ELSE IF /I "%%~x"=="Dirty" (
         SET Build_Dirty=1
-    ) ELSE IF /i "%%~x"=="Clean" (
+    ) ELSE IF /I "%%~x"=="Clean" (
         SET Build_Clean=1
-    ) ELSE IF /i "%%~x"=="CleanOnly" (
+    ) ELSE IF /I "%%~x"=="CleanOnly" (
         SET Build_CleanOnly=1
-    ) ELSE IF /i "%%~x"=="PatchPlugin" (
+    ) ELSE IF /I "%%~x"=="PatchPlugin" (
         SET Build_PatchPlugin=1
-    ) ELSE IF /i "%%~x"=="Verbose" (
+    ) ELSE IF /I "%%~x"=="AmfBranch:" (
+
+        IF DEFINED Command_AmfBranch (
+            @ECHO Error: amf branch parameter already specified!
+        ) ELSE (
+            SET Command_AmfBranch=1
+        )
+
+    ) ELSE IF /I "%%~x"=="StitchBranch:" (
+
+        IF DEFINED Command_StitchBranch (
+            @ECHO Error: stitch branch parameter already specified!
+        ) ELSE (
+            SET Command_StitchBranch=1
+        )
+
+    ) ELSE IF /I "%%~x"=="Verbose" (
         SET Build_Verbose=1
-    ) ELSE IF /i "%%~x"=="Help" (
+    ) ELSE IF /I "%%~x"=="Help" (
         GOTO :usage
     ) ELSE (
         @ECHO Error: unsupported option: %%~x!

@@ -54,10 +54,14 @@ IF DEFINED AMF_VERSION (
         SET PLUGIN_FOLDER=AmfMedia-%AMF_VERSION%
         SET PLUGIN_URL=https://github.com/GPUOpenSoftware/UnrealEngine.git
 
-        IF ["%AMF_VERSION%"] == ["4.19"] (
-            SET PLUGIN_BRANCH=AmfMedia-4.18
+        IF DEFINED Param_AmfBranch (
+            SET PLUGIN_BRANCH=%Param_AmfBranch%
         ) ELSE (
-            SET PLUGIN_BRANCH=AmfMedia-%AMF_VERSION%
+            IF ["%AMF_VERSION%"] == ["4.19"] (
+                SET PLUGIN_BRANCH=AmfMedia-4.18
+            ) ELSE (
+                SET PLUGIN_BRANCH=AmfMedia-%AMF_VERSION%
+            )
         )
 
     ) ELSE (
@@ -81,11 +85,16 @@ IF DEFINED AMF_VERSION (
         SET PLUGIN_FOLDER=AmfStitchMedia-%STITCH_VERSION%
         SET PLUGIN_URL=https://github.com/GPUOpenSoftware/UnrealEngine.git
 
-        IF ["%STITCH_VERSION%"] == ["4.19"] (
-            SET PLUGIN_BRANCH=AmfStitchMedia-4.18
+        IF DEFINED Param_StitchBranch (
+            SET PLUGIN_BRANCH=%Param_StitchBranch%
         ) ELSE (
-            SET PLUGIN_BRANCH=AmfStitchMedia-%STITCH_VERSION%
+            IF ["%STITCH_VERSION%"] == ["4.19"] (
+                SET PLUGIN_BRANCH=AmfStitchMedia-4.18
+            ) ELSE (
+                SET PLUGIN_BRANCH=AmfStitchMedia-%STITCH_VERSION%
+            )
         )
+
     ) ELSE (
 
         SET PLUGIN_FOLDER=AmfStitchMedia-%STITCH_VERSION%-amfdev
