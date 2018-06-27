@@ -32,12 +32,12 @@ SET CurrentDirectory=%CD%
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
-@ECHO Start building UnrealEngine
 @ECHO:
-
+@ECHO Build UnrealEngine
 @ECHO MsBuild: %MSBUILD_EXE%
 @ECHO Target: %target%
 @ECHO Affinity: %maxcpucount%
+@ECHO Version: %UE_VERSION%
 @ECHO Configuration: %UnrealConfiguration%
 @ECHO Platform: %platform%
 @ECHO Params: %parameters%

@@ -445,7 +445,7 @@ IF DEFINED Build_4_19 (
                     IF NOT DEFINED SkipTestType (
                         SET SceneName=%%t%~3
                         SET SceneSourceType=%%s
-                        SET SceneConfigurationPrintableName=!SceneName!_!UE_VERSION!_!SceneConfiguration!_!SceneSourceType!
+                        SET SceneConfigurationPrintableName=!UE_VERSION!_!SceneConfiguration!_!SceneName!_!SceneSourceType!
                         SET SceneBuildLogFile=!CD!\!LogFolderName!\!SceneConfigurationPrintableName!.log
 
                         CALL :buildScene
