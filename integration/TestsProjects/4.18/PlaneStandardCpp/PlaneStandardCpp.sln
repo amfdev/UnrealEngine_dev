@@ -330,7 +330,6 @@ Global
 		{6C04269A-43A7-4488-A9FB-134432DCC6F2}.Development Editor|Mac.Build.0 = Mac_Development_Editor|Win32
 		{6C04269A-43A7-4488-A9FB-134432DCC6F2}.Development Editor|Win32.ActiveCfg = Development_Editor|Win32
 		{6C04269A-43A7-4488-A9FB-134432DCC6F2}.Development Editor|Win64.ActiveCfg = Development_Editor|x64
-		{6C04269A-43A7-4488-A9FB-134432DCC6F2}.Development Editor|Win64.Build.0 = Development_Editor|x64
 		{6C04269A-43A7-4488-A9FB-134432DCC6F2}.Development Server|HTML5.ActiveCfg = HTML5_Development_Server|Win32
 		{6C04269A-43A7-4488-A9FB-134432DCC6F2}.Development Server|Mac.ActiveCfg = Mac_Development_Server|Win32
 		{6C04269A-43A7-4488-A9FB-134432DCC6F2}.Development Server|Mac.Build.0 = Mac_Development_Server|Win32
@@ -1173,7 +1172,6 @@ Global
 		{42DF02FF-CEE6-4C54-8515-C5A25DFC8C18}.Development Editor|Mac.Build.0 = Mac_Development_Program|Win32
 		{42DF02FF-CEE6-4C54-8515-C5A25DFC8C18}.Development Editor|Win32.ActiveCfg = Development_Program|Win32
 		{42DF02FF-CEE6-4C54-8515-C5A25DFC8C18}.Development Editor|Win64.ActiveCfg = Development_Program|x64
-		{42DF02FF-CEE6-4C54-8515-C5A25DFC8C18}.Development Editor|Win64.Build.0 = Development_Program|x64
 		{42DF02FF-CEE6-4C54-8515-C5A25DFC8C18}.Development Server|HTML5.ActiveCfg = HTML5_Development_Program|Win32
 		{42DF02FF-CEE6-4C54-8515-C5A25DFC8C18}.Development Server|Mac.ActiveCfg = Mac_Development_Program|Win32
 		{42DF02FF-CEE6-4C54-8515-C5A25DFC8C18}.Development Server|Mac.Build.0 = Mac_Development_Program|Win32
@@ -1262,7 +1260,6 @@ Global
 		{76136F15-3007-4DB5-A4BC-DEA6EF3B2171}.Development Editor|Mac.Build.0 = Mac_Development_Program|Win32
 		{76136F15-3007-4DB5-A4BC-DEA6EF3B2171}.Development Editor|Win32.ActiveCfg = Development_Program|Win32
 		{76136F15-3007-4DB5-A4BC-DEA6EF3B2171}.Development Editor|Win64.ActiveCfg = Development_Program|x64
-		{76136F15-3007-4DB5-A4BC-DEA6EF3B2171}.Development Editor|Win64.Build.0 = Development_Program|x64
 		{76136F15-3007-4DB5-A4BC-DEA6EF3B2171}.Development Server|HTML5.ActiveCfg = HTML5_Development_Program|Win32
 		{76136F15-3007-4DB5-A4BC-DEA6EF3B2171}.Development Server|Mac.ActiveCfg = Mac_Development_Program|Win32
 		{76136F15-3007-4DB5-A4BC-DEA6EF3B2171}.Development Server|Mac.Build.0 = Mac_Development_Program|Win32
@@ -1356,7 +1353,6 @@ Global
 		{5E11F5FC-5D87-49C4-B401-7FA32C886252}.Development Editor|Win32.ActiveCfg = Development_Program|Win32
 		{5E11F5FC-5D87-49C4-B401-7FA32C886252}.Development Editor|Win32.Build.0 = Development_Program|Win32
 		{5E11F5FC-5D87-49C4-B401-7FA32C886252}.Development Editor|Win64.ActiveCfg = Development_Program|x64
-		{5E11F5FC-5D87-49C4-B401-7FA32C886252}.Development Editor|Win64.Build.0 = Development_Program|x64
 		{5E11F5FC-5D87-49C4-B401-7FA32C886252}.Development Server|HTML5.ActiveCfg = HTML5_Development_Program|Win32
 		{5E11F5FC-5D87-49C4-B401-7FA32C886252}.Development Server|Mac.ActiveCfg = Mac_Development_Program|Win32
 		{5E11F5FC-5D87-49C4-B401-7FA32C886252}.Development Server|Mac.Build.0 = Mac_Development_Program|Win32
@@ -1446,7 +1442,6 @@ Global
 		{39F7772E-B72A-4247-A6C1-B124AA10CB90}.Development Editor|Mac.Build.0 = Mac_Development_Program|Win32
 		{39F7772E-B72A-4247-A6C1-B124AA10CB90}.Development Editor|Win32.ActiveCfg = Development_Program|Win32
 		{39F7772E-B72A-4247-A6C1-B124AA10CB90}.Development Editor|Win64.ActiveCfg = Development_Program|x64
-		{39F7772E-B72A-4247-A6C1-B124AA10CB90}.Development Editor|Win64.Build.0 = Development_Program|x64
 		{39F7772E-B72A-4247-A6C1-B124AA10CB90}.Development Server|HTML5.ActiveCfg = HTML5_Development_Program|Win32
 		{39F7772E-B72A-4247-A6C1-B124AA10CB90}.Development Server|Mac.ActiveCfg = Mac_Development_Program|Win32
 		{39F7772E-B72A-4247-A6C1-B124AA10CB90}.Development Server|Mac.Build.0 = Mac_Development_Program|Win32
@@ -1540,7 +1535,6 @@ Global
 		{A8E6AD0E-38A1-443D-8A27-530CA71FAC77}.Development Editor|Win32.ActiveCfg = Development_Program|Win32
 		{A8E6AD0E-38A1-443D-8A27-530CA71FAC77}.Development Editor|Win32.Build.0 = Development_Program|Win32
 		{A8E6AD0E-38A1-443D-8A27-530CA71FAC77}.Development Editor|Win64.ActiveCfg = Development_Program|x64
-		{A8E6AD0E-38A1-443D-8A27-530CA71FAC77}.Development Editor|Win64.Build.0 = Development_Program|x64
 		{A8E6AD0E-38A1-443D-8A27-530CA71FAC77}.Development Server|HTML5.ActiveCfg = HTML5_Development_Program|Win32
 		{A8E6AD0E-38A1-443D-8A27-530CA71FAC77}.Development Server|Mac.ActiveCfg = Mac_Development_Program|Win32
 		{A8E6AD0E-38A1-443D-8A27-530CA71FAC77}.Development Server|Mac.Build.0 = Mac_Development_Program|Win32
@@ -1636,7 +1630,6 @@ Global
 		{FDAB94BC-FA2C-4CB2-B83A-3C03EB43AC3E}.Development Editor|Win32.ActiveCfg = Development_Program|Win32
 		{FDAB94BC-FA2C-4CB2-B83A-3C03EB43AC3E}.Development Editor|Win32.Build.0 = Development_Program|Win32
 		{FDAB94BC-FA2C-4CB2-B83A-3C03EB43AC3E}.Development Editor|Win64.ActiveCfg = Development_Program|x64
-		{FDAB94BC-FA2C-4CB2-B83A-3C03EB43AC3E}.Development Editor|Win64.Build.0 = Development_Program|x64
 		{FDAB94BC-FA2C-4CB2-B83A-3C03EB43AC3E}.Development Server|HTML5.ActiveCfg = HTML5_Development_Program|Win32
 		{FDAB94BC-FA2C-4CB2-B83A-3C03EB43AC3E}.Development Server|Mac.ActiveCfg = Mac_Development_Program|Win32
 		{FDAB94BC-FA2C-4CB2-B83A-3C03EB43AC3E}.Development Server|Mac.Build.0 = Mac_Development_Program|Win32
@@ -1741,7 +1734,6 @@ Global
 		{34A0C2D3-80A6-4B7A-8F13-62248388CDC0}.Development Editor|Win32.ActiveCfg = Development_Program|Win32
 		{34A0C2D3-80A6-4B7A-8F13-62248388CDC0}.Development Editor|Win32.Build.0 = Development_Program|Win32
 		{34A0C2D3-80A6-4B7A-8F13-62248388CDC0}.Development Editor|Win64.ActiveCfg = Development_Program|x64
-		{34A0C2D3-80A6-4B7A-8F13-62248388CDC0}.Development Editor|Win64.Build.0 = Development_Program|x64
 		{34A0C2D3-80A6-4B7A-8F13-62248388CDC0}.Development Server|HTML5.ActiveCfg = HTML5_Development_Program|Win32
 		{34A0C2D3-80A6-4B7A-8F13-62248388CDC0}.Development Server|Mac.ActiveCfg = Mac_Development_Program|Win32
 		{34A0C2D3-80A6-4B7A-8F13-62248388CDC0}.Development Server|Mac.Build.0 = Mac_Development_Program|Win32
@@ -1837,7 +1829,6 @@ Global
 		{7422C29A-0E48-4D31-8C61-BE99C535132E}.Development Editor|Win32.ActiveCfg = Development_Program|Win32
 		{7422C29A-0E48-4D31-8C61-BE99C535132E}.Development Editor|Win32.Build.0 = Development_Program|Win32
 		{7422C29A-0E48-4D31-8C61-BE99C535132E}.Development Editor|Win64.ActiveCfg = Development_Program|x64
-		{7422C29A-0E48-4D31-8C61-BE99C535132E}.Development Editor|Win64.Build.0 = Development_Program|x64
 		{7422C29A-0E48-4D31-8C61-BE99C535132E}.Development Server|HTML5.ActiveCfg = HTML5_Development_Program|Win32
 		{7422C29A-0E48-4D31-8C61-BE99C535132E}.Development Server|Mac.ActiveCfg = Mac_Development_Program|Win32
 		{7422C29A-0E48-4D31-8C61-BE99C535132E}.Development Server|Mac.Build.0 = Mac_Development_Program|Win32
@@ -1933,7 +1924,6 @@ Global
 		{E1CAC66C-AA5F-4AE2-B642-1940079E3DAA}.Development Editor|Win32.ActiveCfg = Development_Program|Win32
 		{E1CAC66C-AA5F-4AE2-B642-1940079E3DAA}.Development Editor|Win32.Build.0 = Development_Program|Win32
 		{E1CAC66C-AA5F-4AE2-B642-1940079E3DAA}.Development Editor|Win64.ActiveCfg = Development_Program|x64
-		{E1CAC66C-AA5F-4AE2-B642-1940079E3DAA}.Development Editor|Win64.Build.0 = Development_Program|x64
 		{E1CAC66C-AA5F-4AE2-B642-1940079E3DAA}.Development Server|HTML5.ActiveCfg = HTML5_Development_Program|Win32
 		{E1CAC66C-AA5F-4AE2-B642-1940079E3DAA}.Development Server|Mac.ActiveCfg = Mac_Development_Program|Win32
 		{E1CAC66C-AA5F-4AE2-B642-1940079E3DAA}.Development Server|Mac.Build.0 = Mac_Development_Program|Win32
@@ -2030,7 +2020,6 @@ Global
 		{A4A74912-7E1A-4734-A0BB-6D6B55A38D28}.Development Editor|Win32.ActiveCfg = Development_Program|Win32
 		{A4A74912-7E1A-4734-A0BB-6D6B55A38D28}.Development Editor|Win32.Build.0 = Development_Program|Win32
 		{A4A74912-7E1A-4734-A0BB-6D6B55A38D28}.Development Editor|Win64.ActiveCfg = Development_Program|x64
-		{A4A74912-7E1A-4734-A0BB-6D6B55A38D28}.Development Editor|Win64.Build.0 = Development_Program|x64
 		{A4A74912-7E1A-4734-A0BB-6D6B55A38D28}.Development Server|HTML5.ActiveCfg = HTML5_Development_Program|Win32
 		{A4A74912-7E1A-4734-A0BB-6D6B55A38D28}.Development Server|Mac.ActiveCfg = Mac_Development_Program|Win32
 		{A4A74912-7E1A-4734-A0BB-6D6B55A38D28}.Development Server|Mac.Build.0 = Mac_Development_Program|Win32
@@ -2126,7 +2115,6 @@ Global
 		{846DD93B-53B7-4B47-9BCC-2EF40CA1604B}.Development Editor|Win32.ActiveCfg = Development_Program|Win32
 		{846DD93B-53B7-4B47-9BCC-2EF40CA1604B}.Development Editor|Win32.Build.0 = Development_Program|Win32
 		{846DD93B-53B7-4B47-9BCC-2EF40CA1604B}.Development Editor|Win64.ActiveCfg = Development_Program|x64
-		{846DD93B-53B7-4B47-9BCC-2EF40CA1604B}.Development Editor|Win64.Build.0 = Development_Program|x64
 		{846DD93B-53B7-4B47-9BCC-2EF40CA1604B}.Development Server|HTML5.ActiveCfg = HTML5_Development_Program|Win32
 		{846DD93B-53B7-4B47-9BCC-2EF40CA1604B}.Development Server|Mac.ActiveCfg = Mac_Development_Program|Win32
 		{846DD93B-53B7-4B47-9BCC-2EF40CA1604B}.Development Server|Mac.Build.0 = Mac_Development_Program|Win32
@@ -2222,7 +2210,6 @@ Global
 		{6154C469-C700-46D2-91F1-74A60036F355}.Development Editor|Win32.ActiveCfg = Development_Program|Win32
 		{6154C469-C700-46D2-91F1-74A60036F355}.Development Editor|Win32.Build.0 = Development_Program|Win32
 		{6154C469-C700-46D2-91F1-74A60036F355}.Development Editor|Win64.ActiveCfg = Development_Program|x64
-		{6154C469-C700-46D2-91F1-74A60036F355}.Development Editor|Win64.Build.0 = Development_Program|x64
 		{6154C469-C700-46D2-91F1-74A60036F355}.Development Server|HTML5.ActiveCfg = HTML5_Development_Program|Win32
 		{6154C469-C700-46D2-91F1-74A60036F355}.Development Server|Mac.ActiveCfg = Mac_Development_Program|Win32
 		{6154C469-C700-46D2-91F1-74A60036F355}.Development Server|Mac.Build.0 = Mac_Development_Program|Win32
@@ -2312,7 +2299,6 @@ Global
 		{B2533838-9FC2-43EF-BA43-3A03338504B9}.Development Editor|Win32.ActiveCfg = Development_Program|Win32
 		{B2533838-9FC2-43EF-BA43-3A03338504B9}.Development Editor|Win32.Build.0 = Development_Program|Win32
 		{B2533838-9FC2-43EF-BA43-3A03338504B9}.Development Editor|Win64.ActiveCfg = Development_Program|x64
-		{B2533838-9FC2-43EF-BA43-3A03338504B9}.Development Editor|Win64.Build.0 = Development_Program|x64
 		{B2533838-9FC2-43EF-BA43-3A03338504B9}.Development Server|HTML5.ActiveCfg = HTML5_Development_Program|Win32
 		{B2533838-9FC2-43EF-BA43-3A03338504B9}.Development Server|Mac.ActiveCfg = Mac_Development_Program|Win32
 		{B2533838-9FC2-43EF-BA43-3A03338504B9}.Development Server|Win32.ActiveCfg = Development_Program|Win32
@@ -2637,7 +2623,6 @@ Global
 		{FD7C5E1A-CFE4-4FD5-A525-1EB1599A39AC}.Development Editor|Win32.ActiveCfg = Development|Any CPU
 		{FD7C5E1A-CFE4-4FD5-A525-1EB1599A39AC}.Development Editor|Win32.Build.0 = Development|Any CPU
 		{FD7C5E1A-CFE4-4FD5-A525-1EB1599A39AC}.Development Editor|Win64.ActiveCfg = Development|Any CPU
-		{FD7C5E1A-CFE4-4FD5-A525-1EB1599A39AC}.Development Editor|Win64.Build.0 = Development|Any CPU
 		{FD7C5E1A-CFE4-4FD5-A525-1EB1599A39AC}.Development Server|HTML5.ActiveCfg = Development|Any CPU
 		{FD7C5E1A-CFE4-4FD5-A525-1EB1599A39AC}.Development Server|HTML5.Build.0 = Development|Any CPU
 		{FD7C5E1A-CFE4-4FD5-A525-1EB1599A39AC}.Development Server|Mac.ActiveCfg = Development|Any CPU
@@ -3285,7 +3270,6 @@ Global
 		{90FF4220-1CAE-4CCA-BBF6-7AAAED069F03}.Development Editor|Win32.ActiveCfg = Development|Any CPU
 		{90FF4220-1CAE-4CCA-BBF6-7AAAED069F03}.Development Editor|Win32.Build.0 = Development|Any CPU
 		{90FF4220-1CAE-4CCA-BBF6-7AAAED069F03}.Development Editor|Win64.ActiveCfg = Development|Any CPU
-		{90FF4220-1CAE-4CCA-BBF6-7AAAED069F03}.Development Editor|Win64.Build.0 = Development|Any CPU
 		{90FF4220-1CAE-4CCA-BBF6-7AAAED069F03}.Development Server|HTML5.ActiveCfg = Development|Any CPU
 		{90FF4220-1CAE-4CCA-BBF6-7AAAED069F03}.Development Server|HTML5.Build.0 = Development|Any CPU
 		{90FF4220-1CAE-4CCA-BBF6-7AAAED069F03}.Development Server|Mac.ActiveCfg = Development|Any CPU
@@ -3389,7 +3373,6 @@ Global
 		{E1F1261F-DA95-41BD-80C1-60FBE0D37D22}.Development Editor|Win32.ActiveCfg = Development|Any CPU
 		{E1F1261F-DA95-41BD-80C1-60FBE0D37D22}.Development Editor|Win32.Build.0 = Development|Any CPU
 		{E1F1261F-DA95-41BD-80C1-60FBE0D37D22}.Development Editor|Win64.ActiveCfg = Development|Any CPU
-		{E1F1261F-DA95-41BD-80C1-60FBE0D37D22}.Development Editor|Win64.Build.0 = Development|Any CPU
 		{E1F1261F-DA95-41BD-80C1-60FBE0D37D22}.Development Server|HTML5.ActiveCfg = Development|Any CPU
 		{E1F1261F-DA95-41BD-80C1-60FBE0D37D22}.Development Server|HTML5.Build.0 = Development|Any CPU
 		{E1F1261F-DA95-41BD-80C1-60FBE0D37D22}.Development Server|Mac.ActiveCfg = Development|Any CPU
@@ -3493,7 +3476,6 @@ Global
 		{EC395254-405B-4030-92CE-E346CC50848D}.Development Editor|Win32.ActiveCfg = Development|Any CPU
 		{EC395254-405B-4030-92CE-E346CC50848D}.Development Editor|Win32.Build.0 = Development|Any CPU
 		{EC395254-405B-4030-92CE-E346CC50848D}.Development Editor|Win64.ActiveCfg = Development|Any CPU
-		{EC395254-405B-4030-92CE-E346CC50848D}.Development Editor|Win64.Build.0 = Development|Any CPU
 		{EC395254-405B-4030-92CE-E346CC50848D}.Development Server|HTML5.ActiveCfg = Development|Any CPU
 		{EC395254-405B-4030-92CE-E346CC50848D}.Development Server|HTML5.Build.0 = Development|Any CPU
 		{EC395254-405B-4030-92CE-E346CC50848D}.Development Server|Mac.ActiveCfg = Development|Any CPU
@@ -3597,7 +3579,6 @@ Global
 		{C2F959B1-1727-4598-9C32-3D9ACCE72750}.Development Editor|Win32.ActiveCfg = Development|Any CPU
 		{C2F959B1-1727-4598-9C32-3D9ACCE72750}.Development Editor|Win32.Build.0 = Development|Any CPU
 		{C2F959B1-1727-4598-9C32-3D9ACCE72750}.Development Editor|Win64.ActiveCfg = Development|Any CPU
-		{C2F959B1-1727-4598-9C32-3D9ACCE72750}.Development Editor|Win64.Build.0 = Development|Any CPU
 		{C2F959B1-1727-4598-9C32-3D9ACCE72750}.Development Server|HTML5.ActiveCfg = Development|Any CPU
 		{C2F959B1-1727-4598-9C32-3D9ACCE72750}.Development Server|HTML5.Build.0 = Development|Any CPU
 		{C2F959B1-1727-4598-9C32-3D9ACCE72750}.Development Server|Mac.ActiveCfg = Development|Any CPU
@@ -3701,7 +3682,6 @@ Global
 		{16778681-DAB8-46A4-89F6-927796467995}.Development Editor|Win32.ActiveCfg = Development|Any CPU
 		{16778681-DAB8-46A4-89F6-927796467995}.Development Editor|Win32.Build.0 = Development|Any CPU
 		{16778681-DAB8-46A4-89F6-927796467995}.Development Editor|Win64.ActiveCfg = Development|Any CPU
-		{16778681-DAB8-46A4-89F6-927796467995}.Development Editor|Win64.Build.0 = Development|Any CPU
 		{16778681-DAB8-46A4-89F6-927796467995}.Development Server|HTML5.ActiveCfg = Development|Any CPU
 		{16778681-DAB8-46A4-89F6-927796467995}.Development Server|HTML5.Build.0 = Development|Any CPU
 		{16778681-DAB8-46A4-89F6-927796467995}.Development Server|Mac.ActiveCfg = Development|Any CPU
@@ -3805,7 +3785,6 @@ Global
 		{39369368-5603-46DA-BAAE-766BB3CB2B51}.Development Editor|Win32.ActiveCfg = Development|Any CPU
 		{39369368-5603-46DA-BAAE-766BB3CB2B51}.Development Editor|Win32.Build.0 = Development|Any CPU
 		{39369368-5603-46DA-BAAE-766BB3CB2B51}.Development Editor|Win64.ActiveCfg = Development|Any CPU
-		{39369368-5603-46DA-BAAE-766BB3CB2B51}.Development Editor|Win64.Build.0 = Development|Any CPU
 		{39369368-5603-46DA-BAAE-766BB3CB2B51}.Development Server|HTML5.ActiveCfg = Development|Any CPU
 		{39369368-5603-46DA-BAAE-766BB3CB2B51}.Development Server|HTML5.Build.0 = Development|Any CPU
 		{39369368-5603-46DA-BAAE-766BB3CB2B51}.Development Server|Mac.ActiveCfg = Development|Any CPU
@@ -4013,7 +3992,6 @@ Global
 		{E1F1261F-DA95-41BD-81C1-61FBE1D37D22}.Development Editor|Win32.ActiveCfg = Development|Any CPU
 		{E1F1261F-DA95-41BD-81C1-61FBE1D37D22}.Development Editor|Win32.Build.0 = Development|Any CPU
 		{E1F1261F-DA95-41BD-81C1-61FBE1D37D22}.Development Editor|Win64.ActiveCfg = Development|Any CPU
-		{E1F1261F-DA95-41BD-81C1-61FBE1D37D22}.Development Editor|Win64.Build.0 = Development|Any CPU
 		{E1F1261F-DA95-41BD-81C1-61FBE1D37D22}.Development Server|HTML5.ActiveCfg = Development|Any CPU
 		{E1F1261F-DA95-41BD-81C1-61FBE1D37D22}.Development Server|HTML5.Build.0 = Development|Any CPU
 		{E1F1261F-DA95-41BD-81C1-61FBE1D37D22}.Development Server|Mac.ActiveCfg = Development|Any CPU
@@ -4117,7 +4095,6 @@ Global
 		{6F6F8E5B-53CA-4C9F-A696-96AA9B8FB128}.Development Editor|Win32.ActiveCfg = Development|Any CPU
 		{6F6F8E5B-53CA-4C9F-A696-96AA9B8FB128}.Development Editor|Win32.Build.0 = Development|Any CPU
 		{6F6F8E5B-53CA-4C9F-A696-96AA9B8FB128}.Development Editor|Win64.ActiveCfg = Development|Any CPU
-		{6F6F8E5B-53CA-4C9F-A696-96AA9B8FB128}.Development Editor|Win64.Build.0 = Development|Any CPU
 		{6F6F8E5B-53CA-4C9F-A696-96AA9B8FB128}.Development Server|HTML5.ActiveCfg = Development|Any CPU
 		{6F6F8E5B-53CA-4C9F-A696-96AA9B8FB128}.Development Server|HTML5.Build.0 = Development|Any CPU
 		{6F6F8E5B-53CA-4C9F-A696-96AA9B8FB128}.Development Server|Mac.ActiveCfg = Development|Any CPU
@@ -4221,7 +4198,6 @@ Global
 		{7E2D6784-C9B7-40C6-A89B-0A8AFDDCE60D}.Development Editor|Win32.ActiveCfg = Development|Any CPU
 		{7E2D6784-C9B7-40C6-A89B-0A8AFDDCE60D}.Development Editor|Win32.Build.0 = Development|Any CPU
 		{7E2D6784-C9B7-40C6-A89B-0A8AFDDCE60D}.Development Editor|Win64.ActiveCfg = Development|Any CPU
-		{7E2D6784-C9B7-40C6-A89B-0A8AFDDCE60D}.Development Editor|Win64.Build.0 = Development|Any CPU
 		{7E2D6784-C9B7-40C6-A89B-0A8AFDDCE60D}.Development Server|HTML5.ActiveCfg = Development|Any CPU
 		{7E2D6784-C9B7-40C6-A89B-0A8AFDDCE60D}.Development Server|HTML5.Build.0 = Development|Any CPU
 		{7E2D6784-C9B7-40C6-A89B-0A8AFDDCE60D}.Development Server|Mac.ActiveCfg = Development|Any CPU
@@ -4429,7 +4405,6 @@ Global
 		{5D7D66E8-8C76-4AF9-B3EC-2EF03421D730}.Development Editor|Win32.ActiveCfg = Development|Any CPU
 		{5D7D66E8-8C76-4AF9-B3EC-2EF03421D730}.Development Editor|Win32.Build.0 = Development|Any CPU
 		{5D7D66E8-8C76-4AF9-B3EC-2EF03421D730}.Development Editor|Win64.ActiveCfg = Development|Any CPU
-		{5D7D66E8-8C76-4AF9-B3EC-2EF03421D730}.Development Editor|Win64.Build.0 = Development|Any CPU
 		{5D7D66E8-8C76-4AF9-B3EC-2EF03421D730}.Development Server|HTML5.ActiveCfg = Development|Any CPU
 		{5D7D66E8-8C76-4AF9-B3EC-2EF03421D730}.Development Server|HTML5.Build.0 = Development|Any CPU
 		{5D7D66E8-8C76-4AF9-B3EC-2EF03421D730}.Development Server|Mac.ActiveCfg = Development|Any CPU
@@ -4533,7 +4508,6 @@ Global
 		{9B740143-841C-4AF7-905E-D8883F1735DE}.Development Editor|Win32.ActiveCfg = Development|Any CPU
 		{9B740143-841C-4AF7-905E-D8883F1735DE}.Development Editor|Win32.Build.0 = Development|Any CPU
 		{9B740143-841C-4AF7-905E-D8883F1735DE}.Development Editor|Win64.ActiveCfg = Development|Any CPU
-		{9B740143-841C-4AF7-905E-D8883F1735DE}.Development Editor|Win64.Build.0 = Development|Any CPU
 		{9B740143-841C-4AF7-905E-D8883F1735DE}.Development Server|HTML5.ActiveCfg = Development|Any CPU
 		{9B740143-841C-4AF7-905E-D8883F1735DE}.Development Server|HTML5.Build.0 = Development|Any CPU
 		{9B740143-841C-4AF7-905E-D8883F1735DE}.Development Server|Mac.ActiveCfg = Development|Any CPU
@@ -4637,7 +4611,6 @@ Global
 		{C22FE09B-9D62-4B4C-AE2E-BDB5D66C143F}.Development Editor|Win32.ActiveCfg = Development|Any CPU
 		{C22FE09B-9D62-4B4C-AE2E-BDB5D66C143F}.Development Editor|Win32.Build.0 = Development|Any CPU
 		{C22FE09B-9D62-4B4C-AE2E-BDB5D66C143F}.Development Editor|Win64.ActiveCfg = Development|Any CPU
-		{C22FE09B-9D62-4B4C-AE2E-BDB5D66C143F}.Development Editor|Win64.Build.0 = Development|Any CPU
 		{C22FE09B-9D62-4B4C-AE2E-BDB5D66C143F}.Development Server|HTML5.ActiveCfg = Development|Any CPU
 		{C22FE09B-9D62-4B4C-AE2E-BDB5D66C143F}.Development Server|HTML5.Build.0 = Development|Any CPU
 		{C22FE09B-9D62-4B4C-AE2E-BDB5D66C143F}.Development Server|Mac.ActiveCfg = Development|Any CPU
@@ -4845,7 +4818,6 @@ Global
 		{461BB9A9-EEDA-4E54-8944-A7E09F53EC5A}.Development Editor|Win32.ActiveCfg = Development|Any CPU
 		{461BB9A9-EEDA-4E54-8944-A7E09F53EC5A}.Development Editor|Win32.Build.0 = Development|Any CPU
 		{461BB9A9-EEDA-4E54-8944-A7E09F53EC5A}.Development Editor|Win64.ActiveCfg = Development|Any CPU
-		{461BB9A9-EEDA-4E54-8944-A7E09F53EC5A}.Development Editor|Win64.Build.0 = Development|Any CPU
 		{461BB9A9-EEDA-4E54-8944-A7E09F53EC5A}.Development Server|HTML5.ActiveCfg = Development|Any CPU
 		{461BB9A9-EEDA-4E54-8944-A7E09F53EC5A}.Development Server|HTML5.Build.0 = Development|Any CPU
 		{461BB9A9-EEDA-4E54-8944-A7E09F53EC5A}.Development Server|Mac.ActiveCfg = Development|Any CPU
@@ -4949,7 +4921,6 @@ Global
 		{DAEDEC3D-6FE8-4A24-92BF-FA08BB892E49}.Development Editor|Win32.ActiveCfg = Development|Any CPU
 		{DAEDEC3D-6FE8-4A24-92BF-FA08BB892E49}.Development Editor|Win32.Build.0 = Development|Any CPU
 		{DAEDEC3D-6FE8-4A24-92BF-FA08BB892E49}.Development Editor|Win64.ActiveCfg = Development|Any CPU
-		{DAEDEC3D-6FE8-4A24-92BF-FA08BB892E49}.Development Editor|Win64.Build.0 = Development|Any CPU
 		{DAEDEC3D-6FE8-4A24-92BF-FA08BB892E49}.Development Server|HTML5.ActiveCfg = Development|Any CPU
 		{DAEDEC3D-6FE8-4A24-92BF-FA08BB892E49}.Development Server|HTML5.Build.0 = Development|Any CPU
 		{DAEDEC3D-6FE8-4A24-92BF-FA08BB892E49}.Development Server|Mac.ActiveCfg = Development|Any CPU
@@ -5053,7 +5024,6 @@ Global
 		{A5CA2153-90B2-42E4-9547-341C28A7726A}.Development Editor|Win32.ActiveCfg = Development|Any CPU
 		{A5CA2153-90B2-42E4-9547-341C28A7726A}.Development Editor|Win32.Build.0 = Development|Any CPU
 		{A5CA2153-90B2-42E4-9547-341C28A7726A}.Development Editor|Win64.ActiveCfg = Development|Any CPU
-		{A5CA2153-90B2-42E4-9547-341C28A7726A}.Development Editor|Win64.Build.0 = Development|Any CPU
 		{A5CA2153-90B2-42E4-9547-341C28A7726A}.Development Server|HTML5.ActiveCfg = Development|Any CPU
 		{A5CA2153-90B2-42E4-9547-341C28A7726A}.Development Server|HTML5.Build.0 = Development|Any CPU
 		{A5CA2153-90B2-42E4-9547-341C28A7726A}.Development Server|Mac.ActiveCfg = Development|Any CPU
@@ -5173,7 +5143,6 @@ Global
 		{75240A67-CF47-4DDC-83B2-AD5D371F31BD}.Development Editor|Win32.ActiveCfg = Debug|Any CPU
 		{75240A67-CF47-4DDC-83B2-AD5D371F31BD}.Development Editor|Win32.Build.0 = Debug|Any CPU
 		{75240A67-CF47-4DDC-83B2-AD5D371F31BD}.Development Editor|Win64.ActiveCfg = Debug|Any CPU
-		{75240A67-CF47-4DDC-83B2-AD5D371F31BD}.Development Editor|Win64.Build.0 = Debug|Any CPU
 		{75240A67-CF47-4DDC-83B2-AD5D371F31BD}.Development Server|HTML5.ActiveCfg = Debug|Any CPU
 		{75240A67-CF47-4DDC-83B2-AD5D371F31BD}.Development Server|HTML5.Build.0 = Debug|Any CPU
 		{75240A67-CF47-4DDC-83B2-AD5D371F31BD}.Development Server|Mac.ActiveCfg = Debug|Any CPU
