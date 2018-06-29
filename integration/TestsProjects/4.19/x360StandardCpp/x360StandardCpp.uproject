@@ -1,0 +1,13 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{1551B27F-44CE-1330-8DB8-F3BFFC7C1D29}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "x360StandardCpp",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
