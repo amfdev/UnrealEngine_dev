@@ -17,20 +17,25 @@ IF NOT DEFINED UnrealConfiguration (
 )
 
 @ECHO:
-@ECHO Prepare UnrealEngine...
+@ECHO Setup MS_BUILD_EXE...
+CALL Scripts\UtilitySetupMSBuildExe.bat
+IF ERRORLEVEL 1 GOTO :error
+
+@ECHO:
+@ECHO Test UnrealEngine folder...
 IF NOT EXIST "%UnrealHome%" (
     @ECHO No UnrealEngine folder found, create it
     MKDIR "%UnrealHome%"
     IF ERRORLEVEL 1 GOTO :error
 )
 
+@ECHO:
+@ECHO Clone UnrealEngine...
 CALL Scripts\HelperUnrealClone.bat
 IF ERRORLEVEL 1 GOTO :error
 
-CALL Scripts\UtilitySetupMSBuildExe.bat
-IF ERRORLEVEL 1 GOTO :error
-
-@ECHO Setup UnrealEngine
+@ECHO:
+@ECHO Setup UnrealEngine...
 CALL Scripts\HelperUnrealSetup.bat
 IF ERRORLEVEL 1 GOTO :error
 
@@ -118,15 +123,18 @@ IF DEFINED AMF_VERSION (
 
 IF DEFINED PLUGIN_TYPE (
     @ECHO:
+    @ECHO Clean plugin folder...
     CALL Scripts\HelperClean.bat
     IF ERRORLEVEL 1 GOTO :error
 
     @ECHO:
+    @ECHO Clone plugin...
     CALL Scripts\HelperClone.bat
     IF ERRORLEVEL 1 GOTO :error
 
     IF DEFINED Build_PatchPlugin (
         @ECHO:
+        @ECHO Patch plugin...
         CALL Scripts\HelperPatch.bat
         IF ERRORLEVEL 1 (
             @ECHO Failed to apply patch!
@@ -136,10 +144,12 @@ IF DEFINED PLUGIN_TYPE (
     )
 
     @ECHO:
+    @ECHO Build plugin...
     CALL Scripts\HelperBuild.bat
     IF ERRORLEVEL 1 GOTO :error
 
     @ECHO:
+    @ECHO Install plugin to UE...
     CALL Scripts\HelperApply.bat
     IF ERRORLEVEL 1 (
         @ECHO ToDo: investigate why error returned here
@@ -148,12 +158,12 @@ IF DEFINED PLUGIN_TYPE (
 )
 
 @ECHO:
-@ECHO Prepare UnrealEngine solution
+@ECHO Generate UnrealEngine solution...
 CALL Scripts\HelperUnrealPrepare.bat
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO:
-@ECHO Build UnrealEngine solution
+@ECHO Build UnrealEngine solution...
 CALL Scripts\HelperUnrealBuild.bat
 IF ERRORLEVEL 1 GOTO :error
 
