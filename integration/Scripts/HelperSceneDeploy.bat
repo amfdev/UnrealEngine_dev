@@ -42,9 +42,6 @@ IF /I ["%SceneSourceType%"] == ["BluePrints"] (
 
 @ECHO Project name to deploy: %SceneProjectName%
 
-SET SceneProjectOutputName=%UE_VERSION%_%Configuration%_%Platform%_%SceneProjectName%
-@ECHO Scene project output name: %SceneProjectOutputName%
-
 IF NOT EXIST "%DeployHome%" (
     @ECHO Create deploy home folder
     MKDIR %DeployHome%
@@ -58,21 +55,28 @@ IF NOT EXIST "%DeployHome%\Tests" (
     IF ERRORLEVEL 1 GOTO :error
 )
 
-IF EXIST "%DeployHome%\Tests\%SceneProjectOutputName%" (
-    @ECHO Delete old %SceneProjectOutputName% folder
+IF NOT EXIST "%DeployHome%\Tests\%UE_VERSION%" (
+    @ECHO Create engine version folder
 
-    RD /S /Q %DeployHome%\Tests\%SceneProjectOutputName%
+    MKDIR %DeployHome%\Tests\%UE_VERSION%
     IF ERRORLEVEL 1 GOTO :error
 )
 
-@ECHO Create deploy folder for %SceneProjectOutputName%
-MKDIR %DeployHome%\Tests\%SceneProjectOutputName%
+IF EXIST "%DeployHome%\Tests\%UE_VERSION%\%SceneProjectName%" (
+    @ECHO Delete old %SceneProjectName% folder
+
+    RD /S /Q %DeployHome%\Tests\%UE_VERSION%\%SceneProjectName%
+    IF ERRORLEVEL 1 GOTO :error
+)
+
+@ECHO Create deploy folder for %SceneProjectName%
+MKDIR %DeployHome%\Tests\%UE_VERSION%\%SceneProjectName%
 IF ERRORLEVEL 1 GOTO :error
 
 IF NOT DEFINED STITCH_VERSION (
     IF EXIST "%CD%\TestsProjects\%UE_VERSION%\%SceneProjectName%\Content\Video\1.mp4" (
         @ECHO Create folder for video file
-        MKDIR "%CD%\Deploy\Tests\%SceneProjectOutputName%\%SceneProjectName%\Content\Video
+        MKDIR "%CD%\Deploy\Tests\%UE_VERSION%\%SceneProjectName%\%SceneProjectName%\Content\Video
         IF ERRORLEVEL 1 GOTO :error
     )
 
@@ -81,7 +85,7 @@ IF NOT DEFINED STITCH_VERSION (
 )
 
 @ECHO Copy scene to deploy folder
-ROBOCOPY %CD%\TestsProjects\%UE_VERSION%\%SceneProjectName%\Saved\StagedBuilds\WindowsNoEditor %CD%\Deploy\Tests\%SceneProjectOutputName% /E /xf *.pdb /xf *.txt
+ROBOCOPY %CD%\TestsProjects\%UE_VERSION%\%SceneProjectName%\Saved\StagedBuilds\WindowsNoEditor %CD%\Deploy\Tests\%UE_VERSION%\%SceneProjectName% /E /xf *.pdb /xf *.txt
 IF ERRORLEVEL 1 (
     @ECHO Todo: investigate why robocopy returns error
     rem GOTO :error
@@ -90,15 +94,15 @@ IF ERRORLEVEL 1 (
 IF NOT DEFINED STITCH_VERSION (
     IF EXIST "%CD%\TestsProjects\%UE_VERSION%\%SceneProjectName%\Content\Video\1.mp4" (
         @ECHO Copy sample 4K video file
-        COPY "%CD%\TestsProjects\%UE_VERSION%\%SceneProjectName%\Content\Video\1.mp4" "%CD%\Deploy\Tests\%SceneProjectOutputName%\%SceneProjectName%\Content\Video\1.mp4"
+        COPY "%CD%\TestsProjects\%UE_VERSION%\%SceneProjectName%\Content\Video\1.mp4" "%CD%\Deploy\Tests\%UE_VERSION%\%SceneProjectName%\%SceneProjectName%\Content\Video\1.mp4"
         IF ERRORLEVEL 1 GOTO :error
     )
+)
 
-    IF EXIST "%CD%\TestsProjects\Media" (
-        @ECHO Copy shared video files
-        COPY "%CD%\TestsProjects\Media" "%CD%\Deploy\Media"
-        IF ERRORLEVEL 1 GOTO :error
-    )
+IF EXIST "%CD%\TestsProjects\Media" (
+    @ECHO Copy shared video files
+    COPY "%CD%\TestsProjects\Media" "%CD%\Deploy\Media"
+    IF ERRORLEVEL 1 GOTO :error
 )
 
 :done

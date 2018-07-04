@@ -9,8 +9,14 @@ SET UnrealHome=
 IF NOT DEFINED UE_VERSION (
     @ECHO Error: UE_VERSION variable undefined!
     GOTO :error
-) ELSE (
-    SET UnrealHome=UnrealEngine-%UE_VERSION%
+)
+
+SET UnrealHome=UnrealEngine-%UE_VERSION%
+
+IF DEFINED AMF_VERSION (
+    SET UnrealHome=%UnrealHome%-Amf
+) ELSE IF DEFINED STITCH_VERSION (
+    SET UnrealHome=%UnrealHome%-Stitch
 )
 
 SET AmfHome=

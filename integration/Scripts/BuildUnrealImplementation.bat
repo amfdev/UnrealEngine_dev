@@ -23,11 +23,6 @@ IF NOT DEFINED UnrealConfiguration (
 )
 
 @ECHO:
-@ECHO Setup MS_BUILD_EXE...
-CALL Scripts\UtilitySetupMSBuildExe.bat
-IF ERRORLEVEL 1 GOTO :error
-
-@ECHO:
 @ECHO Test UnrealEngine folder...
 IF NOT EXIST "%UnrealHome%" (
     @ECHO No UnrealEngine folder found, create it
@@ -38,6 +33,12 @@ IF NOT EXIST "%UnrealHome%" (
 @ECHO:
 @ECHO Clone UnrealEngine...
 CALL Scripts\HelperUnrealClone.bat
+IF ERRORLEVEL 1 GOTO :error
+
+@ECHO:
+@ECHO Setup MS_BUILD_EXE...
+REM Must be after cloning
+CALL Scripts\UtilitySetupMSBuildExe.bat
 IF ERRORLEVEL 1 GOTO :error
 
 @ECHO:
