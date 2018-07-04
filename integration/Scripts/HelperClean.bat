@@ -11,14 +11,20 @@ IF EXIST "%PLUGIN_FOLDER%" (
     CD %PLUGIN_FOLDER%
     IF ERRORLEVEL 1 GOTO :error
 
+    git config --global core.longpaths true
+    IF ERRORLEVEL 1 GOTO :error
+
+    SET GIT_ASK_YESNO=false
+
     git reset --hard
     IF ERRORLEVEL 1 GOTO :error
 
     git clean -fdx
     IF ERRORLEVEL 1 GOTO :error
 
-    RD /S /Q "%CD%/.git/rebase-apply"
-
+    IF EXIST "%CD%/.git/rebase-apply" (
+        RD /S /Q "%CD%/.git/rebase-apply"
+    )
 )
 
 :done

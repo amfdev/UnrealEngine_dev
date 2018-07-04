@@ -9,6 +9,11 @@ IF NOT DEFINED UnrealHome (
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
+git config --global core.longpaths true
+IF ERRORLEVEL 1 GOTO :error
+
+SET GIT_ASK_YESNO=false
+
 git reset --hard
 IF ERRORLEVEL 1 GOTO :error
 

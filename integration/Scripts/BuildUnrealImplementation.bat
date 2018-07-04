@@ -129,10 +129,15 @@ IF DEFINED AMF_VERSION (
 )
 
 IF DEFINED PLUGIN_TYPE (
-    @ECHO:
-    @ECHO Clean plugin folder...
-    CALL Scripts\HelperClean.bat
-    IF ERRORLEVEL 1 GOTO :error
+
+    SET CleanFirst=!Build_Clean!!Build_CleanOnly!
+
+    IF DEFINED CleanFirst (
+        @ECHO:
+        @ECHO Clean plugin folder...
+        CALL Scripts\HelperClean.bat
+        IF ERRORLEVEL 1 GOTO :error
+    )
 
     @ECHO:
     @ECHO Clone plugin...
