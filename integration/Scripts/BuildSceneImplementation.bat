@@ -22,6 +22,12 @@ IF NOT DEFINED SceneSourceType (
 @ECHO Prepare folders...
 SET UnrealHome=UnrealEngine-%UE_VERSION%
 
+IF DEFINED AMF_VERSION (
+    SET UnrealHome=%UnrealHome%-Amf
+) ELSE IF DEFINED STITCH_VERSION (
+    SET UnrealHome=%UnrealHome%-Stitch
+)
+
 @ECHO Build test scenes
 CALL Scripts\HelperSceneBuild.bat
 IF ERRORLEVEL 1 GOTO :error
