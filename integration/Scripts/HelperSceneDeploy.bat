@@ -101,7 +101,10 @@ IF NOT DEFINED STITCH_VERSION (
 
 IF EXIST "%CD%\TestsProjects\Media" (
     @ECHO Copy shared video files
+    REM Todo: eliminate usage
     COPY "%CD%\TestsProjects\Media" "%CD%\Deploy\Media"
+    REM Todo: new folder
+    COPY "%CD%\TestsProjects\Media" "%CD%\Deploy\Tests\Media"
     IF ERRORLEVEL 1 GOTO :error
 )
 
