@@ -53,6 +53,9 @@ IF NOT EXIST "%DeployHome%\Tests" (
 
     MKDIR %DeployHome%\Tests
     IF ERRORLEVEL 1 GOTO :error
+
+    MKDIR %DeployHome%\Tests\Media
+    IF ERRORLEVEL 1 GOTO :error
 )
 
 IF NOT EXIST "%DeployHome%\Tests\%UE_VERSION%" (
