@@ -19,6 +19,7 @@ SET Build_BluePrints=
 SET Build_CPP=
 SET Build_Plane=
 SET Build_x360=
+SET Build_MediaTest=
 SET Build_Engine=
 SET Build_Tests=
 SET Build_Dirty=
@@ -78,6 +79,9 @@ FOR %%x IN (%*) DO (
     ) ELSE IF /I "%%~x"=="x360" (
         SET Build_Tests=1
         SET Build_x360=1
+    ) ELSE IF /I "%%~x"=="MediaTest" (
+        SET Build_Tests=1
+        SET Build_MediaTest=1
     ) ELSE IF /I "%%~x"=="Engine" (
         SET Build_Engine=1
     ) ELSE IF /I "%%~x"=="Tests" (
@@ -179,22 +183,25 @@ IF NOT DEFINED Build_Engine IF NOT DEFINED Build_Tests (
 )
 
 IF DEFINED Build_Tests (
-    IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 (
+    IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 IF NOT DEFINED Build_MediaTest (
         IF DEFINED Build_Standard (
             SET Build_Plane=1
             SET Build_x360=1
+            REM Build_MediaTest is not compatible with standard rendering
         )
 
         IF DEFINED Build_Amf (
             SET Build_Plane=1
             SET Build_x360=1
+            SET Build_MediaTest=1
         )
     )
 )
 
-IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 IF NOT DEFINED Build_Stitch IF DEFINED Build_Tests (
+IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 IF NOT DEFINED Build_MediaTest IF NOT DEFINED Build_Stitch IF DEFINED Build_Tests (
     SET Build_Plane=1
     SET Build_x360=1
+    SET Build_MediaTest=1
     SET Build_Stitch=1
 )
 
@@ -211,6 +218,7 @@ SET Build_BluePrints
 SET Build_CPP
 SET Build_Plane
 SET Build_x360
+SET Build_MediaTest
 SET Build_Engine
 SET Build_Tests
 SET Build_Dirty
@@ -273,7 +281,7 @@ IF DEFINED Build_4_19 (
     @ECHO     Shipping - Unreal Engine and related tests with shipping configuration
     @ECHO     BluePrints - build blueprints variant of the related tests
     @ECHO     CPP - build c++ variant of the related tests
-    @ECHO     Plane, X360 - specify name of the test for standard and amf configuration
+    @ECHO     Plane, X360, MediaTest - specify name of the test for standard and amf configuration
     @ECHO     Clean - clean up Unreal Engine and plugin repository before build
     @ECHO     Dirty - don't clean Unreal Engine and plugin repository before build
     @ECHO     PatchPlugin - use test repository, download branch, then patch it with our patches
@@ -423,9 +431,9 @@ IF DEFINED Build_4_19 (
 
         IF NOT DEFINED SkipSourceType (
 
-            IF "%~3" == "Stitch" (
+            IF /I ["%~3"] == ["Stitch"] (
 
-                IF ["%%s"] == ["Blueprints"] (
+                IF /I ["%%s"] == ["Blueprints"] (
 
                     SET SceneName=StitchAmf
                     SET SceneSourceType=%%s
@@ -436,11 +444,15 @@ IF DEFINED Build_4_19 (
                 )
             ) ELSE (
 
-                FOR %%t IN (Plane, x360) DO (
+                FOR %%t IN (Plane, x360, MediaTest) DO (
 
                     SET SkipTestType=
-                    IF ["%%t"] == ["Plane"] IF NOT DEFINED Build_Plane SET SkipTestType=1
-                    IF ["%%t"] == ["x360"] IF NOT DEFINED Build_x360 SET SkipTestType=1
+                    IF /I ["%%t"] == ["Plane"] IF NOT DEFINED Build_Plane SET SkipTestType=1
+                    IF /I ["%%t"] == ["x360"] IF NOT DEFINED Build_x360 SET SkipTestType=1
+                    IF /I ["%%t"] == ["MediaTest"] IF NOT DEFINED Build_MediaTest SET SkipTestType=1
+
+                    IF /I ["%%t"] == ["MediaTest"] IF NOT DEFINED Build_MediaTest SET SkipTestType=1
+                    IF /I ["%%t"] == ["MediaTest"]  IF /I ["%%s"] == ["Blueprints"] SET SkipTestType=1
 
                     IF NOT DEFINED SkipTestType (
                         SET SceneName=%%t%~3
