@@ -10,7 +10,7 @@
  * 
  */
 UCLASS()
-class MEDIATEST_API AMediaTestAmfCppGameModeBase : public AGameModeBase
+class MEDIATESTAMFCPP_API AMediaTestAmfCppGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
