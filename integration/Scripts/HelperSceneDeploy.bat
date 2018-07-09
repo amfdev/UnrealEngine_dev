@@ -56,7 +56,10 @@ IF NOT EXIST "%DeployHome%\Tests" (
 
     MKDIR %DeployHome%\Tests
     IF ERRORLEVEL 1 GOTO :error
+)
 
+IF NOT EXIST "%DeployHome%\Tests\Media" (
+    @ECHO Create media folder
     MKDIR %DeployHome%\Tests\Media
     IF ERRORLEVEL 1 GOTO :error
 )
@@ -88,6 +91,7 @@ IF NOT DEFINED STITCH_VERSION (
 
     @ECHO Create folder for shared video files
     IF NOT EXIST "%CD%\Deploy\Media" MKDIR "%CD%\Deploy\Media"
+    IF NOT EXIST "%CD%\Deploy\Tests\Media" MKDIR "%CD%\Deploy\Tests\Media"
 )
 
 @ECHO Copy scene to deploy folder
@@ -107,8 +111,11 @@ IF NOT DEFINED STITCH_VERSION (
 
 IF EXIST "%CD%\TestsProjects\Media" (
     @ECHO Copy shared video files
+
     REM Todo: eliminate usage
     COPY "%CD%\TestsProjects\Media" "%CD%\Deploy\Media"
+    IF ERRORLEVEL 1 GOTO :error
+
     REM Todo: new folder
     COPY "%CD%\TestsProjects\Media" "%CD%\Deploy\Tests\Media"
     IF ERRORLEVEL 1 GOTO :error
