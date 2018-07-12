@@ -153,10 +153,14 @@ IF NOT DEFINED Build_4_17 IF NOT DEFINED Build_4_18 IF NOT DEFINED Build_4_19 (
 )
 
 IF NOT DEFINED Build_Standard IF NOT DEFINED Build_Amf IF NOT DEFINED Build_Stitch (
-    @ECHO No build type specified by args, standard, Amf and Stitch will be added
+    @ECHO No rendering type specified by args
+
     SET Build_Standard=1
     SET Build_Amf=1
-    SET Build_Stitch=1
+
+    IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 IF NOT DEFINED Build_MediaTest (
+        SET Build_Stitch=1
+    )
 )
 
 IF NOT DEFINED Build_Development IF NOT DEFINED Build_Shipping (
@@ -455,7 +459,7 @@ IF DEFINED Build_4_19 (
                     IF /I ["%%t"] == ["x360"] IF NOT DEFINED Build_x360 SET SkipTestType=1
                     IF /I ["%%t"] == ["MediaTest"] IF NOT DEFINED Build_MediaTest SET SkipTestType=1
 
-                    IF /I ["%%t"] == ["MediaTest"] IF NOT DEFINED Build_MediaTest SET SkipTestType=1
+                    IF /I ["%%t"] == ["MediaTest"] IF /I ["%~3"] == ["Standard"] SET SkipTestType=1
                     IF /I ["%%t"] == ["MediaTest"]  IF /I ["%%s"] == ["Blueprints"] SET SkipTestType=1
 
                     IF NOT DEFINED SkipTestType (
