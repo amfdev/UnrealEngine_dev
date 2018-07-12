@@ -26,6 +26,7 @@ SET Build_Dirty=
 SET Build_Clean=
 SET Build_CleanOnly=
 SET Build_PatchPlugin=
+SET Build_Minimal=
 SET Build_Verbose=
 
 SET Command_AmfBranch=
@@ -124,6 +125,8 @@ FOR %%x IN (%*) DO (
             SET Command_StitchBranch=1
         )
 
+    ) ELSE IF /I "%%~x"=="Minimal" (
+        SET Build_Minimal=1
     ) ELSE IF /I "%%~x"=="Verbose" (
         SET Build_Verbose=1
     ) ELSE IF /I "%%~x"=="Help" (
@@ -224,6 +227,7 @@ SET Build_Tests
 SET Build_Dirty
 SET Build_Clean
 SET Build_PatchPlugin
+SET Build_Minimal
 SET Build_Verbose
 SET Param_AmfBranch
 SET Param_StitchBranch

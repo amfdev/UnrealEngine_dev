@@ -18,8 +18,21 @@ if %errorlevel% == 0 (
 CD %UnrealHome%
 IF ERRORLEVEL 1 GOTO :error
 
-@ECHO Generate UnrealEngine project files
+IF DEFINED Build_Minimal (
 
+    @ECHO Remove unneeded plugins
+    IF ["%UE_VERSION%"] == ["4.18"] (
+        git apply ..\Patches\Erase_UE418.patch
+        IF ERRORLEVEL 1 GOTO :error
+    ) IF ["%UE_VERSION%"] == ["4.19"] (
+        git apply ..\Patches\Erase_UE419.patch
+        IF ERRORLEVEL 1 GOTO :error
+    ) ELSE (
+        @ECHO Unsupported unreal engine version
+    )
+)
+
+@ECHO Generate UnrealEngine project files
 CALL GenerateProjectFiles.bat
 IF ERRORLEVEL 1 GOTO :error
 
