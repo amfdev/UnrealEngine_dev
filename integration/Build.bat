@@ -10,6 +10,8 @@ IF ERRORLEVEL 1 GOTO :error
 SET Build_4_17=
 SET Build_4_18=
 SET Build_4_19=
+SET Build_2015=
+SET Build_2017=
 SET Build_Amf=
 SET Build_Standard=
 SET Build_Stitch=
@@ -58,6 +60,10 @@ FOR %%x IN (%*) DO (
         SET Build_4_18=1
     ) ELSE IF /I "%%~x"=="4.19" (
         SET Build_4_19=1
+    ) ELSE IF /I "%%~x"=="2015" (
+        SET Build_2015=1
+    ) ELSE IF /I "%%~x"=="2017" (
+        SET Build_2017=1
     ) ELSE IF /I "%%~x"=="Amf" (
         SET Build_Amf=1
     ) ELSE IF /I "%%~x"=="Stitch" (
@@ -152,6 +158,12 @@ IF NOT DEFINED Build_4_17 IF NOT DEFINED Build_4_18 IF NOT DEFINED Build_4_19 (
     SET Build_4_19=1
 )
 
+IF NOT DEFINED Build_2015 IF NOT DEFINED Build_2017 (
+    @ECHO No Visual Studio version specified, 2015 and 2017 will be added
+    SET Build_2015=1
+    SET Build_2017=1
+)
+
 IF NOT DEFINED Build_Standard IF NOT DEFINED Build_Amf IF NOT DEFINED Build_Stitch (
     @ECHO No rendering type specified by args
 
@@ -216,6 +228,8 @@ IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 IF NOT DEFINED Build_MediaT
 SET Build_4_17
 SET Build_4_18
 SET Build_4_19
+SET Build_2015
+SET Build_2017
 SET Build_Amf
 SET Build_Standard
 SET Build_Stitch
@@ -257,17 +271,28 @@ IF NOT EXIST %LogFolderName% (
 
 @ECHO project_name,start_date,start_time,end_date,end_time,result>>"%ResultsFileName%""
 
-IF DEFINED Build_4_17 (
-    CALL :runBuildHelper 4.17
-    )
+FOR %%s IN (2015, 2017) DO (
+    SET SkipVisualStudio=
 
-IF DEFINED Build_4_18 (
-    CALL :runBuildHelper 4.18
-    )
+    IF /I ["%%s"] == ["2015"] IF NOT DEFINED Build_2015 SET SkipVisualStudio=1
+    IF /I ["%%s"] == ["2017"] IF NOT DEFINED Build_2017 SET SkipVisualStudio=1
 
-IF DEFINED Build_4_19 (
-    CALL :runBuildHelper 4.19
+    IF NOT DEFINED SkipVisualStudio (
+        SET VS_VERSION=%%s
+
+        IF DEFINED Build_4_17 (
+            CALL :runBuildHelper 4.17
+            )
+
+        IF DEFINED Build_4_18 (
+            CALL :runBuildHelper 4.18
+            )
+
+        IF DEFINED Build_4_19 (
+            CALL :runBuildHelper 4.19
+            )
     )
+)
 
 :done
     @ECHO:
@@ -282,6 +307,7 @@ IF DEFINED Build_4_19 (
     @ECHO     Engine - build Unreal Engine
     @ECHO     Tests - build tests
     @ECHO     4.17 4.18 4.19 - specify Unreal Engine version
+    @ECHO     2015 2017 - specify Visual Studio version
     @ECHO     Standard - build Unreal Engine and related tests with standard media playback
     @ECHO     Amf - build Unreal Engine and related tests with accelerated AMF media playback
     @ECHO     Stitch - build Unreal Engine and related tests with stitch media playback
@@ -371,7 +397,7 @@ IF DEFINED Build_4_19 (
         SET SceneConfiguration=
     )
 
-    SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%renderTypePrintable%
+    SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%renderTypePrintable%_%VS_VERSION%
     SET UnrealBuildLogFile=%CD%\%LogFolderName%\%UnrealConfigurationPrintableName%.log
     SET returnCode=0
     SET buildResult=""

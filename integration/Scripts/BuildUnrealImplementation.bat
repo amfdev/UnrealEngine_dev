@@ -9,6 +9,11 @@ IF NOT DEFINED UE_VERSION (
     GOTO :error
 )
 
+IF NOT DEFINED VS_VERSION (
+    @ECHO Error: VS_VERSION variable undefined!
+    GOTO :error
+)
+
 SET UnrealHome=UnrealEngine-%UE_VERSION%
 
 IF DEFINED AMF_VERSION (
@@ -89,7 +94,7 @@ IF DEFINED AMF_VERSION (
 
     )
 
-    SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs2015\AmfMediaCommon.sln
+    SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs%VS_VERSION%\AmfMediaCommon.sln
     SET PLUGIN_APPLY_PROGRAM=AmfMediaInstall.bat
 
 ) ELSE IF DEFINED STITCH_VERSION (
@@ -124,7 +129,7 @@ IF DEFINED AMF_VERSION (
         )
     )
 
-    SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs2015\AmfStitchMediaCommon.sln
+    SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs%VS_VERSION%\AmfStitchMediaCommon.sln
     SET PLUGIN_APPLY_PROGRAM=AmfStitchMediaInstall.bat
 )
 

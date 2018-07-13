@@ -1,6 +1,16 @@
 @ECHO %Verbose%
 SETLOCAL
 
+IF NOT DEFINED UE_VERSION (
+    @ECHO Error: UE_VERSION variable undefined!
+    GOTO :error
+)
+
+IF NOT DEFINED VS_VERSION (
+    @ECHO Error: VS_VERSION variable undefined!
+    GOTO :error
+)
+
 IF NOT DEFINED UnrealHome (
     @ECHO Error: UnrealHome variable undefined!
     GOTO :error
@@ -34,12 +44,13 @@ IF ERRORLEVEL 1 GOTO :error
 
 @ECHO:
 @ECHO Build UnrealEngine
+@ECHO UnrealEngine version: %UE_VERSION%
+@ECHO VisualStudio version: %VS_VERSION%
+@ECHO Configuration: %UnrealConfiguration%
+@ECHO Platform: %platform%
 @ECHO MsBuild: %MSBUILD_EXE%
 @ECHO Target: %target%
 @ECHO Affinity: %maxcpucount%
-@ECHO Version: %UE_VERSION%
-@ECHO Configuration: %UnrealConfiguration%
-@ECHO Platform: %platform%
 @ECHO Params: %parameters%
 @ECHO Solution: %solution%
 @ECHO Log file: %UnrealBuildLogFile%
