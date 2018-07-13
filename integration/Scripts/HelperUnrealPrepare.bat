@@ -24,9 +24,9 @@ IF DEFINED Build_Minimal (
     IF ["%UE_VERSION%"] == ["4.18"] (
         git apply ..\Patches\Erase_UE418.patch
         IF ERRORLEVEL 1 GOTO :error
-    ) IF ["%UE_VERSION%"] == ["4.19"] (
-        git apply ..\Patches\Erase_UE419.patch
-        IF ERRORLEVEL 1 GOTO :error
+    rem ) ELSE IF ["%UE_VERSION%"] == ["4.19"] (
+    rem    git apply ..\Patches\Erase_UE419.patch
+    rem    IF ERRORLEVEL 1 GOTO :error
     ) ELSE (
         @ECHO Unsupported unreal engine version
     )
