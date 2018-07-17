@@ -22,4 +22,7 @@ class MEDIATESTAMFCPP_API UMediaTestFunctionLibrary : public UBlueprintFunctionL
 
 	UFUNCTION(BlueprintPure, Category = "Files")
 	static bool FileLoadStringArray(FString FileNameIn, TArray<FString>& StringArrayOut);
+
+	UFUNCTION(BlueprintPure, Category = "System")
+	static FString GetCurrentPath();
 };

@@ -22,6 +22,11 @@ bool UMediaTestFunctionLibrary::FileLoadStringArray(FString FileNameIn, TArray<F
 	return FFileHelper::LoadFileToStringArray(StringArrayOut, *FileNameIn);
 }
 
+FString UMediaTestFunctionLibrary::GetCurrentPath()
+{
+	return FPaths::LaunchDir();
+}
+
 
 
 

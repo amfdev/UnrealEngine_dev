@@ -15,11 +15,26 @@ class MEDIATESTAMFCPP_API UMediaTestFunctionLibrary : public UBlueprintFunctionL
 	GENERATED_BODY()
 	
 	UFUNCTION(BlueprintCallable, Category = "Files")
-	static bool FileSaveString(FString FileNameIn, FString SaveTextIn);
+	static bool FileSaveString(const FString& FileNameIn, const FString& SaveTextIn);
 
 	UFUNCTION(BlueprintPure, Category = "Files")
-	static bool FileLoadString(FString FileNameIn, FString& SaveTextOut);
+	static bool FileLoadString(const FString& FileNameIn, FString& SaveTextOut);
 
 	UFUNCTION(BlueprintPure, Category = "Files")
-	static bool FileLoadStringArray(FString FileNameIn, TArray<FString>& StringArrayOut);
+	static bool FileLoadStringArray(const FString& FileNameIn, TArray<FString>& StringArrayOut);
+
+	UFUNCTION(BlueprintPure, Category = "System")
+	static FString GetCurrentPath();
+
+	UFUNCTION(BlueprintPure, Category = "System")
+	static FString GetRootDir();
+
+	//UFUNCTION(BlueprintPure, Category = "System")
+	//static FString GetBaseDir();
+
+	UFUNCTION(BlueprintPure, Category = "System")
+	static void PrepareFullPath(const FString& BaseDirIn, const FString& FileNameIn, FString& FileNameOut);
+
+	UFUNCTION(BlueprintPure, Category = "System")
+	static bool IsFileExist(const FString& FileNameIn);
 };

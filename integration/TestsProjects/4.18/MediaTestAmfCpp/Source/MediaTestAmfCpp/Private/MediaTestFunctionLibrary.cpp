@@ -6,22 +6,43 @@
 #include "Modules/ModuleManager.h"
 #include "Misc/PackageName.h"
 
-bool UMediaTestFunctionLibrary::FileSaveString(FString FileNameIn, FString SaveTextIn)
+bool UMediaTestFunctionLibrary::FileSaveString(const FString& FileNameIn, const FString& SaveTextIn)
 {
 	                                 //*(FPaths::GameDir() + FileNameB)
 	return FFileHelper::SaveStringToFile(SaveTextIn, *FileNameIn);
 }
 
-bool UMediaTestFunctionLibrary::FileLoadString(FString FileNameIn, FString& SaveTextOut)
+bool UMediaTestFunctionLibrary::FileLoadString(const FString& FileNameIn, FString& SaveTextOut)
 {
 	return FFileHelper::LoadFileToString(SaveTextOut, *FileNameIn);
 }
 
-bool UMediaTestFunctionLibrary::FileLoadStringArray(FString FileNameIn, TArray<FString>& StringArrayOut)
+bool UMediaTestFunctionLibrary::FileLoadStringArray(const FString& FileNameIn, TArray<FString>& StringArrayOut)
 {
 	return FFileHelper::LoadFileToStringArray(StringArrayOut, *FileNameIn);
 }
 
+FString UMediaTestFunctionLibrary::GetCurrentPath()
+{
+	return FPaths::LaunchDir();
+}
 
+FString UMediaTestFunctionLibrary::GetRootDir()
+{
+	return FPaths::RootDir();
+}
 
+//FString UMediaTestFunctionLibrary::GetBaseDir()
+//{
+//	return FPaths::BaseDir();
+//}
 
+void UMediaTestFunctionLibrary::PrepareFullPath(const FString& BaseDirIn, const FString& FileNameIn, FString& FileNameOut)
+{
+	FileNameOut = FPaths::ConvertRelativePathToFull(BaseDirIn, FileNameIn);
+}
+
+bool UMediaTestFunctionLibrary::IsFileExist(const FString& FileNameIn)
+{
+	return FPaths::FileExists(FileNameIn);
+}
