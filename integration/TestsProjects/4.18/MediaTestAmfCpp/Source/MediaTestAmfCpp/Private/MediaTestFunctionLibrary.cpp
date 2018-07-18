@@ -46,3 +46,88 @@ bool UMediaTestFunctionLibrary::IsFileExist(const FString& FileNameIn)
 {
 	return FPaths::FileExists(FileNameIn);
 }
+
+bool UMediaTestFunctionLibrary::GrabOption(FString& Options, FString& Result)
+{
+	FString QuestionMark(TEXT("?"));
+	FString SwitchMark(TEXT("-"));
+
+	Options = Options.TrimStart();
+
+	int QuestionIndex = Options.Find(QuestionMark, ESearchCase::CaseSensitive);
+	int SwitchIndex = Options.Find(SwitchMark, ESearchCase::CaseSensitive);
+
+	// Option or switch found
+	if (0 == QuestionIndex || 0 == SwitchIndex)
+	{
+		int NextQuestionIndex = Options.Find(QuestionMark, ESearchCase::CaseSensitive, ESearchDir::FromStart, 1);
+		int NextSwitchIndex = Options.Find(SwitchMark, ESearchCase::CaseSensitive, ESearchDir::FromStart, 1);
+		
+		int NextIndex = INDEX_NONE == NextQuestionIndex
+			? NextSwitchIndex
+			: (INDEX_NONE == NextSwitchIndex ? NextQuestionIndex : FMath::Min(NextQuestionIndex, NextSwitchIndex));
+
+
+		// Take a block before next param
+		if (INDEX_NONE != NextIndex)
+		{
+			Result = Options.Mid(1, NextIndex - 1).TrimEnd();
+			Options = Options.Right(Options.Len() - NextIndex);
+		}
+		// No next params
+		else
+		{
+			Result = Options.Mid(1, MAX_int32);
+			Options.Reset();
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+void UMediaTestFunctionLibrary::GetKeyValue(const FString& Pair, FString& Key, FString& Value)
+{
+	const int32 EqualSignIndex = Pair.Find(TEXT("="), ESearchCase::CaseSensitive);
+	if (EqualSignIndex != INDEX_NONE)
+	{
+		Key = Pair.Left(EqualSignIndex);
+		Value = Pair.Mid(EqualSignIndex + 1, MAX_int32);
+	}
+	else
+	{
+		Key = Pair;
+		Value = TEXT("");
+	}
+}
+
+bool UMediaTestFunctionLibrary::HasOption(FString Options, const FString& Key)
+{
+	FString Pair, PairKey, PairValue;
+	while (GrabOption(Options, Pair))
+	{
+		GetKeyValue(Pair, PairKey, PairValue);
+		if (Key == PairKey)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+FString UMediaTestFunctionLibrary::ParseOption(FString Options, const FString& Key)
+{
+	FString ReturnValue;
+	FString Pair, PairKey, PairValue;
+	while (GrabOption(Options, Pair))
+	{
+		GetKeyValue(Pair, PairKey, PairValue);
+		if (Key == PairKey)
+		{
+			ReturnValue = MoveTemp(PairValue);
+			break;
+		}
+	}
+	return ReturnValue;
+}
