@@ -1,0 +1,1 @@
+MediaTestAmfCpp.exe -PlaneScreen ?playlist=Planescreen.playlist -Amf
