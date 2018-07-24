@@ -1,0 +1,763 @@
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/common/ObservableImpl.h b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/common/ObservableImpl.h
+index 55c03b38bf..685d046883 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/common/ObservableImpl.h
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/common/ObservableImpl.h
+@@ -41,6 +41,7 @@
+ #pragma once
+ 
+ #include "Thread.h"
++#include "TraceAdapter.h"
+ #include <list>
+ 
+ namespace amf
+@@ -90,7 +91,7 @@ namespace amf
+             m_observers.clear();
+         }
+ 
+-        void AMF_STD_CALL NotifyObservers(void  (AMF_STD_CALL Observer::* pEvent)())
++        AMF_RESULT AMF_STD_CALL NotifyObservers(AMF_RESULT  (AMF_STD_CALL Observer::* pEvent)())
+         {
+             ObserversList tempList;
+             {
+@@ -100,12 +101,14 @@ namespace amf
+             for (typename ObserversList::iterator it = tempList.begin(); it != tempList.end(); ++it)
+             {
+                 Observer* pObserver = *it;
+-                (pObserver->*pEvent)();
++                AMF_RETURN_IF_FAILED((pObserver->*pEvent)(), L"NotifyObservers failed");
+             }
++
++            return AMF_OK;
+         }
+ 
+         template<typename TArg0>
+-        void AMF_STD_CALL NotifyObservers(void (AMF_STD_CALL Observer::* pEvent)(TArg0), TArg0 arg0)
++        AMF_RESULT AMF_STD_CALL NotifyObservers(AMF_RESULT (AMF_STD_CALL Observer::* pEvent)(TArg0), TArg0 arg0)
+         {
+             ObserversList tempList;
+             {
+@@ -115,11 +118,14 @@ namespace amf
+             for (typename ObserversList::iterator it = tempList.begin(); it != tempList.end(); ++it)
+             {
+                 Observer* pObserver = *it;
+-                (pObserver->*pEvent)(arg0);
++                AMF_RETURN_IF_FAILED((pObserver->*pEvent)(arg0), L"NotifyObservers failed");
+             }
++
++            return AMF_OK;
+         }
++
+         template<typename TArg0, typename TArg1>
+-        void AMF_STD_CALL NotifyObservers(void (AMF_STD_CALL Observer::* pEvent)(TArg0, TArg1), TArg0 arg0, TArg1 arg1)
++        AMF_RESULT AMF_STD_CALL NotifyObservers(AMF_RESULT (AMF_STD_CALL Observer::* pEvent)(TArg0, TArg1), TArg0 arg0, TArg1 arg1)
+         {
+             ObserversList tempList;
+             {
+@@ -129,8 +135,10 @@ namespace amf
+             for (typename ObserversList::iterator it = tempList.begin(); it != tempList.end(); it++)
+             {
+                 Observer* pObserver = *it;
+-                (pObserver->*pEvent)(arg0, arg1);
++                AMF_RETURN_IF_FAILED((pObserver->*pEvent)(arg0, arg1), L"NotifyObservers failed");
+             }
++
++            return AMF_OK;
+         }
+     private:
+         AMFCriticalSection m_sc;
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/common/PropertyStorageExImpl.h b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/common/PropertyStorageExImpl.h
+index a3c8190b07..185b51c015 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/common/PropertyStorageExImpl.h
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/common/PropertyStorageExImpl.h
+@@ -310,7 +310,12 @@ namespace amf
+             return AMF_OK;
+         }
+         //-------------------------------------------------------------------------------------------------
+-        virtual void        AMF_STD_CALL OnPropertyChanged(const wchar_t* name){ name; }
++        virtual AMF_RESULT  AMF_STD_CALL OnPropertyChanged(const wchar_t* name)
++        {
++            name;
++            
++            return AMF_OK;
++        }
+         //-------------------------------------------------------------------------------------------------
+         virtual void        AMF_STD_CALL AddObserver(AMFPropertyStorageObserver* pObserver) { AMFObservableImpl<AMFPropertyStorageObserver>::AddObserver(pObserver); }
+         //-------------------------------------------------------------------------------------------------
+@@ -338,8 +343,8 @@ namespace amf
+             }
+ 
+             pPropertyInfo->accessType = accessType;
+-            OnPropertyChanged(name);
+-            NotifyObservers<const wchar_t*>(&AMFPropertyStorageObserver::OnPropertyChanged, name);
++            AMF_RETURN_IF_FAILED(OnPropertyChanged(name), L"SetAccessType( %s ) failed", name);
++            AMF_RETURN_IF_FAILED(NotifyObservers<const wchar_t*>(&AMFPropertyStorageObserver::OnPropertyChanged, name), L"SetAccessType( %s ) - failed to notify observers", name);
+             return AMF_OK;
+         }
+         //-------------------------------------------------------------------------------------------------
+@@ -364,8 +369,11 @@ namespace amf
+                 {
+                     m_PropertyValues[name] = validatedValue;
+                 }
+-                OnPropertyChanged(name);
+-                NotifyObservers<const wchar_t*>(&AMFPropertyStorageObserver::OnPropertyChanged, name);
++
++                AMF_RESULT changeResult = OnPropertyChanged(name);
++                AMF_RETURN_IF_FAILED(changeResult, L"SetPrivateProperty( %s ) failed", name);
++                AMF_RETURN_IF_FAILED(NotifyObservers<const wchar_t*>(&AMFPropertyStorageObserver::OnPropertyChanged, name), L"SetPrivateProperty( %s ) - failed to notify observers", name);
++                return changeResult;
+             }
+             return validateResult;
+         }
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/common/PropertyStorageImpl.h b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/common/PropertyStorageImpl.h
+index 1dfd549f97..ebc8aae8dc 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/common/PropertyStorageImpl.h
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/common/PropertyStorageImpl.h
+@@ -70,8 +70,8 @@ namespace amf
+             AMF_RETURN_IF_INVALID_POINTER(pName);
+ 
+             m_PropertyValues[pName] = value;
+-            OnPropertyChanged(pName);
+-            NotifyObservers<const wchar_t*>(&AMFPropertyStorageObserver::OnPropertyChanged, pName);
++            AMF_RETURN_IF_FAILED(OnPropertyChanged(pName), L"SetProperty( %s ) failed", pName);
++            AMF_RETURN_IF_FAILED(NotifyObservers<const wchar_t*>(&AMFPropertyStorageObserver::OnPropertyChanged, pName), L"SetProperty( %s ) - failed to notify observers", pName);            
+             return AMF_OK;
+         }
+         //-------------------------------------------------------------------------------------------------
+@@ -179,9 +179,11 @@ namespace amf
+             }
+         }
+         //-------------------------------------------------------------------------------------------------
+-        virtual void        AMF_STD_CALL OnPropertyChanged(const wchar_t* name)
++        virtual AMF_RESULT  AMF_STD_CALL OnPropertyChanged(const wchar_t* name)
+         {
+             name;
++
++            return AMF_OK;
+         }
+         //-------------------------------------------------------------------------------------------------
+         virtual void        AMF_STD_CALL AddObserver(AMFPropertyStorageObserver* pObserver) { AMFObservableImpl<AMFPropertyStorageObserver>::AddObserver(pObserver); }
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/include/core/PropertyStorage.h b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/include/core/PropertyStorage.h
+index dd96a6d3cb..fd7e1f8206 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/include/core/PropertyStorage.h
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/include/core/PropertyStorage.h
+@@ -48,13 +48,13 @@ namespace amf
+     class AMF_NO_VTABLE AMFPropertyStorageObserver
+     {
+     public:
+-        virtual void                AMF_STD_CALL OnPropertyChanged(const wchar_t* name) = 0;
++        virtual AMF_RESULT          AMF_STD_CALL OnPropertyChanged(const wchar_t* name) = 0;
+     };
+ #else //#if defined(__cplusplus)
+     typedef struct AMFPropertyStorageObserver AMFPropertyStorageObserver;
+     typedef struct AMFPropertyStorageObserverVtbl
+     {
+-        void                (AMF_STD_CALL *OnPropertyChanged)(AMFPropertyStorageObserver *pThis, const wchar_t* name);
++        AMF_RESULT          (AMF_STD_CALL *OnPropertyChanged)(AMFPropertyStorageObserver *pThis, const wchar_t* name);
+     } AMFPropertyStorageObserverVtbl;
+ 
+     struct AMFPropertyStorageObserver
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/PlaybackPipelineBase.cpp b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/PlaybackPipelineBase.cpp
+index b91064f21f..f6c6b42c04 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/PlaybackPipelineBase.cpp
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/PlaybackPipelineBase.cpp
+@@ -291,7 +291,8 @@ AMF_RESULT PlaybackPipelineBase::Init()
+             GetParam(PlaybackPipelineBase::PARAM_NAME_LISTEN_FOR_CONNECTION, bListen);
+             m_pDemuxerVideo->SetProperty(FFMPEG_DEMUXER_LISTEN, bListen);
+         }
+-        m_pDemuxerVideo->SetProperty(m_bURL ? FFMPEG_DEMUXER_URL : FFMPEG_DEMUXER_PATH, inputPath.c_str());
++        res = m_pDemuxerVideo->SetProperty(m_bURL ? FFMPEG_DEMUXER_URL : FFMPEG_DEMUXER_PATH, inputPath.c_str());
++        CHECK_AMF_ERROR_RETURN(res, L"m_pDemuxerVideo->Init() failed");
+         res = m_pDemuxerVideo->Init(amf::AMF_SURFACE_UNKNOWN, 0, 0);
+         CHECK_AMF_ERROR_RETURN(res, L"m_pDemuxerVideo->Init() failed");
+ 
+@@ -406,9 +407,11 @@ AMF_RESULT PlaybackPipelineBase::Init()
+         m_AVSync.Reset();
+         m_pVideoPresenter->SetAVSyncObject(&m_AVSync);
+         m_pAudioPresenter->SetAVSyncObject(&m_AVSync);
++
++        return AMF_OK;
+     }
+     
+-    return AMF_OK;
++    return AMF_FAIL;
+ }
+ 
+ AMF_RESULT PlaybackPipelineBase::InitAudioPipeline(amf_uint32 iAudioStreamIndex, PipelineElementPtr pAudioSourceStream)
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/PlaybackPipelineBase.h b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/PlaybackPipelineBase.h
+index 6d6f15600a..df399a7714 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/PlaybackPipelineBase.h
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/samples/CPPSamples/common/PlaybackPipelineBase.h
+@@ -75,12 +75,12 @@ public:
+     virtual void Terminate();
+ 
+     virtual AMF_RESULT GetDuration(amf_pts& pts) const;
+-	virtual AMF_RESULT GetCurrentPts(amf_pts& pts) const;
++    virtual AMF_RESULT GetCurrentPts(amf_pts& pts) const;
+     
+     virtual double     GetProgressSize() const;
+     virtual double     GetProgressPosition() const;
+ 
+-	virtual AMF_RESULT Seek(amf_pts pts);
++    virtual AMF_RESULT Seek(amf_pts pts);
+ 
+     virtual double     GetFPS();
+     amf_int64  GetFramesDropped() const;
+@@ -91,7 +91,7 @@ protected:
+     virtual void OnEof();
+ 
+     virtual AMF_RESULT InitContext(amf::AMF_MEMORY_TYPE type) = 0;
+-	virtual AMF_RESULT CreateVideoPresenter(amf::AMF_MEMORY_TYPE type, amf_int64 bitRate, double fps) = 0;
++    virtual AMF_RESULT CreateVideoPresenter(amf::AMF_MEMORY_TYPE type, amf_int64 bitRate, double fps) = 0;
+     virtual AMF_RESULT CreateAudioPresenter() = 0;
+ 
+     virtual void        OnParamChanged(const wchar_t* name);
+@@ -99,8 +99,8 @@ protected:
+     virtual AMF_RESULT  InitVideoDecoder(const wchar_t *pDecoderID, amf::AMFBuffer* pExtraData);
+     virtual AMF_RESULT  InitAudio(amf::AMFOutput* pOutput);
+     virtual AMF_RESULT  InitVideo(amf::AMFOutput* pOutput, amf::AMF_MEMORY_TYPE presenterEngine);
+-	virtual AMF_RESULT  InitVideoPipeline(amf_uint32 iVideoStreamIndex, PipelineElementPtr pVideoSourceStream);
+-	virtual AMF_RESULT  InitAudioPipeline(amf_uint32 iAudioStreamIndex, PipelineElementPtr pAudioSourceStream);
++    virtual AMF_RESULT  InitVideoPipeline(amf_uint32 iVideoStreamIndex, PipelineElementPtr pVideoSourceStream);
++    virtual AMF_RESULT  InitAudioPipeline(amf_uint32 iAudioStreamIndex, PipelineElementPtr pAudioSourceStream);
+     
+     amf::AMFContextPtr      m_pContext;
+ 
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/AmbisonicRenderer/Ambisonic2SRendererImpl.cpp b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/AmbisonicRenderer/Ambisonic2SRendererImpl.cpp
+index c734cc1dbc..6e987d3905 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/AmbisonicRenderer/Ambisonic2SRendererImpl.cpp
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/AmbisonicRenderer/Ambisonic2SRendererImpl.cpp
+@@ -939,38 +939,40 @@ AMF_RESULT AMF_STD_CALL AMFAmbisonic2SRendererImpl::Optimize(AMFComponentOptimiz
+     amf_uint count = 0;
+ }
+ //-------------------------------------------------------------------------------------------------
+-void AMF_STD_CALL  AMFAmbisonic2SRendererImpl::OnPropertyChanged(const wchar_t* pName)
++AMF_RESULT AMF_STD_CALL  AMFAmbisonic2SRendererImpl::OnPropertyChanged(const wchar_t* pName)
+ {
+     AMFLock lock(&m_syncProperties);
+     const amf_wstring  name(pName);
+ 
+     if (wcscmp(pName, AMF_AMBISONIC2SRENDERER_THETA) == 0)
+     {
+-        GetProperty(AMF_AMBISONIC2SRENDERER_THETA, &m_Theta);
++        return GetProperty(AMF_AMBISONIC2SRENDERER_THETA, &m_Theta);
+     }
+     else if (wcscmp(pName, AMF_AMBISONIC2SRENDERER_PHI) == 0)
+     {
+-        GetProperty(AMF_AMBISONIC2SRENDERER_PHI, &m_Phi);
++        return GetProperty(AMF_AMBISONIC2SRENDERER_PHI, &m_Phi);
+     }
+     else if (wcscmp(pName, AMF_AMBISONIC2SRENDERER_RHO) == 0)
+     {
+-        GetProperty(AMF_AMBISONIC2SRENDERER_RHO, &m_Rho);
++        return GetProperty(AMF_AMBISONIC2SRENDERER_RHO, &m_Rho);
+     }
+     else  if (wcscmp(pName, AMF_AMBISONIC2SRENDERER_W) == 0)
+     {
+-        GetProperty(AMF_AMBISONIC2SRENDERER_RHO, &m_wIndex);
++        return GetProperty(AMF_AMBISONIC2SRENDERER_RHO, &m_wIndex);
+     }
+     else  if (wcscmp(pName, AMF_AMBISONIC2SRENDERER_X) == 0)
+     {
+-        GetProperty(AMF_AMBISONIC2SRENDERER_RHO, &m_xIndex);
++        return GetProperty(AMF_AMBISONIC2SRENDERER_RHO, &m_xIndex);
+     }
+     else  if (wcscmp(pName, AMF_AMBISONIC2SRENDERER_Y) == 0)
+     {
+-        GetProperty(AMF_AMBISONIC2SRENDERER_RHO, &m_yIndex);
++        return GetProperty(AMF_AMBISONIC2SRENDERER_RHO, &m_yIndex);
+     }
+     else  if (wcscmp(pName, AMF_AMBISONIC2SRENDERER_Z) == 0)
+     {
+-        GetProperty(AMF_AMBISONIC2SRENDERER_RHO, &m_zIndex);
++        return GetProperty(AMF_AMBISONIC2SRENDERER_RHO, &m_zIndex);
+     }
++
++    return AMF_OK;
+ }
+ //-------------------------------------------------------------------------------------------------
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/AmbisonicRenderer/Ambisonic2SRendererImpl.h b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/AmbisonicRenderer/Ambisonic2SRendererImpl.h
+index 19390f259d..d48320c0b3 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/AmbisonicRenderer/Ambisonic2SRendererImpl.h
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/AmbisonicRenderer/Ambisonic2SRendererImpl.h
+@@ -120,7 +120,7 @@ namespace amf
+ 
+         virtual AMF_RESULT  AMF_STD_CALL Optimize(AMFComponentOptimizationCallback* pCallback);
+ 
+-        virtual void        AMF_STD_CALL OnPropertyChanged(const wchar_t* pName);
++        virtual AMF_RESULT  AMF_STD_CALL OnPropertyChanged(const wchar_t* pName);
+ 
+     private:
+         mutable AMFCriticalSection          m_sync;
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/AudioCapture/AudioCaptureImpl.cpp b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/AudioCapture/AudioCaptureImpl.cpp
+index cbbcaab858..667a51d81c 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/AudioCapture/AudioCaptureImpl.cpp
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/AudioCapture/AudioCaptureImpl.cpp
+@@ -257,10 +257,12 @@ AMF_RESULT AMF_STD_CALL  AMFAudioCaptureImpl::QueryOutput(AMFData** ppData)
+ }
+ 
+ //-------------------------------------------------------------------------------------------------
+-void AMF_STD_CALL  AMFAudioCaptureImpl::OnPropertyChanged(const wchar_t* pName)
++AMF_RESULT AMF_STD_CALL  AMFAudioCaptureImpl::OnPropertyChanged(const wchar_t* pName)
+ {
+ 	AMFLock lock(&m_sync);
+ 	amf_wstring name(pName);
++
++	return AMF_OK;
+ }
+ 
+ //-------------------------------------------------------------------------------------------------
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/AudioCapture/AudioCaptureImpl.h b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/AudioCapture/AudioCaptureImpl.h
+index d251c92dce..5db5fd9487 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/AudioCapture/AudioCaptureImpl.h
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/AudioCapture/AudioCaptureImpl.h
+@@ -72,7 +72,7 @@ namespace amf
+ 		virtual AMFContext* AMF_STD_CALL  GetContext()                                              { return m_pContext; };
+ 
+ 		// AMFPropertyStorageObserver interface
+-		virtual void        AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
++		virtual AMF_RESULT  AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
+ 
+ 		amf_pts GetCurrentPts() const;
+ 
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioConverterFFMPEGImpl.cpp b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioConverterFFMPEGImpl.cpp
+index 00e1fb520e..3e5db6aa60 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioConverterFFMPEGImpl.cpp
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioConverterFFMPEGImpl.cpp
+@@ -472,8 +472,10 @@ AMF_RESULT AMF_STD_CALL  AMFAudioConverterFFMPEGImpl::QueryOutput(AMFData** ppDa
+     return AMF_OK;
+ }
+ //-------------------------------------------------------------------------------------------------
+-void AMF_STD_CALL  AMFAudioConverterFFMPEGImpl::OnPropertyChanged(const wchar_t* pName)
++AMF_RESULT AMF_STD_CALL  AMFAudioConverterFFMPEGImpl::OnPropertyChanged(const wchar_t* pName)
+ {
+     AMFLock lock(&m_sync);
+     const amf_wstring  name(pName);
++
++    return AMF_OK;
+ }
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioConverterFFMPEGImpl.h b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioConverterFFMPEGImpl.h
+index a249c53714..b816632c55 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioConverterFFMPEGImpl.h
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioConverterFFMPEGImpl.h
+@@ -83,7 +83,7 @@ namespace amf
+         virtual AMF_RESULT  AMF_STD_CALL  Optimize(AMFComponentOptimizationCallback* pCallback)     {  return AMF_OK;  };
+ 
+         // AMFPropertyStorageObserver interface
+-        virtual void        AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
++        virtual AMF_RESULT  AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
+ 
+     private:
+       mutable AMFCriticalSection  m_sync;
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioDecoderFFMPEGImpl.cpp b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioDecoderFFMPEGImpl.cpp
+index 3d675b73ce..10535a160f 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioDecoderFFMPEGImpl.cpp
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioDecoderFFMPEGImpl.cpp
+@@ -452,21 +452,21 @@ AMF_RESULT AMF_STD_CALL  AMFAudioDecoderFFMPEGImpl::QueryOutput(AMFData** ppData
+     return m_bForceEof ? AMF_EOF : err;
+ }
+ //-------------------------------------------------------------------------------------------------
+-void AMF_STD_CALL  AMFAudioDecoderFFMPEGImpl::OnPropertyChanged(const wchar_t* pName)
++AMF_RESULT AMF_STD_CALL  AMFAudioDecoderFFMPEGImpl::OnPropertyChanged(const wchar_t* pName)
+ {
+     AMFLock lock(&m_sync);
+ 
+     const amf_wstring  name(pName);
+     if (name == AUDIO_DECODER_ENABLE_DECODING)
+     {
+-        GetProperty(AUDIO_DECODER_ENABLE_DECODING, &m_bDecodingEnabled);
+-        return;
++        return GetProperty(AUDIO_DECODER_ENABLE_DECODING, &m_bDecodingEnabled);
+     }
+ 
+     if (name == AUDIO_DECODER_IN_AUDIO_SEEK_POSITION)
+     {
+         amf_pts  seekPts = 0;
+-        if (GetProperty(AUDIO_DECODER_IN_AUDIO_SEEK_POSITION, &seekPts) == AMF_OK)
++        AMF_RESULT res = GetProperty(AUDIO_DECODER_IN_AUDIO_SEEK_POSITION, &seekPts);
++        if (AMF_OK == res)
+         {
+             if (m_pCodecContext)
+             {
+@@ -474,13 +474,16 @@ void AMF_STD_CALL  AMFAudioDecoderFFMPEGImpl::OnPropertyChanged(const wchar_t* p
+             }
+             m_SeekPts = seekPts;
+         }
++
++        return res;
+     }
+ 
+     if (name == AUDIO_DECODER_ENABLE_DEBUGGING)
+     {
+         // do nothing
+-        return;
+     }
++
++    return AMF_OK;
+ }
+ 
+ 
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioDecoderFFMPEGImpl.h b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioDecoderFFMPEGImpl.h
+index b8a2cb3452..90335959a8 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioDecoderFFMPEGImpl.h
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioDecoderFFMPEGImpl.h
+@@ -81,7 +81,7 @@ namespace amf
+ 
+ 
+         // AMFPropertyStorageObserver interface
+-        virtual void        AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
++        virtual AMF_RESULT  AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
+ 
+ 
+     protected:
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioEncoderFFMPEGImpl.cpp b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioEncoderFFMPEGImpl.cpp
+index 85ff661d57..82f80fe2ab 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioEncoderFFMPEGImpl.cpp
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioEncoderFFMPEGImpl.cpp
+@@ -551,22 +551,22 @@ AMF_RESULT AMF_STD_CALL  AMFAudioEncoderFFMPEGImpl::QueryOutput(AMFData** ppData
+     return m_bEof ? AMF_EOF : AMF_OK;
+ }
+ //-------------------------------------------------------------------------------------------------
+-void AMF_STD_CALL  AMFAudioEncoderFFMPEGImpl::OnPropertyChanged(const wchar_t* pName)
++AMF_RESULT AMF_STD_CALL  AMFAudioEncoderFFMPEGImpl::OnPropertyChanged(const wchar_t* pName)
+ {
+     AMFLock lock(&m_sync);
+ 
+     const amf_wstring  name(pName);
+     if (name == AUDIO_ENCODER_ENABLE_ENCODING)
+     {
+-        GetProperty(AUDIO_ENCODER_ENABLE_ENCODING, &m_bEncodingEnabled);
+-        return;
++        return GetProperty(AUDIO_ENCODER_ENABLE_ENCODING, &m_bEncodingEnabled);
+     }
+ 
+     if (name == AUDIO_ENCODER_ENABLE_DEBUGGING)
+     {
+         // do nothing
+-        return;
+     }
++
++    return AMF_OK;
+ }
+ //-------------------------------------------------------------------------------------------------
+ //-------------------------------------------------------------------------------------------------
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioEncoderFFMPEGImpl.h b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioEncoderFFMPEGImpl.h
+index a00ca411fb..58ad1c7146 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioEncoderFFMPEGImpl.h
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/AudioEncoderFFMPEGImpl.h
+@@ -82,7 +82,7 @@ namespace amf
+ 
+ 
+         // AMFPropertyStorageObserver interface
+-        virtual void        AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
++        virtual AMF_RESULT  AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
+ 
+ 
+     private:
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/FileDemuxerFFMPEGImpl.cpp b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/FileDemuxerFFMPEGImpl.cpp
+index 4949f179e9..0fdc128d30 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/FileDemuxerFFMPEGImpl.cpp
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/FileDemuxerFFMPEGImpl.cpp
+@@ -249,14 +249,17 @@ bool        AMFFileDemuxerFFMPEGImpl::AMFOutputDemuxerImpl::IsCached()
+     return m_packetsCache.size() != 0;
+ }
+ //-------------------------------------------------------------------------------------------------
+-void        AMF_STD_CALL  AMFFileDemuxerFFMPEGImpl::AMFOutputDemuxerImpl::OnPropertyChanged(const wchar_t* pName)
++AMF_RESULT AMF_STD_CALL   AMFFileDemuxerFFMPEGImpl::AMFOutputDemuxerImpl::OnPropertyChanged(const wchar_t* pName)
+ {
+     const amf_wstring  name(pName);
+     if (name == AMF_STREAM_ENABLED)
+     {
+         AMFLock lock(&m_pHost->m_sync);
+-        AMFPropertyStorage::GetProperty(AMF_STREAM_ENABLED, &m_bEnabled);
++
++        return AMFPropertyStorage::GetProperty(AMF_STREAM_ENABLED, &m_bEnabled);
+     }
++
++    return AMF_OK;
+ }
+ //-------------------------------------------------------------------------------------------------
+ 
+@@ -488,7 +491,7 @@ AMF_RESULT AMF_STD_CALL  AMFFileDemuxerFFMPEGImpl::Init(AMF_SURFACE_FORMAT /*for
+         ReadRangeSettings();
+     }
+ 
+-    return AMF_OK;
++    return res;
+ }
+ //-------------------------------------------------------------------------------------------------
+ AMF_RESULT AMF_STD_CALL  AMFFileDemuxerFFMPEGImpl::ReInit(amf_int32 width, amf_int32 height)
+@@ -775,7 +778,7 @@ bool AMF_STD_CALL  AMFFileDemuxerFFMPEGImpl::SupportFramesAccess()
+     return (m_iVideoStreamIndex != -1);
+ }
+ //-------------------------------------------------------------------------------------------------
+-void AMF_STD_CALL  AMFFileDemuxerFFMPEGImpl::OnPropertyChanged(const wchar_t* pName)
++AMF_RESULT AMF_STD_CALL  AMFFileDemuxerFFMPEGImpl::OnPropertyChanged(const wchar_t* pName)
+ {
+     AMFLock lock(&m_sync);
+ 
+@@ -783,15 +786,16 @@ void AMF_STD_CALL  AMFFileDemuxerFFMPEGImpl::OnPropertyChanged(const wchar_t* pN
+     if (name == FFMPEG_DEMUXER_PATH || name == FFMPEG_DEMUXER_URL)
+     {
+         m_OutputStreams.clear();
+-        ReInit(0, 0);
+-        return;
++
++        return ReInit(0, 0);
+     }
+ 
+-    if (name == FFMPEG_DEMUXER_INDIVIDUAL_STREAM_MODE)
++    else if (name == FFMPEG_DEMUXER_INDIVIDUAL_STREAM_MODE)
+     {
+-        GetProperty(FFMPEG_DEMUXER_INDIVIDUAL_STREAM_MODE, &m_bStreamingMode);
+-        return;
++        return GetProperty(FFMPEG_DEMUXER_INDIVIDUAL_STREAM_MODE, &m_bStreamingMode);
+     }
++
++    return AMF_OK;
+ }
+ 
+ 
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/FileDemuxerFFMPEGImpl.h b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/FileDemuxerFFMPEGImpl.h
+index a67c63a4de..3920381edc 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/FileDemuxerFFMPEGImpl.h
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/FileDemuxerFFMPEGImpl.h
+@@ -82,7 +82,7 @@ namespace amf
+             virtual AMF_RESULT AMF_STD_CALL  QueryOutput(AMFData** ppData);
+ 
+         protected:
+-            virtual void        AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
++            virtual AMF_RESULT AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
+ 
+             AMFFileDemuxerFFMPEGImpl*   m_pHost;
+             amf_int32                   m_iIndex;
+@@ -172,7 +172,7 @@ namespace amf
+ 
+ 
+         // AMFPropertyStorageObserver interface
+-        virtual void        AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
++        virtual AMF_RESULT           AMF_STD_CALL OnPropertyChanged(const wchar_t* pName);
+ 
+     protected:
+         AMF_RESULT AMF_STD_CALL  Open();
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/FileMuxerFFMPEGImpl.cpp b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/FileMuxerFFMPEGImpl.cpp
+index 2eb7a3d38b..8a1fd7b8ee 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/FileMuxerFFMPEGImpl.cpp
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/FileMuxerFFMPEGImpl.cpp
+@@ -200,15 +200,16 @@ AMF_RESULT  AMF_STD_CALL  AMFFileMuxerFFMPEGImpl::AMFInputMuxerImpl::Drain()
+ //
+ //
+ 
+-void AMF_STD_CALL  AMFFileMuxerFFMPEGImpl::AMFInputMuxerImpl::OnPropertyChanged(const wchar_t* pName)
++AMF_RESULT AMF_STD_CALL  AMFFileMuxerFFMPEGImpl::AMFInputMuxerImpl::OnPropertyChanged(const wchar_t* pName)
+ {
+     const amf_wstring  name(pName);
+     if (name == AMF_STREAM_ENABLED)
+     {
+         AMFLock lock(&m_pHost->m_sync);
+-        AMFPropertyStorage::GetProperty(AMF_STREAM_ENABLED, &m_bEnabled);
+-        return;
++        return AMFPropertyStorage::GetProperty(AMF_STREAM_ENABLED, &m_bEnabled);
+     }
++
++    return AMF_OK;
+ }
+ //-------------------------------------------------------------------------------------------------
+ AMFFileMuxerFFMPEGImpl::AMFVideoInputMuxerImpl::AMFVideoInputMuxerImpl(AMFFileMuxerFFMPEGImpl* pHost)
+@@ -380,7 +381,7 @@ AMF_RESULT AMF_STD_CALL  AMFFileMuxerFFMPEGImpl::GetInput(amf_int32 index, AMFIn
+     return AMF_OK;
+ }
+ //-------------------------------------------------------------------------------------------------
+-void AMF_STD_CALL  AMFFileMuxerFFMPEGImpl::OnPropertyChanged(const wchar_t* pName)
++AMF_RESULT AMF_STD_CALL  AMFFileMuxerFFMPEGImpl::OnPropertyChanged(const wchar_t* pName)
+ {
+     AMFLock lock(&m_sync);
+ 
+@@ -420,6 +421,8 @@ void AMF_STD_CALL  AMFFileMuxerFFMPEGImpl::OnPropertyChanged(const wchar_t* pNam
+ 
+         }
+     }
++
++    return AMF_OK;
+ }
+ 
+ 
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/FileMuxerFFMPEGImpl.h b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/FileMuxerFFMPEGImpl.h
+index dd9c9f8a3c..1722aba944 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/FileMuxerFFMPEGImpl.h
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ComponentsFFMPEG/FileMuxerFFMPEGImpl.h
+@@ -90,7 +90,7 @@ namespace amf
+             virtual AMF_RESULT  AMF_STD_CALL  SubmitInput(AMFData* pData);
+ 
+         protected:
+-            virtual void        AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
++            virtual AMF_RESULT  AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
+             virtual AMF_RESULT  AMF_STD_CALL  Drain();
+ 
+             AMFFileMuxerFFMPEGImpl*   m_pHost;
+@@ -160,7 +160,7 @@ namespace amf
+         virtual AMF_RESULT  AMF_STD_CALL  GetOutput(amf_int32 index, AMFOutput** ppOutput)          {  return AMF_NOT_SUPPORTED;  };
+ 
+         // AMFPropertyStorageObserver interface
+-        virtual void        AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
++        virtual AMF_RESULT  AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
+ 
+     protected:
+         AMF_RESULT AMF_STD_CALL     AllocateContext();
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/DisplayCapture/DisplayCaptureImpl.cpp b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/DisplayCapture/DisplayCaptureImpl.cpp
+index 87652afd69..47a1b84e88 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/DisplayCapture/DisplayCaptureImpl.cpp
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/DisplayCapture/DisplayCaptureImpl.cpp
+@@ -247,9 +247,10 @@ AMF_RESULT AMF_STD_CALL AMFDisplayCaptureImpl::Optimize(AMFComponentOptimization
+ }
+ 
+ //-------------------------------------------------------------------------------------------------
+-void AMF_STD_CALL  AMFDisplayCaptureImpl::OnPropertyChanged(const wchar_t* pName)
++AMF_RESULT AMF_STD_CALL  AMFDisplayCaptureImpl::OnPropertyChanged(const wchar_t* pName)
+ {
+ 	// const amf_wstring  name(pName);
++	return AMF_OK;
+ }
+ 
+ //-------------------------------------------------------------------------------------------------
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/DisplayCapture/DisplayCaptureImpl.h b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/DisplayCapture/DisplayCaptureImpl.h
+index 8decd86f83..fb6de6020c 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/DisplayCapture/DisplayCaptureImpl.h
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/DisplayCapture/DisplayCaptureImpl.h
+@@ -70,7 +70,7 @@ namespace amf
+ 
+ 		virtual AMF_RESULT  AMF_STD_CALL Optimize(AMFComponentOptimizationCallback* pCallback);
+ 
+-		virtual void        AMF_STD_CALL OnPropertyChanged(const wchar_t* pName);
++		virtual AMF_RESULT  AMF_STD_CALL OnPropertyChanged(const wchar_t* pName);
+ 
+ 		amf_pts GetCurrentPts() const;
+ 
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/VideoCapture/VideoCaptureImpl.cpp b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/VideoCapture/VideoCaptureImpl.cpp
+index b891c6a14d..6154861337 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/VideoCapture/VideoCaptureImpl.cpp
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/VideoCapture/VideoCaptureImpl.cpp
+@@ -238,10 +238,12 @@ AMF_RESULT AMF_STD_CALL  AMFVideoCaptureImpl::GetOutput(amf_int32 index, AMFOutp
+     return AMF_OK;
+ }
+ //-------------------------------------------------------------------------------------------------
+-void AMF_STD_CALL  AMFVideoCaptureImpl::OnPropertyChanged(const wchar_t* pName)
++AMF_RESULT AMF_STD_CALL  AMFVideoCaptureImpl::OnPropertyChanged(const wchar_t* pName)
+ {
+     AMFLock lock(&m_sync);
+     amf_wstring name(pName);
++
++	return AMF_OK;
+ }
+ //-------------------------------------------------------------------------------------------------
+ AMF_RESULT AMFVideoCaptureImpl::PollStream()
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/VideoCapture/VideoCaptureImpl.h b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/VideoCapture/VideoCaptureImpl.h
+index cad294c6a4..a984dbed42 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/VideoCapture/VideoCaptureImpl.h
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/VideoCapture/VideoCaptureImpl.h
+@@ -123,7 +123,7 @@ namespace amf
+         virtual AMF_RESULT  AMF_STD_CALL  GetOutput(amf_int32 index, AMFOutput** ppOutput);
+ 
+         // AMFPropertyStorageObserver interface
+-        virtual void        AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
++        virtual AMF_RESULT  AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
+ 
+     protected:
+         AMF_RESULT PollStream();
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/VideoStitch/VideoStitchImpl.cpp b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/VideoStitch/VideoStitchImpl.cpp
+index 915b33a260..145196fb31 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/VideoStitch/VideoStitchImpl.cpp
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/VideoStitch/VideoStitchImpl.cpp
+@@ -554,7 +554,7 @@ AMF_RESULT AMF_STD_CALL AMFVideoStitchImpl::AllocOutputSurface(amf_pts pts, amf_
+ }
+ 
+ //-------------------------------------------------------------------------------------------------
+-void AMF_STD_CALL AMFVideoStitchImpl::OnPropertyChanged(const wchar_t* pName)
++AMF_RESULT AMF_STD_CALL AMFVideoStitchImpl::OnPropertyChanged(const wchar_t* pName)
+ {
+     AMFLock lock(&m_sync);
+     amf_wstring name(pName);
+@@ -604,7 +604,8 @@ void AMF_STD_CALL AMFVideoStitchImpl::OnPropertyChanged(const wchar_t* pName)
+             m_pEngine->UpdateFOV(m_width, m_height, m_outputSize.width, m_outputSize.height, this);
+         }
+     }
+-    
++
++	return AMF_OK;
+ }
+ 
+ //-------------------------------------------------------------------------------------------------
+@@ -707,7 +708,7 @@ AMF_RESULT  AMF_STD_CALL AMFVideoStitchImpl::AMFInputStitchImpl::SubmitInput(AMF
+ }
+ 
+ //-------------------------------------------------------------------------------------------------
+-void AMF_STD_CALL AMFVideoStitchImpl::AMFInputStitchImpl::OnPropertyChanged(const wchar_t* pName)
++AMF_RESULT AMF_STD_CALL AMFVideoStitchImpl::AMFInputStitchImpl::OnPropertyChanged(const wchar_t* pName)
+ {
+     AMFLock lock(&m_pHost->m_sync);
+     amf_wstring name(pName);
+@@ -722,6 +723,8 @@ void AMF_STD_CALL AMFVideoStitchImpl::AMFInputStitchImpl::OnPropertyChanged(cons
+             m_pHost->m_pEngine->UpdateMesh(m_iIndex, m_pHost->m_width, m_pHost->m_height, m_pHost->m_outputSize.width, m_pHost->m_outputSize.height, this, m_pHost);
+         }
+     }
++
++	return AMF_OK;
+ }
+ 
+ //-------------------------------------------------------------------------------------------------
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/VideoStitch/VideoStitchImpl.h b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/VideoStitch/VideoStitchImpl.h
+index 26f62aca14..0f0f845ac1 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/VideoStitch/VideoStitchImpl.h
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/VideoStitch/VideoStitchImpl.h
+@@ -71,7 +71,7 @@ namespace amf
+             // AMFInput inteface
+             virtual AMF_RESULT  AMF_STD_CALL SubmitInput(AMFData* pData);
+ 
+-            virtual void       AMF_STD_CALL OnPropertyChanged(const wchar_t* pName);
++            virtual AMF_RESULT  AMF_STD_CALL OnPropertyChanged(const wchar_t* pName);
+ 
+         protected:
+             AMFVideoStitchImpl* m_pHost;
+@@ -117,7 +117,7 @@ namespace amf
+ 
+         //  AMFComponentPrivate methods
+         virtual void        AMF_STD_CALL SetName(const wchar_t* name) { m_name = name; }
+-        virtual void        AMF_STD_CALL OnPropertyChanged(const wchar_t* pName);
++        virtual AMF_RESULT  AMF_STD_CALL OnPropertyChanged(const wchar_t* pName);
+ 
+     private:
+         amf_wstring         m_name;
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ZCamLiveStream/ZCamLiveStreamImpl.cpp b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ZCamLiveStream/ZCamLiveStreamImpl.cpp
+index c5f48d1365..7ff9dbc9aa 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ZCamLiveStream/ZCamLiveStreamImpl.cpp
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ZCamLiveStream/ZCamLiveStreamImpl.cpp
+@@ -353,7 +353,7 @@ AMF_RESULT AMF_STD_CALL  AMFZCamLiveStreamImpl::GetOutput(amf_int32 index, AMFOu
+     return AMF_OK;
+ }
+ //-------------------------------------------------------------------------------------------------
+-void AMF_STD_CALL  AMFZCamLiveStreamImpl::OnPropertyChanged(const wchar_t* pName)
++AMF_RESULT AMF_STD_CALL  AMFZCamLiveStreamImpl::OnPropertyChanged(const wchar_t* pName)
+ {
+     AMFLock lock(&m_sync);
+     amf_wstring name(pName);
+@@ -368,6 +368,8 @@ void AMF_STD_CALL  AMFZCamLiveStreamImpl::OnPropertyChanged(const wchar_t* pName
+     {
+         GetProperty(ZCAMLIVE_AUDIO_MODE, (amf_int64*)&m_audioMode);
+     }
++
++	return AMF_OK;
+ }
+ //-------------------------------------------------------------------------------------------------
+ amf_int32   AMF_STD_CALL  AMFZCamLiveStreamImpl::GetOutputCount()
+diff --git a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ZCamLiveStream/ZCamLiveStreamImpl.h b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ZCamLiveStream/ZCamLiveStreamImpl.h
+index fe27a14d0a..c9cf9f1c72 100644
+--- a/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ZCamLiveStream/ZCamLiveStreamImpl.h
++++ b/Engine/Source/ThirdParty/AMD/AMF_SDK/amf/public/src/components/ZCamLiveStream/ZCamLiveStreamImpl.h
+@@ -127,7 +127,7 @@ namespace amf
+         virtual AMF_RESULT  AMF_STD_CALL  GetOutput(amf_int32 index, AMFOutput** ppOutput);
+ 
+         // AMFPropertyStorageObserver interface
+-        virtual void        AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
++        virtual AMF_RESULT  AMF_STD_CALL  OnPropertyChanged(const wchar_t* pName);
+ 
+     protected:
+         AMF_RESULT PollStream();

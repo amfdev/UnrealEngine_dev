@@ -28,14 +28,22 @@ IF DEFINED AMF_VERSION (
 
     ) ELSE IF ["%UE_VERSION%"] == ["4.18"] (
 
+        SET result=
+
         git apply ..\Patches\AmfMedia_UE418.patch
-        IF ERRORLEVEL 1 GOTO :error
+        IF ERRORLEVEL 1 SET result=failed
+        git apply ..\Patches\AmfMedia_UE418_2.patch
+        IF ERRORLEVEL 1 SET result=failed
+
+        IF /I ["failed"] == ["%result%"] GOTO :error
 
     ) ELSE IF ["%UE_VERSION%"] == ["4.19"] (
 
         SET result=
 
         git apply ..\Patches\AmfMedia_UE418.patch
+        IF ERRORLEVEL 1 SET result=failed
+        git apply ..\Patches\AmfMedia_UE418_2.patch
         IF ERRORLEVEL 1 SET result=failed
 
         git apply ..\Patches\AmfMedia_UE419.patch
