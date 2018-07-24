@@ -5,18 +5,22 @@ It provides building a list of the specified versions of Unreal Engine with diff
 related Amf patches to the Unreal Engine. In additional it provides building if the demostration projects witch are specialy designed to
 play 4k video to tests media playback inside Unreal Engine.
 
-## Supported versions
+## Supported Unreal Engine versions
 Unreal Engine 4.17
 Unreal Engine 4.18
 Unreal Engine 4.19
+
+## Supported Visual Studio versions
+Visual Studio 2015
+Visual Studio 2017
 
 ## Supported configurations
 Development [Editor]
 Shipping
 
-## Supported tests types
+## Supported rendering types
 Standard (using Windows media playback)
-Amf (using improved Amf media playback)
+Amf (using  Amf media playback)
 Stitch (using Amf Stitch plugin)
 
 ## Supported project types
@@ -26,7 +30,7 @@ C++ project
 ## Supported platforms
 Win64
 
-# Futures
+# Features
 Build.bat could builds entire combinations of the all available configurations or just a list of the specified options. Build.bat can
 builds Unreal Engine itself or with related tests projects, and separatly tests projects only (assuming that Unreal Engine with demanded configuration
 are already built and placed in the correct folder).
@@ -45,7 +49,7 @@ Build.bat [Command1] [Command2] [Command3] ...
         Shipping - Unreal Engine and related tests with shipping configuration
         BluePrints - build blueprints variant of the related tests
         CPP - build c++ variant of the related tests
-        Plane, X360 - specify name of the test for standard and amf configuration
+        Plane, X360, MediaTest - specify the name of the tests for standard and amf configuration
         Clean - clean up Unreal Engine and plugin repository before build
         Dirty - don't clean Unreal Engine and plugin repository before build
         PatchPlugin - use test repository, download branch, then patch it with our patches
@@ -69,7 +73,9 @@ Build.bat [Command1] [Command2] [Command3] ...
 
 "Build.bat Development 4.17 Blueprints Amf" - builds tests projects with Amf playback using Development configuration of UnrealEngine 4.17
 
-"Build.bat Engine 4.18" - build Development and Shipping configuration of Unreal Engine with and without Amf patches
+"Build.bat Engine 4.18" - builds Development and Shipping configuration of Unreal Engine with and without Amf patches
+
+"Build.bat Amf Engine Mediatest" -builds cumulative mediatest example for all supported Unreal Engine versions
 
 # Logs
 Build logs are saved to the folder "Logs". Log saved in the CSV table for all built configuration.

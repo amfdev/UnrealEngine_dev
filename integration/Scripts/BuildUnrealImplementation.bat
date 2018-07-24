@@ -9,6 +9,11 @@ IF NOT DEFINED UE_VERSION (
     GOTO :error
 )
 
+IF NOT DEFINED VS_VERSION (
+    @ECHO Error: VS_VERSION variable undefined!
+    GOTO :error
+)
+
 SET UnrealHome=UnrealEngine-%UE_VERSION%
 
 IF DEFINED AMF_VERSION (
@@ -89,7 +94,7 @@ IF DEFINED AMF_VERSION (
 
     )
 
-    SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs2015\AmfMediaCommon.sln
+    SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs%VS_VERSION%\AmfMediaCommon.sln
     SET PLUGIN_APPLY_PROGRAM=AmfMediaInstall.bat
 
 ) ELSE IF DEFINED STITCH_VERSION (
@@ -124,7 +129,7 @@ IF DEFINED AMF_VERSION (
         )
     )
 
-    SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs2015\AmfStitchMediaCommon.sln
+    SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs%VS_VERSION%\AmfStitchMediaCommon.sln
     SET PLUGIN_APPLY_PROGRAM=AmfStitchMediaInstall.bat
 )
 
@@ -139,45 +144,51 @@ IF DEFINED PLUGIN_TYPE (
         IF ERRORLEVEL 1 GOTO :error
     )
 
-    @ECHO:
-    @ECHO Clone plugin...
-    CALL Scripts\HelperClone.bat
-    IF ERRORLEVEL 1 GOTO :error
+    IF NOT DEFINED Build_CleanOnly (
 
-    IF DEFINED Build_PatchPlugin (
         @ECHO:
-        @ECHO Patch plugin...
-        CALL Scripts\HelperPatch.bat
+        @ECHO Clone plugin...
+        CALL Scripts\HelperClone.bat
+        IF ERRORLEVEL 1 GOTO :error
+
+        IF DEFINED Build_PatchPlugin (
+            @ECHO:
+            @ECHO Patch plugin...
+            CALL Scripts\HelperPatch.bat
+            IF ERRORLEVEL 1 (
+                @ECHO Failed to apply patch!
+                @ECHO It seems like the code is already patched,
+                @ECHO try to build it...
+                )
+        )
+
+        @ECHO:
+        @ECHO Build plugin...
+        CALL Scripts\HelperBuild.bat
+        IF ERRORLEVEL 1 GOTO :error
+
+        @ECHO:
+        @ECHO Install plugin to UE...
+        CALL Scripts\HelperApply.bat
         IF ERRORLEVEL 1 (
-            @ECHO Failed to apply patch!
-            @ECHO It seems like the code is already patched,
-            @ECHO try to build it...
-            )
-    )
-
-    @ECHO:
-    @ECHO Build plugin...
-    CALL Scripts\HelperBuild.bat
-    IF ERRORLEVEL 1 GOTO :error
-
-    @ECHO:
-    @ECHO Install plugin to UE...
-    CALL Scripts\HelperApply.bat
-    IF ERRORLEVEL 1 (
-        @ECHO ToDo: investigate why error returned here
-        rem GOTO :error
+            @ECHO ToDo: investigate why error returned here
+            rem GOTO :error
+        )
     )
 )
 
-@ECHO:
-@ECHO Generate UnrealEngine solution...
-CALL Scripts\HelperUnrealPrepare.bat
-IF ERRORLEVEL 1 GOTO :error
+IF NOT DEFINED Build_CleanOnly (
 
-@ECHO:
-@ECHO Build UnrealEngine solution...
-CALL Scripts\HelperUnrealBuild.bat
-IF ERRORLEVEL 1 GOTO :error
+    @ECHO:
+    @ECHO Generate UnrealEngine solution...
+    CALL Scripts\HelperUnrealPrepare.bat
+    IF ERRORLEVEL 1 GOTO :error
+
+    @ECHO:
+    @ECHO Build UnrealEngine solution...
+    CALL Scripts\HelperUnrealBuild.bat
+    IF ERRORLEVEL 1 GOTO :error
+)
 
 :done
     @ECHO UnrealEngine built successfully

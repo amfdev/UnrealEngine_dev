@@ -17,7 +17,6 @@ if %errorlevel% == 0 (
 )
 
 :done
-    @ECHO:
     @ECHO Neccessary defines tested successfully
     EXIT /B 0
 
