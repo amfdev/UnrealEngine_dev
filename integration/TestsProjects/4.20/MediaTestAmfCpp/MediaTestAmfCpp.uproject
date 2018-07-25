@@ -1,0 +1,17 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{79983961-46EE-B13E-BB95-D49A15211A4F}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "MediaTestAmfCpp",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"MediaAssets"
+			]
+		}
+	]
+}
