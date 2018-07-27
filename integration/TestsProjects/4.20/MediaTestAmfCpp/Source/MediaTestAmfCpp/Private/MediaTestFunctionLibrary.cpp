@@ -51,22 +51,72 @@ bool UMediaTestFunctionLibrary::GrabOption(FString& Options, FString& Result)
 {
 	FString QuestionMark(TEXT("?"));
 	FString SwitchMark(TEXT("-"));
+    FString WhiteSpace(TEXT(" "));
 
 	Options = Options.TrimStart();
 
 	int QuestionIndex = Options.Find(QuestionMark, ESearchCase::CaseSensitive);
 	int SwitchIndex = Options.Find(SwitchMark, ESearchCase::CaseSensitive);
+    bool Quotas = false;
 
-	// Option or switch found
+    if (0 == QuestionIndex)
+    {
+        return GrabParamEqualValue(Options, Result);
+    }
+    else if (0 == SwitchIndex)
+    {
+        return GrabLaunchOption(Options, Result);
+    }
+
+    /*return false;
+    //TCHAR Escape = 0;
+
+    // Option or switch found
 	if (0 == QuestionIndex || 0 == SwitchIndex)
 	{
-		int NextQuestionIndex = Options.Find(QuestionMark, ESearchCase::CaseSensitive, ESearchDir::FromStart, 1);
-		int NextSwitchIndex = Options.Find(SwitchMark, ESearchCase::CaseSensitive, ESearchDir::FromStart, 1);
+        for (int Index = 1; Index < Options.Len(); ++Index)
+        {
+            TCHAR Char = Options[Index];
+
+            switch (Char)
+            {
+            case '"':
+                // Begin of the quoted text block
+                if (!Quotas)
+                {
+                    Quotas = true;
+                }
+                // End of the quoted text block
+                else
+                {
+                    Quotas = false;
+                }
+            default:
+                break;
+            }
+            if (Escape)
+            {
+            }
+            if (Options[character] == '\')
+            {
+                    
+            }
+            if (Options[character] == '"')
+            {
+                if
+            }
+            if (Options[character] == ' ')
+            {
+                if
+            }
+        }* /
+
+		int NextQuestionIndex = Options.Find(WhiteSpace + QuestionMark, ESearchCase::CaseSensitive, ESearchDir::FromStart, 1);
+		int NextSwitchIndex = Options.Find(WhiteSpace + SwitchMark, ESearchCase::CaseSensitive, ESearchDir::FromStart, 1);
 		
 		int NextIndex = INDEX_NONE == NextQuestionIndex
 			? NextSwitchIndex
 			: (INDEX_NONE == NextSwitchIndex ? NextQuestionIndex : FMath::Min(NextQuestionIndex, NextSwitchIndex));
-
 
 		// Take a block before next param
 		if (INDEX_NONE != NextIndex)
@@ -82,14 +132,194 @@ bool UMediaTestFunctionLibrary::GrabOption(FString& Options, FString& Result)
 		}
 
 		return true;
-	}
+	}*/
 
 	return false;
 }
 
+bool UMediaTestFunctionLibrary::GrabParamEqualValue(FString& Options, FString& ResultString)
+{
+    FString QuestionMark(TEXT("?"));
+    FString SwitchMark(TEXT("-"));
+    FString WhiteSpace(TEXT(" "));
+
+    FString LaunchOption;
+    LaunchOption.Reserve(Options.Len());
+    bool ParamFound = false;
+    bool ValueFound = false;
+    bool InQuotas = false;
+    bool EndOption = false;
+
+    int Index = 0;
+
+    FString LaunchOptionAndValue;
+    LaunchOptionAndValue.Reserve(Options.Len());
+
+    for (Index = 1; !EndOption && Index < Options.Len(); ++Index)
+    {
+        TCHAR Char = Options[Index];
+
+        switch (Char)
+        {
+        case ' ':
+        case '\t':
+            if (!InQuotas)
+            {
+                // Don't allow extra spaces before param name, only ?param=value or ?param="value with spaces" allowed
+                if (!ParamFound)
+                {
+                    return false;
+                }
+                // Found end of the ?param=value sequence
+                else if (ValueFound)
+                {
+                    EndOption = true;
+
+                    break;
+                }
+                else
+                {
+                    // Don't allow extra spaces inside ?param=value sequence
+                    return false;
+                }
+            }
+            else
+            {
+                LaunchOptionAndValue.AppendChar(Char);
+            }
+
+            break;
+
+        case '\\':
+            // Don't allow escaping in the ?param=value sequence
+            if (!InQuotas)
+            {
+                return false;
+            }
+            else
+            {
+                LaunchOptionAndValue.AppendChar(Char);
+            }
+
+            break;
+            
+        case '\'':
+        case '\"':
+            if (InQuotas)
+            {
+                // Test last symbol               Test space before other options
+                if ((Index == Options.Len() - 1) || (Options[Index + 1] == ' ') || (Options[Index + 1] == '\t'))
+                {
+                    InQuotas = false;
+                    EndOption = true;
+
+                    break;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (ParamFound && (Options[Index - 1] == '='))
+                {
+                    InQuotas = true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            break;
+
+        case '=':
+            if (ParamFound)
+            {
+                LaunchOptionAndValue.AppendChar(Char);
+            }
+            else
+            {
+                return false;
+            }
+
+            break;
+
+        default:
+            if (!ParamFound)
+            {
+                ParamFound = true;
+            }
+            else if (LaunchOptionAndValue[LaunchOptionAndValue.Len() - 1] == '=')
+            {
+                ValueFound = true;
+            }
+
+            LaunchOptionAndValue.AppendChar(Char);
+        }
+
+        if (!InQuotas && ParamFound && ValueFound && (Index == Options.Len() - 1))
+        {
+            EndOption = true;
+        }
+    }
+
+    if (LaunchOptionAndValue.Len() && EndOption)
+    {
+        ResultString = LaunchOptionAndValue;
+        Options = Options.Right(Options.Len() - Index);
+
+        return true;
+    }
+
+    return false;
+}
+
+bool UMediaTestFunctionLibrary::GrabLaunchOption(FString& Options, FString& ResultString)
+{
+    int Index = 0;
+
+    FString LaunchOption;
+    LaunchOption.Reserve(Options.Len());
+
+    for (Index = 1; Index < Options.Len(); ++Index)
+    {
+        TCHAR Char = Options[Index];
+
+        switch (Char)
+        {
+        // Don't allow extra spaces, must be -LaunchOptionName
+        case ' ':
+        case '\t':
+            break;
+
+        // Don't allow escaping in the launch option
+        case '\\':
+            return false;
+
+        // Don't allow quoted text in the launch option
+        case '\'':
+        case '\"':
+            return false;
+
+        default:
+            LaunchOption.AppendChar(Char);
+        }
+    }
+
+    if (LaunchOption.Len())
+    {
+        ResultString = LaunchOption;
+        Options = Options.Right(Options.Len() - Index);
+    }
+
+    return LaunchOption.Len() > 0;
+}
+
 void UMediaTestFunctionLibrary::GetKeyValue(const FString& Pair, FString& Key, FString& Value)
 {
-	const int32 EqualSignIndex = Pair.Find(TEXT("="), ESearchCase::CaseSensitive);
+    const int32 EqualSignIndex = Pair.Find(TEXT("="), ESearchCase::CaseSensitive);
 	if (EqualSignIndex != INDEX_NONE)
 	{
 		Key = Pair.Left(EqualSignIndex);

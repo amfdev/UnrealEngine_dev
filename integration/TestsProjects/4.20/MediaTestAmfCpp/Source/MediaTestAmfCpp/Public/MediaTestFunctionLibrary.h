@@ -39,6 +39,8 @@ class MEDIATESTAMFCPP_API UMediaTestFunctionLibrary : public UBlueprintFunctionL
 	static bool IsFileExist(const FString& FileNameIn);
 
 	static bool GrabOption(FString& Options, FString& ResultString);
+    static bool GrabParamEqualValue(FString& Options, FString& ResultString);
+    static bool GrabLaunchOption(FString& Options, FString& ResultString);
 
 	/**
 	* Break up a key=value pair into its key and value.
