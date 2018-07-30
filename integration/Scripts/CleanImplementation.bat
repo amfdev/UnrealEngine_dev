@@ -42,33 +42,21 @@ IF EXIST "%UnrealHome%" (
 SET PLUGIN_TYPE=
 SET PLUGIN_FOLDER=
 
+IF DEFINED Build_SourceOrigin (
+    SET PLUGIN_FOLDER_SUFFIX=-gpuopen
+) ELSE IF DEFINED Build_SourceClone (
+    SET PLUGIN_FOLDER_SUFFIX=-amfdev
+)
+
 IF DEFINED AMF_VERSION (
 
     SET PLUGIN_TYPE=AMF
-
-    IF DEFINED Build_PatchPlugin (
-
-        SET PLUGIN_FOLDER=AmfMedia-%AMF_VERSION%
-
-    ) ELSE (
-
-        SET PLUGIN_FOLDER=AmfMedia-%AMF_VERSION%-amfdev
-
-    )
+    SET PLUGIN_FOLDER=AmfMedia-%AMF_VERSION%%PLUGIN_FOLDER_SUFFIX%
 
 ) ELSE IF DEFINED STITCH_VERSION (
 
     SET PLUGIN_TYPE=Stitch
-
-    IF DEFINED Build_PatchPlugin (
-
-        SET PLUGIN_FOLDER=AmfStitchMedia-%STITCH_VERSION%
-
-    ) ELSE (
-
-        SET PLUGIN_FOLDER=AmfStitchMedia-%STITCH_VERSION%-amfdev
-
-    )
+    SET PLUGIN_FOLDER=AmfStitchMedia-%STITCH_VERSION%%PLUGIN_FOLDER_SUFFIX%
 )
 
 IF DEFINED PLUGIN_TYPE (

@@ -28,7 +28,9 @@ SET Build_Tests=
 SET Build_Dirty=
 SET Build_Clean=
 SET Build_CleanOnly=
-SET Build_PatchPlugin=
+SET Build_SourceOrigin=
+SET Build_SourceClone=
+SET Build_SourcePatch=
 SET Build_Minimal=
 SET Build_Verbose=
 
@@ -102,8 +104,12 @@ FOR %%x IN (%*) DO (
         SET Build_Clean=1
     ) ELSE IF /I "%%~x"=="CleanOnly" (
         SET Build_CleanOnly=1
-    ) ELSE IF /I "%%~x"=="PatchPlugin" (
-        SET Build_PatchPlugin=1
+    ) ELSE IF /I "%%~x"=="Origin" (
+        SET Build_SourceOrigin=1
+    ) ELSE IF /I "%%~x"=="Clone" (
+        SET Build_SourceClone=1
+    ) ELSE IF /I "%%~x"=="SourcePatch" (
+        SET Build_SourcePatch=1
     ) ELSE IF /I "%%~x"=="AmfBranch:" (
 
         IF DEFINED Command_AmfBranch (
@@ -228,6 +234,14 @@ IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 IF NOT DEFINED Build_MediaT
     SET Build_Stitch=1
 )
 
+IF NOT DEFINED Build_SourceOrigin IF NOT DEFINED Build_SourceClone (
+    IF DEFINED Build_Amf (
+        SET Build_SourceClone=1
+    ) ELSE IF DEFINED Build_Amf (
+        SET Build_SourceClone=1
+    )
+)
+
 @ECHO:
 SET Build_4_17
 SET Build_4_18
@@ -249,7 +263,9 @@ SET Build_Engine
 SET Build_Tests
 SET Build_Dirty
 SET Build_Clean
-SET Build_PatchPlugin
+SET Build_SourceOrigin
+SET Build_SourceClone
+SET Build_SourcePatch
 SET Build_Minimal
 SET Build_Verbose
 SET Param_AmfBranch
@@ -320,8 +336,8 @@ FOR %%s IN (2015, 2017) DO (
     @ECHO     Plane, X360, MediaTest - specify name of the test for standard and amf configuration
     @ECHO     Clean - clean up Unreal Engine and plugin repository before build
     @ECHO     Dirty - don't clean Unreal Engine and plugin repository before build
-    @ECHO     PatchPlugin - use test repository, download branch, then patch it with our patches
-    @ECHO                   Attention: not-patched plugin will be used if this command are not specified!
+    @ECHO     SourcePatch - use test repository, download branch, then patch it with our patches
+    @ECHO                   Attention: not-patched plugin will be used if this command is not set!
     @ECHO     AmfBranch: branch_name - download specified branch of AMF plugin
     @ECHO     StitchBranch: branch_name - download specified branch of Stitch plugin
     @ECHO     Verbose - show extended information

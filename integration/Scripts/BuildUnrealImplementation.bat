@@ -56,42 +56,38 @@ IF ERRORLEVEL 1 GOTO :error
 
 SET PLUGIN_TYPE=
 SET PLUGIN_FOLDER=
+SET PLUGIN_FOLDER_SUFFIX=
 SET PLUGIN_URL=
 SET PLUGIN_BRANCH=
 SET PLUGIN_SOLUTION=
 SET PLUGIN_APPLY_PROGRAM=
 
+IF DEFINED Build_SourceOrigin (
+    SET PLUGIN_URL=https://github.com/GPUOpenSoftware/UnrealEngine.git
+    SET PLUGIN_FOLDER_SUFFIX=-gpuopen
+) ELSE IF DEFINED Build_SourceClone (
+    SET PLUGIN_URL=https://github.com/amfdev/UnrealEngine_AMF
+    SET PLUGIN_FOLDER_SUFFIX=-amfdev
+) ELSE (
+    IF DEFINED AMF_VERSION (
+        @ECHO Error: amf plugin source must be set!
+        GOTO :error
+    ) IF DEFINED STITCH_VERSION (
+        @ECHO Error: stitch plugin source must be set!
+        GOTO :error
+    )
+)
+
 IF DEFINED AMF_VERSION (
     @ECHO Prepare amf plugin...
 
     SET PLUGIN_TYPE=AMF
+    SET PLUGIN_FOLDER=AmfMedia-%AMF_VERSION%%PLUGIN_FOLDER_SUFFIX%
 
-    IF DEFINED Build_PatchPlugin (
-
-        SET PLUGIN_FOLDER=AmfMedia-%AMF_VERSION%
-        SET PLUGIN_URL=https://github.com/GPUOpenSoftware/UnrealEngine.git
-
-        IF DEFINED Param_AmfBranch (
-            SET PLUGIN_BRANCH=%Param_AmfBranch%
-        ) ELSE (
-            IF ["%AMF_VERSION%"] == ["4.19"] (
-                SET PLUGIN_BRANCH=AmfMedia-4.18
-            ) ELSE (
-                SET PLUGIN_BRANCH=AmfMedia-%AMF_VERSION%
-            )
-        )
-
+    IF DEFINED Param_AmfBranch (
+        SET PLUGIN_BRANCH=%Param_AmfBranch%
     ) ELSE (
-
-        SET PLUGIN_FOLDER=AmfMedia-%AMF_VERSION%-amfdev
-        SET PLUGIN_URL=https://github.com/amfdev/UnrealEngine_AMF
-
-        IF DEFINED Param_AmfBranch (
-            SET PLUGIN_BRANCH=%Param_AmfBranch%
-        ) ELSE (
-            SET PLUGIN_BRANCH=AmfMedia-%AMF_VERSION%
-        )
-
+        SET PLUGIN_BRANCH=AmfMedia-%AMF_VERSION%
     )
 
     SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs%VS_VERSION%\AmfMediaCommon.sln
@@ -101,32 +97,12 @@ IF DEFINED AMF_VERSION (
     @ECHO Prepare stitch plugin...
 
     SET PLUGIN_TYPE=Stitch
+    SET PLUGIN_FOLDER=AmfStitchMedia-%STITCH_VERSION%%PLUGIN_FOLDER_SUFFIX%
 
-    IF DEFINED Build_PatchPlugin (
-
-        SET PLUGIN_FOLDER=AmfStitchMedia-%STITCH_VERSION%
-        SET PLUGIN_URL=https://github.com/GPUOpenSoftware/UnrealEngine.git
-
-        IF DEFINED Param_StitchBranch (
-            SET PLUGIN_BRANCH=%Param_StitchBranch%
-        ) ELSE (
-            IF ["%STITCH_VERSION%"] == ["4.19"] (
-                SET PLUGIN_BRANCH=AmfStitchMedia-4.18
-            ) ELSE (
-                SET PLUGIN_BRANCH=AmfStitchMedia-%STITCH_VERSION%
-            )
-        )
-
+    IF DEFINED Param_StitchBranch (
+        SET PLUGIN_BRANCH=%Param_StitchBranch%
     ) ELSE (
-
-        SET PLUGIN_FOLDER=AmfStitchMedia-%STITCH_VERSION%-amfdev
-        SET PLUGIN_URL=https://github.com/amfdev/UnrealEngine_AMF
-
-        IF DEFINED Param_StitchBranch (
-            SET PLUGIN_BRANCH=%Param_StitchBranch%
-        ) ELSE (
-            SET PLUGIN_BRANCH=AmfStitchMedia-%STITCH_VERSION%
-        )
+        SET PLUGIN_BRANCH=AmfStitchMedia-%STITCH_VERSION%
     )
 
     SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs%VS_VERSION%\AmfStitchMediaCommon.sln
@@ -151,7 +127,7 @@ IF DEFINED PLUGIN_TYPE (
         CALL Scripts\HelperClone.bat
         IF ERRORLEVEL 1 GOTO :error
 
-        IF DEFINED Build_PatchPlugin (
+        IF DEFINED Build_SourcePatch (
             @ECHO:
             @ECHO Patch plugin...
             CALL Scripts\HelperPatch.bat
