@@ -336,6 +336,8 @@ FOR %%s IN (2015, 2017) DO (
     @ECHO     Plane, X360, MediaTest - specify name of the test for standard and amf configuration
     @ECHO     Clean - clean up Unreal Engine and plugin repository before build
     @ECHO     Dirty - don't clean Unreal Engine and plugin repository before build
+    @ECHO     Origin - take plugin from https://github.com/GPUOpenSoftware/UnrealEngine.git
+    @ECHO     Clone - take plugin from https://github.com/amfdev/UnrealEngine_AMF
     @ECHO     SourcePatch - use test repository, download branch, then patch it with our patches
     @ECHO                   Attention: not-patched plugin will be used if this command is not set!
     @ECHO     AmfBranch: branch_name - download specified branch of AMF plugin
