@@ -72,7 +72,7 @@ IF DEFINED Build_SourceOrigin (
     IF DEFINED AMF_VERSION (
         @ECHO Error: amf plugin source must be set!
         GOTO :error
-    ) IF DEFINED STITCH_VERSION (
+    ) ELSE IF DEFINED STITCH_VERSION (
         @ECHO Error: stitch plugin source must be set!
         GOTO :error
     )
