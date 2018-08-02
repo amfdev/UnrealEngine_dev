@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "MediaTestFunctionLibrary.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
@@ -19,7 +17,40 @@ bool UMediaTestFunctionLibrary::FileLoadString(const FString& FileNameIn, FStrin
 
 bool UMediaTestFunctionLibrary::FileLoadStringArray(const FString& FileNameIn, TArray<FString>& StringArrayOut)
 {
-	return FFileHelper::LoadFileToStringArray(StringArrayOut, *FileNameIn);
+	return LoadFileToStringArray(StringArrayOut, *FileNameIn);
+}
+
+bool UMediaTestFunctionLibrary::LoadFileToStringArray( TArray<FString>& Result, const TCHAR* Filename )
+{
+    Result.Empty();
+
+    FString Buffer;
+    if(!FFileHelper::LoadFileToString(Buffer, Filename))
+    {
+        return false;
+    }
+
+    for(const TCHAR* Pos = *Buffer; *Pos != 0; )
+    {
+        const TCHAR* LineStart = Pos;
+        while(*Pos != 0 && *Pos != '\r' && *Pos != '\n')
+        {
+            Pos++;
+        }
+
+        Result.Add(FString(Pos - LineStart, LineStart));
+
+        if(*Pos == '\r')
+        {
+            Pos++;
+        }
+        if(*Pos == '\n')
+        {
+            Pos++;
+        }
+    }
+
+    return true;
 }
 
 FString UMediaTestFunctionLibrary::GetCurrentPath()
@@ -51,13 +82,9 @@ bool UMediaTestFunctionLibrary::GrabOption(FString& Options, FString& Result)
 {
 	FString QuestionMark(TEXT("?"));
 	FString SwitchMark(TEXT("-"));
-    FString WhiteSpace(TEXT(" "));
 
-	Options = Options.TrimStart();
-
-	int QuestionIndex = Options.Find(QuestionMark, ESearchCase::CaseSensitive);
-	int SwitchIndex = Options.Find(SwitchMark, ESearchCase::CaseSensitive);
-    bool Quotas = false;
+	int QuestionIndex = TrimStart(Options).Find(QuestionMark, ESearchCase::CaseSensitive);
+	int SwitchIndex = TrimStart(Options).Find(SwitchMark, ESearchCase::CaseSensitive);
 
     if (0 == QuestionIndex)
     {
@@ -68,88 +95,19 @@ bool UMediaTestFunctionLibrary::GrabOption(FString& Options, FString& Result)
         return GrabLaunchOption(Options, Result);
     }
 
-    /*return false;
-    //TCHAR Escape = 0;
-
-    // Option or switch found
-	if (0 == QuestionIndex || 0 == SwitchIndex)
-	{
-        for (int Index = 1; Index < Options.Len(); ++Index)
-        {
-            TCHAR Char = Options[Index];
-
-            switch (Char)
-            {
-            case '"':
-                // Begin of the quoted text block
-                if (!Quotas)
-                {
-                    Quotas = true;
-                }
-                // End of the quoted text block
-                else
-                {
-                    Quotas = false;
-                }
-            default:
-                break;
-            }
-            if (Escape)
-            {
-            }
-            if (Options[character] == '\')
-            {
-                    
-            }
-            if (Options[character] == '"')
-            {
-                if
-            }
-            if (Options[character] == ' ')
-            {
-                if
-            }
-        }* /
-
-		int NextQuestionIndex = Options.Find(WhiteSpace + QuestionMark, ESearchCase::CaseSensitive, ESearchDir::FromStart, 1);
-		int NextSwitchIndex = Options.Find(WhiteSpace + SwitchMark, ESearchCase::CaseSensitive, ESearchDir::FromStart, 1);
-		
-		int NextIndex = INDEX_NONE == NextQuestionIndex
-			? NextSwitchIndex
-			: (INDEX_NONE == NextSwitchIndex ? NextQuestionIndex : FMath::Min(NextQuestionIndex, NextSwitchIndex));
-
-		// Take a block before next param
-		if (INDEX_NONE != NextIndex)
-		{
-			Result = Options.Mid(1, NextIndex - 1).TrimEnd();
-			Options = Options.Right(Options.Len() - NextIndex);
-		}
-		// No next params
-		else
-		{
-			Result = Options.Mid(1, MAX_int32);
-			Options.Reset();
-		}
-
-		return true;
-	}*/
-
-	return false;
+    return false;
 }
 
 bool UMediaTestFunctionLibrary::GrabParamEqualValue(FString& Options, FString& ResultString)
 {
-    FString QuestionMark(TEXT("?"));
-    FString SwitchMark(TEXT("-"));
-    FString WhiteSpace(TEXT(" "));
-
     FString LaunchOption;
     LaunchOption.Reserve(Options.Len());
+    
     bool ParamFound = false;
     bool ValueFound = false;
     bool InQuotas = false;
+    
     bool EndOption = false;
-
     int Index = 0;
 
     FString LaunchOptionAndValue;
@@ -290,8 +248,8 @@ bool UMediaTestFunctionLibrary::GrabLaunchOption(FString& Options, FString& Resu
         switch (Char)
         {
         // Don't allow extra spaces, must be -LaunchOptionName
-        case ' ':
-        case '\t':
+        case L' ':
+        case L'\t':
             break;
 
         // Don't allow escaping in the launch option
@@ -315,6 +273,19 @@ bool UMediaTestFunctionLibrary::GrabLaunchOption(FString& Options, FString& Resu
     }
 
     return LaunchOption.Len() > 0;
+}
+
+FString UMediaTestFunctionLibrary::TrimStart(const FString& String)
+{
+    FString Result(String);
+    int32 Pos = 0;
+    while(Pos < Result.Len() && FChar::IsWhitespace(Result[Pos]))
+    {
+        Pos++;
+    }
+    Result.RemoveAt(0, Pos);
+
+    return Result;
 }
 
 void UMediaTestFunctionLibrary::GetKeyValue(const FString& Pair, FString& Key, FString& Value)
