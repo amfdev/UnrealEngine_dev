@@ -1,8 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Misc/FileHelper.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "MediaTestFunctionLibrary.generated.h"
 
@@ -23,6 +22,15 @@ class MEDIATESTAMFCPP_API UMediaTestFunctionLibrary : public UBlueprintFunctionL
 	UFUNCTION(BlueprintPure, Category = "Files")
 	static bool FileLoadStringArray(const FString& FileNameIn, TArray<FString>& StringArrayOut);
 
+    /**
+    * Load a text file to an array of strings. Supports all combination of ANSI/Unicode files and platforms.
+    *
+    * @param Result       String representation of the loaded file
+    * @param Filename     Name of the file to load
+    * @param VerifyFlags  Flags controlling the hash verification behavior ( see EHashOptions )
+    */
+    static bool LoadFileToStringArray( TArray<FString>& Result, const TCHAR* Filename );
+
 	UFUNCTION(BlueprintPure, Category = "System")
 	static FString GetCurrentPath();
 
@@ -42,7 +50,14 @@ class MEDIATESTAMFCPP_API UMediaTestFunctionLibrary : public UBlueprintFunctionL
     static bool GrabParamEqualValue(FString& Options, FString& ResultString);
     static bool GrabLaunchOption(FString& Options, FString& ResultString);
 
-	/**
+    /**
+    * Removes whitespace characters from the start of this string.
+    * @note Unlike Trim() this function returns a copy, and does not mutate the string.
+    */
+    UFUNCTION(BlueprintPure, Category = "System")
+    static FString TrimStart(const FString& String);
+
+    /**
 	* Break up a key=value pair into its key and value.
 	* @param Pair			The string containing a pair to split apart.
 	* @param Key			(out) Key portion of Pair. If no = in string will be the same as Pair.
