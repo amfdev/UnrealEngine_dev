@@ -15,6 +15,7 @@ protected:
     std::vector< float > FpsRate;
     std::vector< float > CpuConsumption;
     std::vector< float > GpuConsumption;
+    float LastQueryDelta;
 
 public:
     GENERATED_BODY()

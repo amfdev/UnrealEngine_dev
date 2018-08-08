@@ -12,7 +12,7 @@
 static PDH_HQUERY cpuQuery;
 static PDH_HCOUNTER cpuTotal;
 
-/*void init(){
+void init(){
     PdhOpenQuery(NULL, NULL, &cpuQuery);
     // You can also use L"\\Processor(*)\\% Processor Time" and get individual CPU values with PdhGetFormattedCounterArray()
     PdhAddEnglishCounter(cpuQuery, L"\\Processor(_Total)\\% Processor Time", NULL, &cpuTotal);
@@ -25,7 +25,7 @@ double getCurrentValue(){
     PdhCollectQueryData(cpuQuery);
     PdhGetFormattedCounterValue(cpuTotal, PDH_FMT_DOUBLE, NULL, &counterVal);
     return counterVal.doubleValue;
-}*/
+}
 
 DWORD GetProcessorCount() 
 { 
@@ -42,93 +42,7 @@ DWORD GetProcessorCount()
     return dwNumberOfProcessors; 
 }
 
-/*std::vector<PCTSTR> GetProcessNames() 
-{ 
-    DWORD dwProcessID[1024]; 
-    DWORD cbProcess; 
-    DWORD cProcessID; 
-    BOOL fResult = FALSE; 
-    DWORD index; 
-
-
-    HANDLE hProcess; 
-    HMODULE lphModule[1024]; 
-    DWORD cbNeeded;     
-    int len; 
-
-
-    std::vector<PCTSTR> vProcessNames; 
-
-
-    TCHAR * szProcessName; 
-    TCHAR * szProcessNameWithPrefix; 
-
-
-    fResult = EnumProcesses(dwProcessID, sizeof(dwProcessID), &cbProcess); 
-
-
-    if(!fResult) 
-    { 
-        goto cleanup; 
-    } 
-
-
-    cProcessID = cbProcess / sizeof(DWORD); 
-
-
-    for( index = 0; index < cProcessID; index++ ) 
-    { 
-        szProcessName = new TCHAR[MAX_PATH];         
-        hProcess = OpenProcess( PROCESS_QUERY_INFORMATION | 
-            PROCESS_VM_READ, 
-            FALSE, dwProcessID[index] ); 
-        if( NULL != hProcess ) 
-        { 
-            if ( EnumProcessModulesEx( hProcess, lphModule, sizeof(lphModule),  
-                &cbNeeded,LIST_MODULES_ALL) ) 
-            { 
-                if( GetModuleBaseName( hProcess, lphModule[0], szProcessName,  
-                    MAX_PATH ) ) 
-                { 
-                    len = _tcslen(szProcessName); 
-                    _tcscpy(szProcessName+len-4, TEXT("\0")); 
-
-                    bool fProcessExists = false; 
-                    int count = 0; 
-                    szProcessNameWithPrefix = new TCHAR[MAX_PATH]; 
-                    _stprintf(szProcessNameWithPrefix, TEXT("%s"), szProcessName); 
-                    do 
-                    { 
-                        if(count>0) 
-                        { 
-                            _stprintf(szProcessNameWithPrefix,TEXT("%s#%d"),szProcessName,count); 
-                        } 
-                        fProcessExists = false; 
-                        for(auto it = vProcessNames.begin(); it < vProcessNames.end(); it++) 
-                        { 
-                            if(_tcscmp(*it,szProcessNameWithPrefix)==0) 
-                            { 
-                                fProcessExists = true; 
-                                break; 
-                            } 
-                        }                     
-                        count++; 
-                    } 
-                    while(fProcessExists); 
-
-                    vProcessNames.push_back(szProcessNameWithPrefix); 
-                } 
-            } 
-        } 
-    } 
-
-
-cleanup: 
-    szProcessName = NULL; 
-    szProcessNameWithPrefix = NULL; 
-    return vProcessNames;
-}*/
-
+/*
 //CPU currently used by current process:
 static ULARGE_INTEGER lastCPU, lastSysCPU, lastUserCPU;
 static int numProcessors;
@@ -171,17 +85,7 @@ double getCurrentValue(){
 
     return percent * 100;
 }
-
-struct ConsumptionHelper
-{
-    ConsumptionHelper()
-    {
-        init();
-    }
-};
-
-static ConsumptionHelper consumptionHelper;
-
+*/
 class Log
 {
 public:
@@ -424,7 +328,7 @@ void Query::Record()
 {
     PDH_STATUS status;
     ULONG CounterType;
-    ULONG WaitResult;
+    //ULONG WaitResult;
     PDH_FMT_COUNTERVALUE DisplayValue;	
 
     status = PdhCollectQueryData(query);
@@ -434,7 +338,7 @@ void Query::Record()
         return;
     }
 
-    status = PdhCollectQueryDataEx(query, SAMPLE_INTERVAL, Event);
+    /*status = PdhCollectQueryDataEx(query, SAMPLE_INTERVAL, Event);
 
     if(status != ERROR_SUCCESS)
     {
@@ -443,16 +347,16 @@ void Query::Record()
 
     WaitResult = WaitForSingleObject(Event, INFINITE);
 
-    if (WaitResult == WAIT_OBJECT_0) 
+    if (WaitResult == WAIT_OBJECT_0) */
     {
         for(auto it = vciSelectedCounters.begin(); it < vciSelectedCounters.end(); it++)
         {
             status = PdhGetFormattedCounterValue(it->counter, PDH_FMT_DOUBLE, &CounterType, &DisplayValue);			
 
-            if(status != ERROR_SUCCESS)
+            /*if(status != ERROR_SUCCESS)
             {
                 continue;
-            }
+            }*/
 
             Log log;
             log.time = time;
@@ -464,12 +368,29 @@ void Query::Record()
     time++;
 }
 
+Query query;
+
+struct ConsumptionHelper
+{
+    ConsumptionHelper()
+    {
+        init();
+        query.Init();
+
+        auto names = GetValidCounterNames();
+        query.AddCounterInfo(names[0]);
+    }
+};
+
+static ConsumptionHelper consumptionHelper;
+
 UCustomPaintWidget::UCustomPaintWidget(const FObjectInitializer& ObjectInitializer):
     UUserWidget(ObjectInitializer)
 {
     FpsRate.reserve(1000);
     CpuConsumption.reserve(1000);
     GpuConsumption.reserve(1000);
+    LastQueryDelta = 0.0f;
 }
 
 void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
@@ -514,6 +435,18 @@ void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
         CpuConsumption.resize(0);
     }
 
-    FpsRate.push_back(1.f / InDeltaTime);
-    CpuConsumption.push_back(getCurrentValue());
+    if (0.0 == LastQueryDelta || LastQueryDelta >= 0.5f)
+    {
+        LastQueryDelta = 0.0;
+
+        FpsRate.push_back(1.f / InDeltaTime);
+        //CpuConsumption.push_back(getCurrentValue());
+
+        query.Record();
+        CpuConsumption.push_back(query.vciSelectedCounters[0].logs.back().value);
+    }
+    else
+    {
+        LastQueryDelta += InDeltaTime;
+    }
 }
