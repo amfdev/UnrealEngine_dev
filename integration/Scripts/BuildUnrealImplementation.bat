@@ -74,10 +74,10 @@ IF DEFINED Build_SourceOrigin (
     SET PLUGIN_FOLDER_SUFFIX=-amfdev
 ) ELSE (
     IF DEFINED AMF_VERSION (
-        @ECHO Error: amf plugin source must be set!
+        @ECHO Error: amf plugin source type must be set!
         GOTO :error
     ) ELSE IF DEFINED STITCH_VERSION (
-        @ECHO Error: stitch plugin source must be set!
+        @ECHO Error: stitch plugin source type must be set!
         GOTO :error
     )
 )

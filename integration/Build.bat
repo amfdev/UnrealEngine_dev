@@ -125,6 +125,7 @@ FOR %%x IN (%*) DO (
         ) ELSE (
             SET Command_StitchBranch=1
         )
+
     ) ELSE IF /I "%%~x"=="GitLogin:" (
 
         IF DEFINED Command_StitchBranch (
@@ -132,6 +133,7 @@ FOR %%x IN (%*) DO (
         ) ELSE (
             SET Command_StitchBranch=1
         )
+
     ) ELSE IF /I "%%~x"=="StitchBranch:" (
 
         IF DEFINED Command_StitchBranch (
@@ -237,7 +239,7 @@ IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 IF NOT DEFINED Build_MediaT
 IF NOT DEFINED Build_SourceOrigin IF NOT DEFINED Build_SourceClone (
     IF DEFINED Build_Amf (
         SET Build_SourceClone=1
-    ) ELSE IF DEFINED Build_Amf (
+    ) ELSE IF DEFINED Build_Stitch (
         SET Build_SourceClone=1
     )
 )
