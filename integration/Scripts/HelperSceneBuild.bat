@@ -55,11 +55,16 @@ IF DEFINED Build_CleanOnly (
     CD TestsProjects\%UE_VERSION%\%SceneProjectName%
     IF ERRORLEVEL 1 GOTO :error
 
-    git reset --hard
+    REM git reset --hard
     IF ERRORLEVEL 1 GOTO :error
 
-    git clean -fdx
+    REM git clean -fdx
     IF ERRORLEVEL 1 GOTO :error
+
+    git checkout -- .
+    IF ERRORLEVEL 1 GOTO :error
+
+    @ECHO Demo scene cleaned successfully for %UE_VERSION%.
 
 ) ELSE (
     @ECHO Build scene...
@@ -69,10 +74,11 @@ IF DEFINED Build_CleanOnly (
 
     CALL "%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\%UE_VERSION%\%SceneProjectName%\%SceneProjectName%.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -build -stage -pak -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%" >> "%SceneBuildLogFile%" 2>>&1
     IF ERRORLEVEL 1 GOTO :error
+
+    @ECHO Demo scene built successfully for %UE_VERSION%.
 )
 
 :done
-    @ECHO Demo scene built successfully for %UE_VERSION%.
     EXIT /B 0
 
 :error
