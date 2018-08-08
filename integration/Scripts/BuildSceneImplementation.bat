@@ -32,9 +32,11 @@ IF DEFINED AMF_VERSION (
 CALL Scripts\HelperSceneBuild.bat
 IF ERRORLEVEL 1 GOTO :error
 
-@ECHO Deploy scenes
-CALL Scripts\HelperSceneDeploy.bat
-IF ERRORLEVEL 1 GOTO :error
+IF NOT DEFINED Build_CleanOnly (
+    @ECHO Deploy scenes
+    CALL Scripts\HelperSceneDeploy.bat
+    IF ERRORLEVEL 1 GOTO :error
+)
 
 :done
     @ECHO Scene built successfully

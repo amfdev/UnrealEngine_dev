@@ -426,9 +426,7 @@ FOR %%s IN (2015, 2017) DO (
 
     @ECHO:
 
-    SET BuildOrCleanEngine=!Build_Engine!!Build_CleanOnly!
-
-    IF DEFINED BuildOrCleanEngine (
+    IF DEFINED Build_Engine (
 
         @ECHO Build unreal engine configuration
         @ECHO Configuration name: !UnrealConfigurationPrintableName!
