@@ -30,13 +30,12 @@ IF DEFINED AMF_VERSION (
 )
 
 @ECHO:
+@ECHO Test UnrealEngine folder: "%UnrealHome%"
 
 IF EXIST "%UnrealHome%" (
-
     @ECHO UnrealEngine folder found, clear it
     CALL Scripts\HelperUnrealClean.bat
     IF ERRORLEVEL 1 SET result=failed
-
 )
 
 SET PLUGIN_TYPE=

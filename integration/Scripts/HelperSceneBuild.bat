@@ -72,7 +72,7 @@ IF DEFINED Build_CleanOnly (
     CD %UnrealHome%
     IF ERRORLEVEL 1 GOTO :error
 
-    CALL "%CD%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="..\TestsProjects\%UE_VERSION%\%SceneProjectName%\%SceneProjectName%.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -build -stage -pak -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%" >> "%SceneBuildLogFile%" 2>>&1
+    CALL Engine\Build\BatchFiles\RunUAT.bat BuildCookRun -project="..\TestsProjects\%UE_VERSION%\%SceneProjectName%\%SceneProjectName%.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -build -stage -pak -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%" >> "%SceneBuildLogFile%" 2>>&1
     IF ERRORLEVEL 1 GOTO :error
 
     @ECHO Demo scene built successfully for %UE_VERSION%.

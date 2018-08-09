@@ -27,6 +27,8 @@ IF NOT DEFINED UnrealConfiguration (
     GOTO :error
 )
 
+@ECHO Test UnrealEngine folder: "%UnrealHome%"
+
 IF NOT DEFINED Build_CleanOnly (
 
     @ECHO:
