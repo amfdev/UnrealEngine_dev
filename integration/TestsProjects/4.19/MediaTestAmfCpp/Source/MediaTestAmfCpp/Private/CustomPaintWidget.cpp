@@ -3,6 +3,7 @@
 #include "pdh.h"
 #pragma comment(lib, "Pdh.lib")
 
+//#include "Engine.h"
 #include "CustomPaintWidget.h"
 #include "UObject/UObjectGlobals.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
@@ -384,6 +385,28 @@ struct ConsumptionHelper
 
 static ConsumptionHelper consumptionHelper;
 
+FVector2D GetGameViewportSize()
+{
+    FVector2D Result = FVector2D( 1, 1 );
+
+    if ( GEngine && GEngine->GameViewport )
+    {
+        GEngine->GameViewport->GetViewportSize( /*out*/Result );
+    }
+
+    return Result;
+}
+
+FVector2D GetGameResolution()
+{
+    FVector2D Result = FVector2D( 1, 1 );
+
+    Result.X = GSystemResolution.ResX;
+    Result.Y = GSystemResolution.ResY;
+
+    return Result;
+}
+
 UCustomPaintWidget::UCustomPaintWidget(const FObjectInitializer& ObjectInitializer):
     UUserWidget(ObjectInitializer)
 {
@@ -397,39 +420,84 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
 {
     UUserWidget::NativePaint(InContext);
 
-    int CapacityX = 1001.f;
+    const FVector2D ViewportSize = GetGameResolution();// GetGameViewportSize();// FVector2D(GEngine->GameViewport->Viewport->GetSizeXY());
+
+    //Viewport Center!            
+    //const FVector2D  ViewportCenter =  FVector2D(ViewportSize.X/2, ViewportSize.Y/2);
+
+    float ChartWidth = ViewportSize.X;// InContext.MyCullingRect.Right - InContext.MyCullingRect.Left;
+    float ChartHeight = ViewportSize.Y;// InContext.MyCullingRect.Bottom - InContext.MyCullingRect.Top;
+
+    int CapacityX = 100.f;
     int CapacityY1 = 200.f;
     int CapacityY2 = 120.f;
 
-    float XRate = (InContext.MyCullingRect.Right - InContext.MyCullingRect.Left) / CapacityX;
-    float YRate1 = (InContext.MyCullingRect.Bottom - InContext.MyCullingRect.Top) / CapacityY1;
-    float YRate2 = (InContext.MyCullingRect.Bottom - InContext.MyCullingRect.Top) / CapacityY2;
+    int Bottom = ChartHeight;
+    int Right = ChartWidth;
 
-    int Bottom = InContext.MyCullingRect.Bottom;
-    int Right = InContext.MyCullingRect.Right;
+    float Part1Width = 2.0f * ChartWidth / 3.0f;
+    //float Part1Height = 6.0f * ChartHeight / 8.0f;
+    float Part1CapacityX = 101.0f;
+    float Part1CapacityY1 = 110.0f;
+    float Part1CapacityY2 = 200.0f;
 
-    for (int PointIndex = 1; PointIndex < FpsRate.size(); ++PointIndex)
+    float Part1RateX = Part1Width / Part1CapacityX;
+    float Part1RateY1 = ChartHeight / CapacityY1;
+    float Part1RateY2 = ChartHeight / CapacityY2;
+
+    float Part1IndentX = ChartWidth / 9.0f;
+    float Part1IndentY = ChartHeight / 8.0f;
+
+    /*for (int PointIndex = 1; PointIndex < FpsRate.size(); ++PointIndex)
     {
-        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-            InContext,
-            FVector2D(XRate * (PointIndex - 1), YRate2 * FpsRate[PointIndex - 1]),
-            FVector2D(XRate * PointIndex, YRate2 * FpsRate[PointIndex])
-            );
+        float XL = Part1IndentX + Part1RateX * (PointIndex - 1);
+        float XR = Part1IndentX + Part1RateX * PointIndex;
+
+        float Y1 = ChartHeight - Part1IndentY - Part1RateY1 * FpsRate[PointIndex - 1];
+        float Y2 = ChartHeight - Part1IndentY - Part1RateY1 * FpsRate[PointIndex];
 
         GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
             InContext,
-            FVector2D(XRate * (PointIndex - 1), YRate2 * CpuConsumption[PointIndex - 1]),
-            FVector2D(XRate * PointIndex, YRate2 * CpuConsumption[PointIndex]),
+            FVector2D(XL, Y1),
+            FVector2D(XR, Y2)
+            );
+        
+        float Y3 = ChartHeight - Part1IndentY - Part1RateY2 * CpuConsumption[PointIndex - 1];        
+        float Y4 = ChartHeight - Part1IndentY - Part1RateY2 * CpuConsumption[PointIndex];
+
+        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+            InContext,
+            FVector2D(XL, Y3),
+            FVector2D(XR, Y4),
             FLinearColor::Blue
             );
-    }
+    }*/
+
+    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+        InContext,
+        FVector2D(Part1IndentX, /*7 **/ ChartHeight /*/ 8.0f*/),
+        FVector2D(Part1IndentX +  (Part1CapacityX + 1) * Part1RateX, /*7 **/ ChartHeight /*/ 8.0f*/),
+        FLinearColor::White
+        );
+    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+        InContext,
+        FVector2D(Part1IndentX, /*7 **/ ChartHeight /*/ 8.0f*/),
+        FVector2D(Part1IndentX, ChartHeight /*/ 8.0f*/),
+        FLinearColor::White
+        );
+    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+        InContext,
+        FVector2D(0, 0),
+        FVector2D(ChartWidth, ChartHeight),
+        FLinearColor::Red
+        );
 }
 
 void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
     UUserWidget::NativeTick(MyGeometry, InDeltaTime);
 
-    if (1000 == FpsRate.size())
+    if (100.0 == FpsRate.size())
     {
         FpsRate.resize(0);
         CpuConsumption.resize(0);
