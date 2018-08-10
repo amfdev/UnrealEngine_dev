@@ -1,10 +1,10 @@
+#include "CustomPaintWidget.h"
+
 #include "windows.h"
 #include "psapi.h"
 #include "pdh.h"
 #pragma comment(lib, "Pdh.lib")
 
-//#include "Engine.h"
-#include "CustomPaintWidget.h"
 #include "UObject/UObjectGlobals.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
@@ -420,7 +420,8 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
 {
     UUserWidget::NativePaint(InContext);
 
-    const FVector2D ViewportSize = GetGameResolution();// GetGameViewportSize();// FVector2D(GEngine->GameViewport->Viewport->GetSizeXY());
+    //const FVector2D ViewportSize = GetGameResolution();// GetGameViewportSize();// FVector2D(GEngine->GameViewport->Viewport->GetSizeXY());
+    const FVector2D ViewportSize = InContext.AllottedGeometry.Size;// GetGameResolution();// GetGameViewportSize();// FVector2D(GEngine->GameViewport->Viewport->GetSizeXY());
 
     //Viewport Center!            
     //const FVector2D  ViewportCenter =  FVector2D(ViewportSize.X/2, ViewportSize.Y/2);
@@ -491,6 +492,25 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
         FVector2D(ChartWidth, ChartHeight),
         FLinearColor::Red
         );
+    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+        InContext,
+        FVector2D(0, 0),
+        FVector2D(1540, 870),
+        FLinearColor::Blue
+        );
+    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+        InContext,
+        FVector2D(0, 630),
+        FVector2D(2000, 630),
+        FLinearColor::Blue
+        );
+
+    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+        InContext,
+        FVector2D(0, 0),
+        FVector2D(14000, 15000),
+        FLinearColor::Red
+    );
 }
 
 void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
