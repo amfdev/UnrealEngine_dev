@@ -68,7 +68,7 @@ IF ERRORLEVEL 1 (
 CD %CurrentDirectory%
 ROBOCOPY %CD%\%UnrealHome%\Engine\Extras\Redist\en-us\ %CD%\Deploy\Prerequirements\%UE_VERSION% /E
 IF ERRORLEVEL 1 (
-    @ECHO Error: error returned from robocopy when coping dependencies! TODO: investigate why?
+    @ECHO Error: error returned from robocopy when coping dependencies, investigate why?
     rem GOTO :error
 )
 

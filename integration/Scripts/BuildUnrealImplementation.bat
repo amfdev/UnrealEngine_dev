@@ -133,16 +133,14 @@ IF DEFINED PLUGIN_TYPE (
         CALL Scripts\HelperClone.bat
         IF ERRORLEVEL 1 GOTO :error
 
-        IF DEFINED Build_SourcePatch (
-            @ECHO:
-            @ECHO Patch plugin...
-            CALL Scripts\HelperPatch.bat
-            IF ERRORLEVEL 1 (
-                @ECHO Failed to apply patch!
-                @ECHO It seems like the code is already patched,
-                @ECHO try to build it...
-                )
-        )
+        @ECHO:
+        @ECHO Patch plugin...
+        CALL Scripts\HelperPatch.bat
+        IF ERRORLEVEL 1 (
+            @ECHO Failed to apply patch!
+            @ECHO It seems like the code is already patched,
+            @ECHO try to build it...
+            )
 
         @ECHO:
         @ECHO Build plugin...

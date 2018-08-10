@@ -23,17 +23,21 @@ IF DEFINED AMF_VERSION (
 
     IF ["%UE_VERSION%"] == ["4.17"] (
 
-        git apply ..\Patches\AmfMedia_UE417.patch
-        IF ERRORLEVEL 1 GOTO :error
+        IF DEFINED Build_SourcePatch (
+            git apply ..\Patches\AmfMedia_UE417.patch
+            IF ERRORLEVEL 1 GOTO :error
+        )
 
     ) ELSE IF ["%UE_VERSION%"] == ["4.18"] (
 
         SET result=
 
-        git apply ..\Patches\AmfMedia_UE418.patch
-        IF ERRORLEVEL 1 SET result=failed
-        git apply ..\Patches\AmfMedia_UE418_2.patch
-        IF ERRORLEVEL 1 SET result=failed
+        IF DEFINED Build_SourcePatch (
+            git apply ..\Patches\AmfMedia_UE418.patch
+            IF ERRORLEVEL 1 SET result=failed
+            REM git apply ..\Patches\AmfMedia_UE418_2.patch
+            REM IF ERRORLEVEL 1 SET result=failed
+        )
 
         IF /I ["failed"] == ["%result%"] GOTO :error
 
@@ -41,13 +45,15 @@ IF DEFINED AMF_VERSION (
 
         SET result=
 
-        git apply ..\Patches\AmfMedia_UE418.patch
-        IF ERRORLEVEL 1 SET result=failed
-        git apply ..\Patches\AmfMedia_UE418_2.patch
-        IF ERRORLEVEL 1 SET result=failed
+        IF DEFINED Build_SourcePatch (
+            git apply ..\Patches\AmfMedia_UE418.patch
+            IF ERRORLEVEL 1 SET result=failed
+            REM git apply ..\Patches\AmfMedia_UE418_2.patch
+            REM IF ERRORLEVEL 1 SET result=failed
 
-        git apply ..\Patches\AmfMedia_UE419.patch
-        IF ERRORLEVEL 1 SET result=failed
+            git apply ..\Patches\AmfMedia_UE419.patch
+            IF ERRORLEVEL 1 SET result=failed
+        )
 
         IF /I ["failed"] == ["%result%"] GOTO :error
     )
@@ -58,22 +64,22 @@ IF DEFINED STITCH_VERSION (
         CD %UnrealHome%
         IF ERRORLEVEL 1 GOTO :error
 
+        REM Apply this patch in any case
         git am ..\Patches\AmfStitchMedia_UE418.patch
         IF ERRORLEVEL 1 GOTO :error
     ) ELSE IF ["%STITCH_VERSION%"] == ["4.19"] (
         SET result=
 
-        CD %PLUGIN_FOLDER%
-        IF ERRORLEVEL 1 SET result=failed
+        IF DEFINED Build_SourcePatch (
+            CD %PLUGIN_FOLDER%
+            IF ERRORLEVEL 1 SET result=failed
 
-        git apply ..\Patches\AmfMedia_UE419.patch
-        IF ERRORLEVEL 1 SET result=failed
+            git apply ..\Patches\AmfMedia_UE419.patch
+            IF ERRORLEVEL 1 SET result=failed
 
-        CD %UnrealHome%
-        IF ERRORLEVEL 1 SET result=failed
-
-        git am ..\Patches\AmfStitchMedia_UE418.patch
-        IF ERRORLEVEL 1 SET result=failed
+            CD %UnrealHome%
+            IF ERRORLEVEL 1 SET result=failed
+        )
 
         IF /I ["failed"] == ["%result%"] GOTO :error
     )

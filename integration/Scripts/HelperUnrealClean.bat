@@ -20,6 +20,10 @@ IF ERRORLEVEL 1 GOTO :error
 git clean -fdx
 IF ERRORLEVEL 1 GOTO :error
 
+IF EXIST "%CD%/.git/rebase-apply" (
+    RD /S /Q "%CD%/.git/rebase-apply"
+)
+
 :done
     @ECHO UnrealEngine cleaned
     EXIT /B 0
