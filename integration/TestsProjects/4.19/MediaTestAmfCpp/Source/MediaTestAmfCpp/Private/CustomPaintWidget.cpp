@@ -5,6 +5,8 @@
 #include "pdh.h"
 #pragma comment(lib, "Pdh.lib")
 
+#undef DrawText
+
 #include "UObject/UObjectGlobals.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
@@ -407,13 +409,19 @@ FVector2D GetGameResolution()
     return Result;
 }
 
+int ChartCapacity = 200;
+float ChartResolution = 0.1f;
+FLinearColor FpsColor = FLinearColor::Blue;
+FLinearColor CpuColor = FLinearColor::White;
+float SmothingWindow = 5;
+
 UCustomPaintWidget::UCustomPaintWidget(const FObjectInitializer& ObjectInitializer):
-    UUserWidget(ObjectInitializer)
+    UUserWidget(ObjectInitializer),
+    LastQueryDelta(-0.5f)
 {
-    FpsRate.reserve(1000);
-    CpuConsumption.reserve(1000);
-    GpuConsumption.reserve(1000);
-    LastQueryDelta = 0.0f;
+    //FpsRate.reserve(1000);
+    //CpuConsumption.reserve(1000);
+    //GpuConsumption.reserve(1000);
 }
 
 void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
@@ -431,7 +439,7 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
     float Part1Width = 2.0f * ChartWidth / 3.0f;
     float Part1Height = 6.0f * ChartHeight / 8.0f;
     
-    float Part1CapacityX = 101.0f;
+    float Part1CapacityX = ChartCapacity + 1;
     float Part1CapacityY1 = 110.0f;
     float Part1CapacityY2 = 200.0f;
 
@@ -442,41 +450,111 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
     float Part1IndentX = ChartWidth / 6.0f;
     float Part1IndentY = ChartHeight / 8.0f;
 
-    for (int PointIndex = 1; PointIndex < FpsRate.size(); ++PointIndex)
-    {
-        float XL = Part1IndentX + Part1RateX * (PointIndex - 1);
-        float XR = Part1IndentX + Part1RateX * PointIndex;
+    auto FpsIterator = FpsRate.begin();
+    auto CpuIterator = CpuConsumption.begin();
+    int PointIndex = 0;
 
-        float Y1 = ChartHeight - Part1IndentY - Part1RateY1 * FpsRate[PointIndex - 1];
-        float Y2 = ChartHeight - Part1IndentY - Part1RateY1 * FpsRate[PointIndex];
-        float Y3 = ChartHeight - Part1IndentY - Part1RateY2 * CpuConsumption[PointIndex - 1];        
-        float Y4 = ChartHeight - Part1IndentY - Part1RateY2 * CpuConsumption[PointIndex];
+    for
+    (
+        ;
+        (FpsRate.size() > 1) && (PointIndex < FpsRate.size() - 1);
+        ++PointIndex
+    )
+    {
+        float XL = Part1IndentX + Part1RateX * PointIndex;
+        float XR = Part1IndentX + Part1RateX * (PointIndex + 1);
+
+        float Y1 = ChartHeight - Part1IndentY - Part1RateY1 * *FpsIterator;
+        float Y2 = ChartHeight - Part1IndentY - Part1RateY1 * *++FpsIterator;
+        float Y3 = ChartHeight - Part1IndentY - Part1RateY2 * *CpuIterator;
+        float Y4 = ChartHeight - Part1IndentY - Part1RateY2 * *++CpuIterator;
 
         GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
             InContext,
             FVector2D(XL, Y1),
-            FVector2D(XR, Y2)
+            FVector2D(XR, Y2),
+            FpsColor
             );
 
         GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
             InContext,
             FVector2D(XL, Y3),
             FVector2D(XR, Y4),
-            FLinearColor::Blue
+            CpuColor
             );
     }
+
+    if (FpsRate.size())
+    {
+        float X = Part1IndentX + Part1RateX * (ChartCapacity + 1);
+        float Y1 = ChartHeight - Part1IndentY - Part1RateY1 * *FpsRate.rend();
+        float Y2 = ChartHeight - Part1IndentY - Part1RateY2 * *CpuConsumption.rend();
+
+        GetDefault<UWidgetBlueprintLibrary>()->DrawText(
+            InContext,
+            FString("FPS: ") + FString::SanitizeFloat(Y1),
+            FVector2D(X, Y1),
+            CpuColor
+            );
+    }
+
+    float ArrowIndent = ChartWidth / 40.0f;
+    float ArrowLength = ChartWidth / 20.0f;
 
     GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
         InContext,
         FVector2D(Part1IndentX, ChartHeight - Part1IndentY),
-        FVector2D(ChartWidth - Part1IndentX, ChartHeight - Part1IndentY),
-        FLinearColor::White
+        FVector2D(ChartWidth - Part1IndentX / 2.0f, ChartHeight - Part1IndentY),
+        CpuColor
+        );
+    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+        InContext,
+        FVector2D(ChartWidth - Part1IndentX / 2.0f, ChartHeight - Part1IndentY),
+        FVector2D(ChartWidth - Part1IndentX / 2.0f - ArrowLength, ChartHeight - Part1IndentY - ArrowIndent),
+        CpuColor
+        );
+    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+        InContext,
+        FVector2D(ChartWidth - Part1IndentX / 2.0f, ChartHeight - Part1IndentY),
+        FVector2D(ChartWidth - Part1IndentX / 2 - ArrowLength, ChartHeight - Part1IndentY + ArrowIndent),
+        CpuColor
         );
     GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
         InContext,
         FVector2D(Part1IndentX, ChartHeight - Part1IndentY),
-        FVector2D(Part1IndentX, Part1IndentY),
-        FLinearColor::White
+        FVector2D(Part1IndentX, Part1IndentY / 2.0f),
+        CpuColor
+        );
+    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+        InContext,
+        FVector2D(Part1IndentX, Part1IndentY / 2.0f),
+        FVector2D(Part1IndentX - ArrowIndent, Part1IndentY / 2.0f + ArrowLength),
+        CpuColor
+        );
+    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+        InContext,
+        FVector2D(Part1IndentX, Part1IndentY / 2.0f),
+        FVector2D(Part1IndentX + ArrowIndent, Part1IndentY / 2.0f + ArrowLength),
+        CpuColor
+        );
+
+    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+        InContext,
+        FVector2D(Part1IndentX / 2.0f, ChartHeight - Part1IndentY),
+        FVector2D(Part1IndentX / 2.0f, Part1IndentY / 2.0f),
+        FpsColor
+        );
+    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+        InContext,
+        FVector2D(Part1IndentX / 2.0f, Part1IndentY / 2.0f),
+        FVector2D(Part1IndentX / 2.0f - ArrowIndent, Part1IndentY / 2.0f + ArrowLength),
+        FpsColor
+        );
+    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+        InContext,
+        FVector2D(Part1IndentX / 2.0f, Part1IndentY / 2.0f),
+        FVector2D(Part1IndentX / 2.0f + ArrowIndent, Part1IndentY / 2.0f + ArrowLength),
+        FpsColor
         );
 }
 
@@ -484,24 +562,55 @@ void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
 {
     UUserWidget::NativeTick(MyGeometry, InDeltaTime);
 
-    if (100.0 == FpsRate.size())
+    if (FpsRate.size() == ChartCapacity)
     {
-        FpsRate.resize(0);
-        CpuConsumption.resize(0);
+        FpsRate.pop_front();
+        CpuConsumption.pop_front();
     }
 
-    if (0.0 == LastQueryDelta || LastQueryDelta >= 0.5f)
+    if ((LastQueryDelta < 0) || (LastQueryDelta >= ChartResolution))
     {
         LastQueryDelta = 0.0;
 
-        FpsRate.push_back(1.f / InDeltaTime);
-        //CpuConsumption.push_back(getCurrentValue());
+        {
+            float CurrentValue = 1.f / InDeltaTime;
 
-        query.Record();
-        CpuConsumption.push_back(query.vciSelectedCounters[0].logs.back().value);
+            int Step = 1;
+            float Summary = CurrentValue;
+
+            for (auto FpsIterator = FpsRate.rbegin(); (Step < SmothingWindow) && (FpsIterator != FpsRate.rend()); ++FpsIterator, ++Step)
+            {
+                Summary += *FpsIterator;
+            }
+
+            Summary /= float(Step);
+
+            FpsRate.push_back(Summary);
+        }
+
+        {
+            query.Record();
+            float CurrentValue = query.vciSelectedCounters[0].logs.back().value;
+
+            int Step = 1;
+            float Summary = CurrentValue;
+
+            for (auto FpsIterator = FpsRate.rbegin(); (Step < SmothingWindow) && (FpsIterator != FpsRate.rend()); ++FpsIterator, ++Step)
+            {
+                Summary += *FpsIterator;
+            }
+
+            Summary /= float(Step);
+
+            CpuConsumption.push_back(Summary);
+        }
     }
     else
     {
         LastQueryDelta += InDeltaTime;
     }
+}
+
+void UCustomPaintWidget::AddMessage(const FString& Message)
+{
 }

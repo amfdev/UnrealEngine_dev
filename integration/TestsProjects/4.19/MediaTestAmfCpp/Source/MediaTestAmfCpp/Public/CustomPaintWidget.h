@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 
-#include <vector>
+#include <list>
 
 #include "CustomPaintWidget.generated.h"
 
@@ -12,9 +12,9 @@ class MEDIATESTAMFCPP_API UCustomPaintWidget:
     public UUserWidget
 {
 protected:
-    std::vector< float > FpsRate;
-    std::vector< float > CpuConsumption;
-    std::vector< float > GpuConsumption;
+    std::list< float > FpsRate;
+    std::list< float > CpuConsumption;
+    std::list< float > GpuConsumption;
     float LastQueryDelta;
 
 public:
@@ -24,4 +24,7 @@ public:
 
     void NativePaint(FPaintContext& InContext) const override;
     void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+    UFUNCTION(BlueprintPure, Category = "PerformanceWidget", meta = (BlueprintThreadSafe))
+    void AddMessage(const FString& Message);
 };
