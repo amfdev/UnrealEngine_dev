@@ -387,13 +387,13 @@ struct ConsumptionHelper
 
 static ConsumptionHelper consumptionHelper;
 
-FVector2D GetGameViewportSize()
+/*FVector2D GetGameViewportSize()
 {
     FVector2D Result = FVector2D( 1, 1 );
 
     if ( GEngine && GEngine->GameViewport )
     {
-        GEngine->GameViewport->GetViewportSize( /*out*/Result );
+        GEngine->GameViewport->GetViewportSize( Result );
     }
 
     return Result;
@@ -407,7 +407,7 @@ FVector2D GetGameResolution()
     Result.Y = GSystemResolution.ResY;
 
     return Result;
-}
+}*/
 
 int ChartCapacity = 200;
 float ChartResolution = 0.1f;
@@ -417,7 +417,8 @@ float SmothingWindow = 5;
 
 UCustomPaintWidget::UCustomPaintWidget(const FObjectInitializer& ObjectInitializer):
     UUserWidget(ObjectInitializer),
-    LastQueryDelta(-0.5f)
+    LastQueryDelta(-0.5f),
+    ConsoleFont(nullptr)
 {
     //FpsRate.reserve(1000);
     //CpuConsumption.reserve(1000);
@@ -438,6 +439,8 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
 
     float Part1Width = 2.0f * ChartWidth / 3.0f;
     float Part1Height = 6.0f * ChartHeight / 8.0f;
+
+    float Part2Width = ChartWidth / 3.0f;
     
     float Part1CapacityX = ChartCapacity + 1;
     float Part1CapacityY1 = 110.0f;
@@ -493,7 +496,8 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
         GetDefault<UWidgetBlueprintLibrary>()->DrawText(
             InContext,
             FString("FPS: ") + FString::SanitizeFloat(Y1),
-            FVector2D(X, Y1),
+            //FVector2D(X, Y1),
+            FVector2D(100, 100),
             CpuColor
             );
     }
@@ -556,6 +560,33 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
         FVector2D(Part1IndentX / 2.0f + ArrowIndent, Part1IndentY / 2.0f + ArrowLength),
         FpsColor
         );
+
+    int MessageIndex = 0;
+    
+    for (auto Message = ConsoleMessages.rbegin(); Message != ConsoleMessages.rend(); ++Message, ++MessageIndex)
+    {
+        if (ConsoleFont)
+        {
+            GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
+                InContext,
+                FText::FromString(*Message),
+                FVector2D(Part1Width, MessageIndex * 2 * ConsoleFontSize),
+                ConsoleFont,
+                ConsoleFontSize,
+                ConsoleFontTypeFace,
+                ConsoleFontColor
+                );
+        }
+        else
+        {
+            GetDefault<UWidgetBlueprintLibrary>()->DrawText(
+                InContext,
+                *Message,
+                FVector2D(Part1Width, MessageIndex * (ChartHeight / 11.0f)),
+                CpuColor
+                );
+        }
+    }
 }
 
 void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -613,4 +644,13 @@ void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
 
 void UCustomPaintWidget::AddMessage(const FString& Message)
 {
+    ConsoleMessages.push_back(Message);
+}
+
+void UCustomPaintWidget::SetConsoleFont(UFont* Font, int32 FontSize, FName FontTypeFace, FLinearColor Tint)
+{
+    ConsoleFont = Font;
+    ConsoleFontSize = FontSize;
+    ConsoleFontTypeFace = FontTypeFace;
+    ConsoleFontColor = Tint;
 }
