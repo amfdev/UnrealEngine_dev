@@ -45,50 +45,6 @@ DWORD GetProcessorCount()
     return dwNumberOfProcessors; 
 }
 
-/*
-//CPU currently used by current process:
-static ULARGE_INTEGER lastCPU, lastSysCPU, lastUserCPU;
-static int numProcessors;
-static HANDLE self;
-
-void init(){
-    SYSTEM_INFO sysInfo;
-    FILETIME ftime, fsys, fuser;
-
-    GetSystemInfo(&sysInfo);
-    numProcessors = sysInfo.dwNumberOfProcessors;
-
-    GetSystemTimeAsFileTime(&ftime);
-    memcpy(&lastCPU, &ftime, sizeof(FILETIME));
-
-    self = GetCurrentProcess();
-    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
-    memcpy(&lastSysCPU, &fsys, sizeof(FILETIME));
-    memcpy(&lastUserCPU, &fuser, sizeof(FILETIME));
-}
-
-double getCurrentValue(){
-    FILETIME ftime, fsys, fuser;
-    ULARGE_INTEGER now, sys, user;
-    double percent;
-
-    GetSystemTimeAsFileTime(&ftime);
-    memcpy(&now, &ftime, sizeof(FILETIME));
-
-    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
-    memcpy(&sys, &fsys, sizeof(FILETIME));
-    memcpy(&user, &fuser, sizeof(FILETIME));
-    percent = (sys.QuadPart - lastSysCPU.QuadPart) +
-        (user.QuadPart - lastUserCPU.QuadPart);
-    percent /= (now.QuadPart - lastCPU.QuadPart);
-    percent /= numProcessors;
-    lastCPU = now;
-    lastUserCPU = user;
-    lastSysCPU = sys;
-
-    return percent * 100;
-}
-*/
 class Log
 {
 public:
@@ -387,28 +343,6 @@ struct ConsumptionHelper
 
 static ConsumptionHelper consumptionHelper;
 
-/*FVector2D GetGameViewportSize()
-{
-    FVector2D Result = FVector2D( 1, 1 );
-
-    if ( GEngine && GEngine->GameViewport )
-    {
-        GEngine->GameViewport->GetViewportSize( Result );
-    }
-
-    return Result;
-}
-
-FVector2D GetGameResolution()
-{
-    FVector2D Result = FVector2D( 1, 1 );
-
-    Result.X = GSystemResolution.ResX;
-    Result.Y = GSystemResolution.ResY;
-
-    return Result;
-}*/
-
 int ChartCapacity = 200;
 float ChartResolution = 0.1f;
 FLinearColor FpsColor = FLinearColor::Blue;
@@ -418,11 +352,9 @@ float SmothingWindow = 5;
 UCustomPaintWidget::UCustomPaintWidget(const FObjectInitializer& ObjectInitializer):
     UUserWidget(ObjectInitializer),
     LastQueryDelta(-0.5f),
-    ConsoleFont(nullptr)
+    ConsoleFont(nullptr),
+    ConsoleDelaySeconds(12)
 {
-    //FpsRate.reserve(1000);
-    //CpuConsumption.reserve(1000);
-    //GpuConsumption.reserve(1000);
 }
 
 void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
@@ -483,21 +415,6 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
             InContext,
             FVector2D(XL, Y3),
             FVector2D(XR, Y4),
-            CpuColor
-            );
-    }
-
-    if (FpsRate.size())
-    {
-        float X = Part1IndentX + Part1RateX * (ChartCapacity + 1);
-        float Y1 = ChartHeight - Part1IndentY - Part1RateY1 * *FpsRate.rend();
-        float Y2 = ChartHeight - Part1IndentY - Part1RateY2 * *CpuConsumption.rend();
-
-        GetDefault<UWidgetBlueprintLibrary>()->DrawText(
-            InContext,
-            FString("FPS: ") + FString::SanitizeFloat(Y1),
-            //FVector2D(X, Y1),
-            FVector2D(100, 100),
             CpuColor
             );
     }
@@ -569,7 +486,7 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
         {
             GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
                 InContext,
-                FText::FromString(*Message),
+                FText::FromString(std::get<0>(*Message)),
                 FVector2D(Part1Width, MessageIndex * 2 * ConsoleFontSize),
                 ConsoleFont,
                 ConsoleFontSize,
@@ -581,7 +498,7 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
         {
             GetDefault<UWidgetBlueprintLibrary>()->DrawText(
                 InContext,
-                *Message,
+                std::get<0>(*Message),
                 FVector2D(Part1Width, MessageIndex * (ChartHeight / 11.0f)),
                 CpuColor
                 );
@@ -635,6 +552,31 @@ void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
 
             CpuConsumption.push_back(Summary);
         }
+
+        {
+            auto ToRemoveEnd = ConsoleMessages.end();
+
+            for (auto MessageIterator = ConsoleMessages.begin(); MessageIterator != ConsoleMessages.end(); ++MessageIterator)
+            {
+                auto Now = FDateTime::Now();
+                auto FinishTime = std::get<1>(*MessageIterator) + FTimespan(0, 0, ConsoleDelaySeconds);
+                
+                if (FinishTime < Now)
+                {
+                    ToRemoveEnd = MessageIterator;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            if (ConsoleMessages.end() != ToRemoveEnd)
+            {
+                ConsoleMessages.erase(ConsoleMessages.begin(), ++ToRemoveEnd);
+            }                    
+
+        }
     }
     else
     {
@@ -644,13 +586,14 @@ void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
 
 void UCustomPaintWidget::AddMessage(const FString& Message)
 {
-    ConsoleMessages.push_back(Message);
+    ConsoleMessages.push_back(std::make_tuple(Message, FDateTime::Now()));
 }
 
-void UCustomPaintWidget::SetConsoleFont(UFont* Font, int32 FontSize, FName FontTypeFace, FLinearColor Tint)
+void UCustomPaintWidget::SetConsoleFont(UFont* Font, int32 FontSize, FName FontTypeFace, FLinearColor Tint, int32 DelaySeconds)
 {
     ConsoleFont = Font;
     ConsoleFontSize = FontSize;
     ConsoleFontTypeFace = FontTypeFace;
     ConsoleFontColor = Tint;
+    ConsoleDelaySeconds = DelaySeconds;
 }
