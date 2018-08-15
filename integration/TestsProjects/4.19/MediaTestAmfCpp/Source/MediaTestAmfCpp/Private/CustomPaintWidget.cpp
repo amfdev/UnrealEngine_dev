@@ -9,6 +9,7 @@
 
 #include "UObject/UObjectGlobals.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Engine/Font.h"
 
 #include <vector>
 
@@ -366,6 +367,9 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
     float ChartWidth = 2 * ViewportSize.X / 3;// InContext.MyCullingRect.Right - InContext.MyCullingRect.Left;
     float ChartHeight = ViewportSize.Y;
 
+    float ArrowLength = ChartWidth / 20.0f;
+    float ArrowIndent = ChartWidth / 40.0f;
+
     int Bottom = ChartHeight;
     int Right = ChartWidth;
 
@@ -379,8 +383,8 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
     float Part1CapacityY2 = 200.0f;
 
     float Part1RateX = Part1Width / Part1CapacityX;
-    float Part1RateY1 = ChartHeight / Part1CapacityY1;
-    float Part1RateY2 = ChartHeight / Part1CapacityY2;
+    float Part1RateY1 = ( ChartHeight - 1.01f * ArrowLength ) / Part1CapacityY1;
+    float Part1RateY2 = ( ChartHeight - 1.01f * ArrowLength ) / Part1CapacityY2;
 
     float Part1IndentX = ChartWidth / 6.0f;
     float Part1IndentY = ChartHeight / 8.0f;
@@ -419,28 +423,105 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
             );
     }
 
-    float ArrowIndent = ChartWidth / 40.0f;
-    float ArrowLength = ChartWidth / 20.0f;
-
+    // ---
     GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
         InContext,
         FVector2D(Part1IndentX, ChartHeight - Part1IndentY),
         FVector2D(ChartWidth - Part1IndentX / 2.0f, ChartHeight - Part1IndentY),
         CpuColor
         );
+    // \
+
     GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
         InContext,
         FVector2D(ChartWidth - Part1IndentX / 2.0f, ChartHeight - Part1IndentY),
         FVector2D(ChartWidth - Part1IndentX / 2.0f - ArrowLength, ChartHeight - Part1IndentY - ArrowIndent),
         CpuColor
         );
+    // /
     GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
         InContext,
         FVector2D(ChartWidth - Part1IndentX / 2.0f, ChartHeight - Part1IndentY),
         FVector2D(ChartWidth - Part1IndentX / 2 - ArrowLength, ChartHeight - Part1IndentY + ArrowIndent),
         CpuColor
         );
+
+    // |
     GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+        InContext,
+        FVector2D(Part1IndentX, ChartHeight - Part1IndentY),
+        FVector2D(Part1IndentX, Part1IndentY / 2.0f),
+        CpuColor
+        );
+
+    // /
+    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+        InContext,
+        FVector2D(Part1IndentX, Part1IndentY / 2.0f),
+        FVector2D(Part1IndentX - ArrowIndent, Part1IndentY / 2.0f + ArrowLength),
+        CpuColor
+        );
+    // \
+
+    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+        InContext,
+        FVector2D(Part1IndentX, Part1IndentY / 2.0f),
+        FVector2D(Part1IndentX + ArrowIndent, Part1IndentY / 2.0f + ArrowLength),
+        CpuColor
+        );
+
+    float StepY = (Part1Height / Part1CapacityY1) * 10.0f;
+    float StepFontSize = ConsoleFontSize / 2.0f;
+
+    for (int Point = 1; Point < 11; ++Point)
+    {
+        
+        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+            InContext,
+            FVector2D(Part1IndentX, ChartHeight - Part1IndentY - StepY * Point),
+            FVector2D(Part1IndentX - ArrowIndent / 2.0f- ArrowIndent / 4.0, ChartHeight - Part1IndentY - StepY * Point),
+            CpuColor
+            );
+
+        GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
+            InContext,
+            FText::FromString(FString::Printf(TEXT("%lld"), Point * 10)),
+            FVector2D(Part1IndentX - ArrowIndent / 2.0f - ArrowIndent / 4.0, ChartHeight - Part1IndentY - StepY * Point),
+            ConsoleFont,
+            StepFontSize,
+            ConsoleFontTypeFace,
+            CpuColor
+            );
+
+        FString Value = FString::Printf(TEXT("%lld"), Point * 10);
+        float ValueWidth = ConsoleFont->GetStringSize(*Value);
+
+        auto FontInfo = ConsoleFont->GetLegacySlateFontInfo();
+        float SizeDevider = FontInfo.Size / StepFontSize;
+        ValueWidth /= SizeDevider;
+        
+        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+            InContext,
+            //FVector2D(Part1IndentX, ChartHeight - Part1IndentY - StepY * Point),
+            //FVector2D(Part1IndentX + ArrowIndent / 2.0f + ArrowIndent / 4.0, ChartHeight - Part1IndentY - StepY * Point),
+            FVector2D( Part1IndentX + 0.1 * ArrowIndent, ChartHeight - Part1IndentY - StepY * Point),
+            FVector2D( Part1IndentX + 0.1 * ArrowIndent+ValueWidth, ChartHeight - Part1IndentY - StepY * Point),
+            FpsColor
+            );
+
+        GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
+            InContext,
+            FText::FromString(Value),
+            //FVector2D(Part1IndentX + ArrowIndent / 2.0f + ArrowIndent / 4.0 - ValueWidth, ChartHeight - Part1IndentY - StepY * Point),
+            FVector2D( Part1IndentX + 0.1 * ArrowIndent, ChartHeight - Part1IndentY - StepY * Point),
+            ConsoleFont,
+            StepFontSize,
+            ConsoleFontTypeFace,
+            FpsColor
+            );
+    }
+
+    /*GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
         InContext,
         FVector2D(Part1IndentX, ChartHeight - Part1IndentY),
         FVector2D(Part1IndentX, Part1IndentY / 2.0f),
@@ -457,7 +538,21 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
         FVector2D(Part1IndentX, Part1IndentY / 2.0f),
         FVector2D(Part1IndentX + ArrowIndent, Part1IndentY / 2.0f + ArrowLength),
         CpuColor
-        );
+        );*/
+
+    FString CpuHint = "CPU";
+    int32 CpuHintWidth = ConsoleFont->GetStringSize(*CpuHint);
+    int32 CpuHintHeight = ConsoleFont->GetStringHeightSize(*CpuHint);
+    
+    GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
+        InContext,
+        FText::FromString(CpuHint),
+        FVector2D(Part1IndentX - CpuHintWidth / 2.0f, Part1IndentY / 2.0f - CpuHintHeight),
+        ConsoleFont,
+        ConsoleFontSize,
+        ConsoleFontTypeFace,
+        CpuColor
+        );    
 
     GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
         InContext,
@@ -478,6 +573,20 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
         FpsColor
         );
 
+    FString FpsHint = "FPS";
+    int32 FpsHintWidth = ConsoleFont->GetStringSize(*FpsHint);
+    int32 FpsHintHeight = ConsoleFont->GetStringHeightSize(*FpsHint);
+
+    GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
+        InContext,
+        FText::FromString("FPS"),
+        FVector2D(Part1IndentX / 2.0f - FpsHintWidth / 2.0f, Part1IndentY / 2.0f - 1.01 * FpsHintHeight),
+        ConsoleFont,
+        ConsoleFontSize,
+        ConsoleFontTypeFace,
+        FpsColor
+        );
+
     int MessageIndex = 0;
     
     for (auto Message = ConsoleMessages.rbegin(); Message != ConsoleMessages.rend(); ++Message, ++MessageIndex)
@@ -487,7 +596,7 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
             GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
                 InContext,
                 FText::FromString(std::get<0>(*Message)),
-                FVector2D(Part1Width, MessageIndex * 2 * ConsoleFontSize),
+                FVector2D(ChartWidth, MessageIndex * 2 * ConsoleFontSize),
                 ConsoleFont,
                 ConsoleFontSize,
                 ConsoleFontTypeFace,
@@ -499,7 +608,7 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
             GetDefault<UWidgetBlueprintLibrary>()->DrawText(
                 InContext,
                 std::get<0>(*Message),
-                FVector2D(Part1Width, MessageIndex * (ChartHeight / 11.0f)),
+                FVector2D(ChartWidth, MessageIndex * (ChartHeight / 11.0f)),
                 CpuColor
                 );
         }
@@ -526,12 +635,12 @@ void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
             int Step = 1;
             float Summary = CurrentValue;
 
-            for (auto FpsIterator = FpsRate.rbegin(); (Step < SmothingWindow) && (FpsIterator != FpsRate.rend()); ++FpsIterator, ++Step)
+            /*for (auto FpsIterator = FpsRate.rbegin(); (Step < SmothingWindow) && (FpsIterator != FpsRate.rend()); ++FpsIterator, ++Step)
             {
                 Summary += *FpsIterator;
             }
 
-            Summary /= float(Step);
+            Summary /= float(Step);*/
 
             FpsRate.push_back(Summary);
         }
@@ -543,12 +652,12 @@ void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
             int Step = 1;
             float Summary = CurrentValue;
 
-            for (auto FpsIterator = FpsRate.rbegin(); (Step < SmothingWindow) && (FpsIterator != FpsRate.rend()); ++FpsIterator, ++Step)
+            /*for (auto FpsIterator = FpsRate.rbegin(); (Step < SmothingWindow) && (FpsIterator != FpsRate.rend()); ++FpsIterator, ++Step)
             {
                 Summary += *FpsIterator;
             }
 
-            Summary /= float(Step);
+            Summary /= float(Step);*/
 
             CpuConsumption.push_back(Summary);
         }
@@ -574,8 +683,7 @@ void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
             if (ConsoleMessages.end() != ToRemoveEnd)
             {
                 ConsoleMessages.erase(ConsoleMessages.begin(), ++ToRemoveEnd);
-            }                    
-
+            }
         }
     }
     else
