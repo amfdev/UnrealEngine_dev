@@ -423,7 +423,7 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
     
     float Part1CapacityX = ChartCapacity + 1;
     float Part1CapacityCpu = 110.0f;
-    float Part1CapacityFps = 200.0f;
+    float Part1CapacityFps = 130.0f;
 
     float Part1RateX = Part1Width / Part1CapacityX;
     float Part1RateYCpu = ( ChartHeight - 1.01f * ArrowLength ) / Part1CapacityCpu;
@@ -475,7 +475,7 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
         GetTextLength(ConsoleFont, Value, ConsoleFontSize, ValueWidth, ValueHeight);
 
         float XR = Part1IndentX + Part1RateX * (FpsRateRounded.size() + 1);
-        float YR = ChartHeight - Part1IndentY - Part1RateYCpu * *FpsRateRounded.rbegin() - ValueHeight;
+        float YR = ChartHeight - Part1IndentY - Part1RateYFps * *FpsRateRounded.rbegin() - ValueHeight;
 
         GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
             InContext,
@@ -496,7 +496,7 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
         GetTextLength(ConsoleFont, Value, ConsoleFontSize, ValueWidth, ValueHeight);
 
         float XR = Part1IndentX + Part1RateX * (CpuConsumptionRounded.size() + 1);
-        float YR = ChartHeight - Part1IndentY - Part1RateYFps * *CpuConsumptionRounded.rbegin() - ValueHeight;
+        float YR = ChartHeight - Part1IndentY - Part1RateYCpu * *CpuConsumptionRounded.rbegin() - ValueHeight;
 
         GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
             InContext,
@@ -557,8 +557,6 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
         CpuColor
         );
 
-    //float StepY1 = (Part1Height / Part1CapacityCpu) * 10.0f;
-    //float StepY2 = (Part1Height / Part1CapacityFps) * 10.0f;
     float StepFontSize = ConsoleFontSize / 2.0f;
 
     for (int Point = 10; ; Point += 10 )
