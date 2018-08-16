@@ -12,6 +12,7 @@
 #include "Engine/Font.h"
 
 #include <vector>
+#include <numeric>
 
 static PDH_HQUERY cpuQuery;
 static PDH_HCOUNTER cpuTotal;
@@ -344,6 +345,18 @@ struct ConsumptionHelper
 
 static ConsumptionHelper consumptionHelper;
 
+void UCustomPaintWidget::GetTextLength(UFont* Font, const FString& String, float FontSize, float& SizeX, float& SizeY)
+{
+    auto FontInfo = Font->GetLegacySlateFontInfo();
+    float SizeDevider = FontInfo.Size / FontSize;
+
+    int32 Width, Height;
+    Font->GetStringHeightAndWidth(String, Height, Width);
+    
+    SizeX = float(Width) / SizeDevider;
+    SizeY = float(Height) / SizeDevider;
+}
+
 int ChartCapacity = 200;
 float ChartResolution = 0.1f;
 FLinearColor FpsColor = FLinearColor::Blue;
@@ -356,6 +369,8 @@ UCustomPaintWidget::UCustomPaintWidget(const FObjectInitializer& ObjectInitializ
     ConsoleFont(nullptr),
     ConsoleDelaySeconds(12)
 {
+    FpsRateCache.resize(128);
+    CpuConsumptionCache.resize(128);
 }
 
 void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
@@ -386,7 +401,7 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
     float Part1RateY1 = ( ChartHeight - 1.01f * ArrowLength ) / Part1CapacityY1;
     float Part1RateY2 = ( ChartHeight - 1.01f * ArrowLength ) / Part1CapacityY2;
 
-    float Part1IndentX = ChartWidth / 6.0f;
+    float Part1IndentX = ChartWidth / 12.0f;
     float Part1IndentY = ChartHeight / 8.0f;
 
     auto FpsIterator = FpsRate.begin();
@@ -427,22 +442,22 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
     GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
         InContext,
         FVector2D(Part1IndentX, ChartHeight - Part1IndentY),
-        FVector2D(ChartWidth - Part1IndentX / 2.0f, ChartHeight - Part1IndentY),
+        FVector2D(ChartWidth - Part1IndentX, ChartHeight - Part1IndentY),
         CpuColor
         );
     // \
 
     GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
         InContext,
-        FVector2D(ChartWidth - Part1IndentX / 2.0f, ChartHeight - Part1IndentY),
-        FVector2D(ChartWidth - Part1IndentX / 2.0f - ArrowLength, ChartHeight - Part1IndentY - ArrowIndent),
+        FVector2D(ChartWidth - Part1IndentX, ChartHeight - Part1IndentY),
+        FVector2D(ChartWidth - Part1IndentX - ArrowLength, ChartHeight - Part1IndentY - ArrowIndent),
         CpuColor
         );
     // /
     GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
         InContext,
-        FVector2D(ChartWidth - Part1IndentX / 2.0f, ChartHeight - Part1IndentY),
-        FVector2D(ChartWidth - Part1IndentX / 2 - ArrowLength, ChartHeight - Part1IndentY + ArrowIndent),
+        FVector2D(ChartWidth - Part1IndentX, ChartHeight - Part1IndentY),
+        FVector2D(ChartWidth - Part1IndentX - ArrowLength, ChartHeight - Part1IndentY + ArrowIndent),
         CpuColor
         );
 
@@ -470,122 +485,103 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
         CpuColor
         );
 
-    float StepY = (Part1Height / Part1CapacityY1) * 10.0f;
+    float StepY1 = (Part1Height / Part1CapacityY1) * 10.0f;
+    float StepY2 = (Part1Height / Part1CapacityY2) * 10.0f;
     float StepFontSize = ConsoleFontSize / 2.0f;
 
-    for (int Point = 1; Point < 11; ++Point)
+    for (int Point = 1; ; ++Point)
+    {        
+        if (Point * 10 < Part1CapacityY1)
+        {
+            GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+                InContext,
+                FVector2D(Part1IndentX, ChartHeight - Part1IndentY - StepY1 * Point),
+                FVector2D(Part1IndentX - ArrowIndent / 2.0f - ArrowIndent / 4.0, ChartHeight - Part1IndentY - StepY1 * Point),
+                CpuColor
+                );
+
+            GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
+                InContext,
+                FText::FromString(FString::Printf(TEXT("%lld"), Point * 10)),
+                FVector2D(Part1IndentX - ArrowIndent / 2.0f - ArrowIndent / 4.0, ChartHeight - Part1IndentY - StepY1 * Point),
+                ConsoleFont,
+                StepFontSize,
+                ConsoleFontTypeFace,
+                CpuColor
+                );
+        }
+        else
+        {
+            if (Part1CapacityY1 > Part1CapacityY2)
+            {
+                break;
+            }
+        }
+
+        if (Point * 10 < Part1CapacityY2)
+        {
+            FString Value = FString::Printf(TEXT("%lld"), Point * 10);
+
+            float ValueWidth, ValueHeight;
+            GetTextLength(ConsoleFont, Value, StepFontSize, ValueWidth, ValueHeight);
+
+            GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+                InContext,
+                FVector2D(Part1IndentX, ChartHeight - Part1IndentY - StepY2 * Point),
+                FVector2D(Part1IndentX + ArrowIndent / 2.0f + ArrowIndent / 4.0, ChartHeight - Part1IndentY - StepY2 * Point),
+                FpsColor
+                );
+
+            GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
+                InContext,
+                FText::FromString(Value),
+                FVector2D(Part1IndentX + ArrowIndent / 2.0f + ArrowIndent / 4.0, ChartHeight - Part1IndentY - StepY2 * Point),
+                ConsoleFont,
+                StepFontSize,
+                ConsoleFontTypeFace,
+                FpsColor
+                );
+        }
+        else
+        {
+            if (Part1CapacityY2 > Part1CapacityY1)
+            {
+                break;
+            }
+        }
+    }
+
     {
-        
-        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-            InContext,
-            FVector2D(Part1IndentX, ChartHeight - Part1IndentY - StepY * Point),
-            FVector2D(Part1IndentX - ArrowIndent / 2.0f- ArrowIndent / 4.0, ChartHeight - Part1IndentY - StepY * Point),
-            CpuColor
-            );
+        FString Hint = "CPU";
+        float SizeX = 0.0f, SizeY = 0.0f;
+        GetTextLength(ConsoleFont, Hint, ConsoleFontSize, SizeX, SizeY);
 
         GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
             InContext,
-            FText::FromString(FString::Printf(TEXT("%lld"), Point * 10)),
-            FVector2D(Part1IndentX - ArrowIndent / 2.0f - ArrowIndent / 4.0, ChartHeight - Part1IndentY - StepY * Point),
+            FText::FromString(Hint),
+            FVector2D(Part1IndentX - 0.01 * ArrowLength - SizeX, Part1IndentY / 2.0f - SizeY),
             ConsoleFont,
-            StepFontSize,
+            ConsoleFontSize,
             ConsoleFontTypeFace,
             CpuColor
             );
+    }
 
-        FString Value = FString::Printf(TEXT("%lld"), Point * 10);
-        float ValueWidth = ConsoleFont->GetStringSize(*Value);
-
-        auto FontInfo = ConsoleFont->GetLegacySlateFontInfo();
-        float SizeDevider = FontInfo.Size / StepFontSize;
-        ValueWidth /= SizeDevider;
-        
-        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-            InContext,
-            //FVector2D(Part1IndentX, ChartHeight - Part1IndentY - StepY * Point),
-            //FVector2D(Part1IndentX + ArrowIndent / 2.0f + ArrowIndent / 4.0, ChartHeight - Part1IndentY - StepY * Point),
-            FVector2D( Part1IndentX + 0.1 * ArrowIndent, ChartHeight - Part1IndentY - StepY * Point),
-            FVector2D( Part1IndentX + 0.1 * ArrowIndent+ValueWidth, ChartHeight - Part1IndentY - StepY * Point),
-            FpsColor
-            );
+    {
+        FString Hint = "FPS";
+        float SizeX = 0.0f, SizeY = 0.0f;
+        GetTextLength(ConsoleFont, Hint, ConsoleFontSize, SizeX, SizeY);
 
         GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
             InContext,
-            FText::FromString(Value),
-            //FVector2D(Part1IndentX + ArrowIndent / 2.0f + ArrowIndent / 4.0 - ValueWidth, ChartHeight - Part1IndentY - StepY * Point),
-            FVector2D( Part1IndentX + 0.1 * ArrowIndent, ChartHeight - Part1IndentY - StepY * Point),
+            FText::FromString(Hint),
+            FVector2D(Part1IndentX + 0.01, Part1IndentY / 2.0f - SizeY),
             ConsoleFont,
-            StepFontSize,
+            ConsoleFontSize,
             ConsoleFontTypeFace,
             FpsColor
             );
     }
-
-    /*GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-        InContext,
-        FVector2D(Part1IndentX, ChartHeight - Part1IndentY),
-        FVector2D(Part1IndentX, Part1IndentY / 2.0f),
-        CpuColor
-        );
-    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-        InContext,
-        FVector2D(Part1IndentX, Part1IndentY / 2.0f),
-        FVector2D(Part1IndentX - ArrowIndent, Part1IndentY / 2.0f + ArrowLength),
-        CpuColor
-        );
-    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-        InContext,
-        FVector2D(Part1IndentX, Part1IndentY / 2.0f),
-        FVector2D(Part1IndentX + ArrowIndent, Part1IndentY / 2.0f + ArrowLength),
-        CpuColor
-        );*/
-
-    FString CpuHint = "CPU";
-    int32 CpuHintWidth = ConsoleFont->GetStringSize(*CpuHint);
-    int32 CpuHintHeight = ConsoleFont->GetStringHeightSize(*CpuHint);
-    
-    GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
-        InContext,
-        FText::FromString(CpuHint),
-        FVector2D(Part1IndentX - CpuHintWidth / 2.0f, Part1IndentY / 2.0f - CpuHintHeight),
-        ConsoleFont,
-        ConsoleFontSize,
-        ConsoleFontTypeFace,
-        CpuColor
-        );    
-
-    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-        InContext,
-        FVector2D(Part1IndentX / 2.0f, ChartHeight - Part1IndentY),
-        FVector2D(Part1IndentX / 2.0f, Part1IndentY / 2.0f),
-        FpsColor
-        );
-    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-        InContext,
-        FVector2D(Part1IndentX / 2.0f, Part1IndentY / 2.0f),
-        FVector2D(Part1IndentX / 2.0f - ArrowIndent, Part1IndentY / 2.0f + ArrowLength),
-        FpsColor
-        );
-    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-        InContext,
-        FVector2D(Part1IndentX / 2.0f, Part1IndentY / 2.0f),
-        FVector2D(Part1IndentX / 2.0f + ArrowIndent, Part1IndentY / 2.0f + ArrowLength),
-        FpsColor
-        );
-
-    FString FpsHint = "FPS";
-    int32 FpsHintWidth = ConsoleFont->GetStringSize(*FpsHint);
-    int32 FpsHintHeight = ConsoleFont->GetStringHeightSize(*FpsHint);
-
-    GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
-        InContext,
-        FText::FromString("FPS"),
-        FVector2D(Part1IndentX / 2.0f - FpsHintWidth / 2.0f, Part1IndentY / 2.0f - 1.01 * FpsHintHeight),
-        ConsoleFont,
-        ConsoleFontSize,
-        ConsoleFontTypeFace,
-        FpsColor
-        );
 
     int MessageIndex = 0;
     
@@ -625,41 +621,25 @@ void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
         CpuConsumption.pop_front();
     }
 
+    float CurrentFps = 1.f / InDeltaTime;
+    FpsRateCache.push_back(CurrentFps);
+    
+    query.Record();
+    float CurrentCpuConsumption = query.vciSelectedCounters[0].logs.back().value;
+    CpuConsumptionCache.push_back(CurrentCpuConsumption);
+
     if ((LastQueryDelta < 0) || (LastQueryDelta >= ChartResolution))
     {
         LastQueryDelta = 0.0;
 
         {
-            float CurrentValue = 1.f / InDeltaTime;
-
-            int Step = 1;
-            float Summary = CurrentValue;
-
-            /*for (auto FpsIterator = FpsRate.rbegin(); (Step < SmothingWindow) && (FpsIterator != FpsRate.rend()); ++FpsIterator, ++Step)
-            {
-                Summary += *FpsIterator;
-            }
-
-            Summary /= float(Step);*/
-
-            FpsRate.push_back(Summary);
+            FpsRate.push_back(int(std::accumulate(FpsRateCache.begin(), FpsRateCache.end(), 0.0f) / float(FpsRateCache.size())));
+            FpsRateCache.resize(0);
         }
 
         {
-            query.Record();
-            float CurrentValue = query.vciSelectedCounters[0].logs.back().value;
-
-            int Step = 1;
-            float Summary = CurrentValue;
-
-            /*for (auto FpsIterator = FpsRate.rbegin(); (Step < SmothingWindow) && (FpsIterator != FpsRate.rend()); ++FpsIterator, ++Step)
-            {
-                Summary += *FpsIterator;
-            }
-
-            Summary /= float(Step);*/
-
-            CpuConsumption.push_back(Summary);
+            CpuConsumption.push_back(int(std::accumulate(CpuConsumptionCache.begin(), CpuConsumptionCache.end(), 0.0f) / float(CpuConsumptionCache.size())));
+            CpuConsumptionCache.resize(0);
         }
 
         {
