@@ -241,8 +241,9 @@ bool UMediaTestFunctionLibrary::GrabLaunchOption(FString& Options, FString& Resu
     FString LaunchOption;
     LaunchOption.Reserve(Options.Len());
     bool SkipDash = false;
+    bool Break = false;
 
-    for (Index = 1; Index < Options.Len(); ++Index)
+    for (Index = 1; !Break && (Index < Options.Len()); ++Index)
     {
         TCHAR Char = Options[Index];
 
@@ -260,9 +261,10 @@ bool UMediaTestFunctionLibrary::GrabLaunchOption(FString& Options, FString& Resu
             // Don't allow --LaunchOptionName
             return false;
 
-        // Don't allow extra spaces, must be -LaunchOptionName
         case L' ':
         case L'\t':
+            Break = true;
+
             break;
 
         // Don't allow escaping in the launch option

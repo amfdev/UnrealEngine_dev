@@ -15,9 +15,13 @@ class MEDIATESTAMFCPP_API UCustomPaintWidget:
 {
 protected:
     std::list< float > FpsRate;
+    std::list< float > FpsRateRounded;
     std::vector< float > FpsRateCache;
+    
     std::list< float > CpuConsumption;
+    std::list< float > CpuConsumptionRounded;
     std::vector< float > CpuConsumptionCache;
+    
     std::list< float > GpuConsumption;
     
     std::list< std::tuple<FString, FDateTime> > ConsoleMessages;
@@ -26,8 +30,14 @@ protected:
     FName ConsoleFontTypeFace;
     FLinearColor ConsoleFontColor;
     int32 ConsoleDelaySeconds;
+    
+    mutable int32 FrameCounter;
+    mutable int32 FrameCount;
+    mutable FDateTime FrameCounterStart;
 
     float LastQueryDelta;
+
+    int RoundingWindow;
 
 public:
     GENERATED_BODY()

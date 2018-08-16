@@ -358,16 +358,16 @@ void UCustomPaintWidget::GetTextLength(UFont* Font, const FString& String, float
 }
 
 int ChartCapacity = 200;
-float ChartResolution = 0.1f;
+float ChartResolution = 0.999f;
 FLinearColor FpsColor = FLinearColor::Blue;
 FLinearColor CpuColor = FLinearColor::White;
-float SmothingWindow = 5;
 
 UCustomPaintWidget::UCustomPaintWidget(const FObjectInitializer& ObjectInitializer):
     UUserWidget(ObjectInitializer),
     LastQueryDelta(-0.5f),
     ConsoleFont(nullptr),
-    ConsoleDelaySeconds(12)
+    ConsoleDelaySeconds(12),
+    RoundingWindow(5)
 {
     FpsRateCache.resize(128);
     CpuConsumptionCache.resize(128);
@@ -378,6 +378,34 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
     UUserWidget::NativePaint(InContext);
 
     const FVector2D ViewportSize = InContext.AllottedGeometry.Size;
+
+    if (!ConsoleFont)
+    {
+        GetDefault<UWidgetBlueprintLibrary>()->DrawText(
+            InContext,
+            "Error: font not set for performace widget",
+            FVector2D(ViewportSize.X / 2.0f, ViewportSize.Y / 2.0f),
+            FLinearColor::Red
+            );
+
+        return;
+    }
+
+    auto Now = FDateTime::Now();
+    auto CounterStartDelta = Now - FrameCounterStart;
+    static auto OneSecond = FTimespan(0, 0, 1);
+
+    if (CounterStartDelta >= OneSecond)
+    {
+        auto Fps = double(FrameCounter) / CounterStartDelta.GetTotalSeconds();
+        FrameCount = Fps;//int(Fps);
+        FrameCounter = 0;
+        FrameCounterStart = Now;
+    }
+    else
+    {
+        ++FrameCounter;
+    }    
 
     float ChartWidth = 2 * ViewportSize.X / 3;// InContext.MyCullingRect.Right - InContext.MyCullingRect.Left;
     float ChartHeight = ViewportSize.Y;
@@ -394,18 +422,18 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
     float Part2Width = ChartWidth / 3.0f;
     
     float Part1CapacityX = ChartCapacity + 1;
-    float Part1CapacityY1 = 110.0f;
-    float Part1CapacityY2 = 200.0f;
+    float Part1CapacityCpu = 110.0f;
+    float Part1CapacityFps = 200.0f;
 
     float Part1RateX = Part1Width / Part1CapacityX;
-    float Part1RateY1 = ( ChartHeight - 1.01f * ArrowLength ) / Part1CapacityY1;
-    float Part1RateY2 = ( ChartHeight - 1.01f * ArrowLength ) / Part1CapacityY2;
+    float Part1RateYCpu = ( ChartHeight - 1.01f * ArrowLength ) / Part1CapacityCpu;
+    float Part1RateYFps = ( ChartHeight - 1.01f * ArrowLength ) / Part1CapacityFps;
 
     float Part1IndentX = ChartWidth / 12.0f;
     float Part1IndentY = ChartHeight / 8.0f;
 
-    auto FpsIterator = FpsRate.begin();
-    auto CpuIterator = CpuConsumption.begin();
+    auto CpuIterator = CpuConsumptionRounded.begin();
+    auto FpsIterator = FpsRateRounded.begin();
     int PointIndex = 0;
 
     for
@@ -418,10 +446,11 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
         float XL = Part1IndentX + Part1RateX * PointIndex;
         float XR = Part1IndentX + Part1RateX * (PointIndex + 1);
 
-        float Y1 = ChartHeight - Part1IndentY - Part1RateY1 * *FpsIterator;
-        float Y2 = ChartHeight - Part1IndentY - Part1RateY1 * *++FpsIterator;
-        float Y3 = ChartHeight - Part1IndentY - Part1RateY2 * *CpuIterator;
-        float Y4 = ChartHeight - Part1IndentY - Part1RateY2 * *++CpuIterator;
+        float Y1 = ChartHeight - Part1IndentY - Part1RateYFps * *FpsIterator;
+        float Y2 = ChartHeight - Part1IndentY - Part1RateYFps * *++FpsIterator;
+
+        float Y3 = ChartHeight - Part1IndentY - Part1RateYCpu * *CpuIterator;
+        float Y4 = ChartHeight - Part1IndentY - Part1RateYCpu * *++CpuIterator;
 
         GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
             InContext,
@@ -438,6 +467,49 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
             );
     }
 
+    if(FpsRateRounded.size())
+    {
+        FString Value = FString::Printf(TEXT("FPS: %lld"), int(*FpsRateRounded.rbegin()));
+
+        float ValueWidth, ValueHeight;
+        GetTextLength(ConsoleFont, Value, ConsoleFontSize, ValueWidth, ValueHeight);
+
+        float XR = Part1IndentX + Part1RateX * (FpsRateRounded.size() + 1);
+        float YR = ChartHeight - Part1IndentY - Part1RateYCpu * *FpsRateRounded.rbegin() - ValueHeight;
+
+        GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
+            InContext,
+            FText::FromString(Value),
+            FVector2D(XR, YR),
+            ConsoleFont,
+            ConsoleFontSize,
+            ConsoleFontTypeFace,
+            FpsColor
+            );
+    }
+
+    if(CpuConsumptionRounded.size())
+    {
+        FString Value = FString::Printf(TEXT("CPU: %lld%%"), int(*CpuConsumptionRounded.rbegin()));
+
+        float ValueWidth, ValueHeight;
+        GetTextLength(ConsoleFont, Value, ConsoleFontSize, ValueWidth, ValueHeight);
+
+        float XR = Part1IndentX + Part1RateX * (CpuConsumptionRounded.size() + 1);
+        float YR = ChartHeight - Part1IndentY - Part1RateYFps * *CpuConsumptionRounded.rbegin() - ValueHeight;
+
+        GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
+            InContext,
+            FText::FromString(Value),
+            FVector2D(XR, YR),
+            ConsoleFont,
+            ConsoleFontSize,
+            ConsoleFontTypeFace,
+            CpuColor
+            );
+    }
+
+    //draw arrows
     // ---
     GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
         InContext,
@@ -485,25 +557,25 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
         CpuColor
         );
 
-    float StepY1 = (Part1Height / Part1CapacityY1) * 10.0f;
-    float StepY2 = (Part1Height / Part1CapacityY2) * 10.0f;
+    //float StepY1 = (Part1Height / Part1CapacityCpu) * 10.0f;
+    //float StepY2 = (Part1Height / Part1CapacityFps) * 10.0f;
     float StepFontSize = ConsoleFontSize / 2.0f;
 
-    for (int Point = 1; ; ++Point)
+    for (int Point = 10; ; Point += 10 )
     {        
-        if (Point * 10 < Part1CapacityY1)
+        if (Point < Part1CapacityCpu)
         {
             GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
                 InContext,
-                FVector2D(Part1IndentX, ChartHeight - Part1IndentY - StepY1 * Point),
-                FVector2D(Part1IndentX - ArrowIndent / 2.0f - ArrowIndent / 4.0, ChartHeight - Part1IndentY - StepY1 * Point),
+                FVector2D(Part1IndentX, ChartHeight - Part1IndentY - Part1RateYCpu * Point),
+                FVector2D(Part1IndentX - ArrowIndent / 2.0f - ArrowIndent / 4.0, ChartHeight - Part1IndentY - Part1RateYCpu * Point),
                 CpuColor
                 );
 
             GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
                 InContext,
-                FText::FromString(FString::Printf(TEXT("%lld"), Point * 10)),
-                FVector2D(Part1IndentX - ArrowIndent / 2.0f - ArrowIndent / 4.0, ChartHeight - Part1IndentY - StepY1 * Point),
+                FText::FromString(FString::Printf(TEXT("%lld"), Point)),
+                FVector2D(Part1IndentX - ArrowIndent / 2.0f - ArrowIndent / 4.0, ChartHeight - Part1IndentY - Part1RateYCpu * Point),
                 ConsoleFont,
                 StepFontSize,
                 ConsoleFontTypeFace,
@@ -512,30 +584,30 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
         }
         else
         {
-            if (Part1CapacityY1 > Part1CapacityY2)
+            if (Part1CapacityCpu > Part1CapacityFps)
             {
                 break;
             }
         }
 
-        if (Point * 10 < Part1CapacityY2)
+        if (Point < Part1CapacityFps)
         {
-            FString Value = FString::Printf(TEXT("%lld"), Point * 10);
+            FString Value = FString::Printf(TEXT("%lld"), Point);
 
             float ValueWidth, ValueHeight;
             GetTextLength(ConsoleFont, Value, StepFontSize, ValueWidth, ValueHeight);
 
             GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
                 InContext,
-                FVector2D(Part1IndentX, ChartHeight - Part1IndentY - StepY2 * Point),
-                FVector2D(Part1IndentX + ArrowIndent / 2.0f + ArrowIndent / 4.0, ChartHeight - Part1IndentY - StepY2 * Point),
+                FVector2D(Part1IndentX, ChartHeight - Part1IndentY - Part1RateYFps * Point),
+                FVector2D(Part1IndentX + ArrowIndent / 2.0f + ArrowIndent / 4.0, ChartHeight - Part1IndentY - Part1RateYFps * Point),
                 FpsColor
                 );
 
             GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
                 InContext,
                 FText::FromString(Value),
-                FVector2D(Part1IndentX + ArrowIndent / 2.0f + ArrowIndent / 4.0, ChartHeight - Part1IndentY - StepY2 * Point),
+                FVector2D(Part1IndentX + ArrowIndent / 2.0f + ArrowIndent / 4.0 - ValueWidth, ChartHeight - Part1IndentY - Part1RateYFps * Point),
                 ConsoleFont,
                 StepFontSize,
                 ConsoleFontTypeFace,
@@ -544,7 +616,7 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
         }
         else
         {
-            if (Part1CapacityY2 > Part1CapacityY1)
+            if (Part1CapacityFps > Part1CapacityCpu)
             {
                 break;
             }
@@ -618,28 +690,62 @@ void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
     if (FpsRate.size() == ChartCapacity)
     {
         FpsRate.pop_front();
+        FpsRateRounded.pop_front();
+
         CpuConsumption.pop_front();
+        CpuConsumptionRounded.pop_front();
     }
 
-    float CurrentFps = 1.f / InDeltaTime;
+    float CurrentFps = FrameCount;// ? FrameCount : 1.f / InDeltaTime;
     FpsRateCache.push_back(CurrentFps);
     
-    query.Record();
-    float CurrentCpuConsumption = query.vciSelectedCounters[0].logs.back().value;
-    CpuConsumptionCache.push_back(CurrentCpuConsumption);
-
     if ((LastQueryDelta < 0) || (LastQueryDelta >= ChartResolution))
     {
+        query.Record();
+        float CurrentCpuConsumption = query.vciSelectedCounters[0].logs.back().value;
+        //CpuConsumptionCache.push_back(CurrentCpuConsumption);
+
         LastQueryDelta = 0.0;
 
         {
             FpsRate.push_back(int(std::accumulate(FpsRateCache.begin(), FpsRateCache.end(), 0.0f) / float(FpsRateCache.size())));
             FpsRateCache.resize(0);
+
+            /*if (FpsRate.size() >= RoundingWindow)
+            {
+                auto Element = FpsRate.rbegin();
+                float Rounded = *Element++;
+                for (int Index = 2; Index < RoundingWindow; ++Index)
+                {
+                    Rounded += *Element++;
+                }
+                FpsRateRounded.push_back(Rounded/float(RoundingWindow));
+            }
+            else*/
+            {
+                FpsRateRounded.push_back(*FpsRate.rbegin());
+            }
         }
 
         {
-            CpuConsumption.push_back(int(std::accumulate(CpuConsumptionCache.begin(), CpuConsumptionCache.end(), 0.0f) / float(CpuConsumptionCache.size())));
-            CpuConsumptionCache.resize(0);
+            CpuConsumption.push_back(CurrentCpuConsumption);
+            //CpuConsumption.push_back(int(std::accumulate(CpuConsumptionCache.begin(), CpuConsumptionCache.end(), 0.0f) / float(CpuConsumptionCache.size())));
+            //CpuConsumptionCache.resize(0);
+
+            /*if (CpuConsumption.size() >= RoundingWindow)
+            {
+                auto Element = CpuConsumption.rbegin();
+                float Rounded = *Element++;
+                for (int Index = 2; Index < RoundingWindow; ++Index)
+                {
+                    Rounded += *Element++;
+                }
+                CpuConsumptionRounded.push_back(Rounded/float(RoundingWindow));
+            }
+            else*/
+            {
+                CpuConsumptionRounded.push_back(*CpuConsumption.rbegin());
+            }
         }
 
         {
