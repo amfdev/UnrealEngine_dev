@@ -98,62 +98,58 @@ std::vector<PCTSTR> GetProcessNames()
     TCHAR * szProcessName;
     TCHAR * szProcessNameWithPrefix;
 
-    fResult = EnumProcesses(dwProcessID, sizeof(dwProcessID), &cbProcess);
-
-    if(!fResult)
+    if(EnumProcesses(dwProcessID, sizeof(dwProcessID), &cbProcess))
     {
-        goto cleanup;
-    }
+        cProcessID = cbProcess / sizeof(DWORD);
 
-    cProcessID = cbProcess / sizeof(DWORD);
-
-    for( index = 0; index < cProcessID; index++ )
-    {
-        szProcessName = new TCHAR[MAX_PATH];		
-        hProcess = OpenProcess( PROCESS_QUERY_INFORMATION |
-            PROCESS_VM_READ,
-            FALSE, dwProcessID[index] );
-        if( NULL != hProcess )
+        for( index = 0; index < cProcessID; index++ )
         {
-            if ( EnumProcessModulesEx( hProcess, lphModule, sizeof(lphModule), 
-                &cbNeeded,LIST_MODULES_ALL) )
+            szProcessName = new TCHAR[MAX_PATH];		
+            hProcess = OpenProcess( PROCESS_QUERY_INFORMATION |
+                PROCESS_VM_READ,
+                FALSE, dwProcessID[index] );
+            if( NULL != hProcess )
             {
-                if( GetModuleBaseName( hProcess, lphModule[0], szProcessName, 
-                    MAX_PATH ) )
+                if ( EnumProcessModulesEx( hProcess, lphModule, sizeof(lphModule), 
+                    &cbNeeded,LIST_MODULES_ALL) )
                 {
-                    len = _tcslen(szProcessName);
-                    _tcscpy(szProcessName+len-4, TEXT("\0"));
-
-                    bool fProcessExists = false;
-                    int count = 0;
-                    szProcessNameWithPrefix = new TCHAR[MAX_PATH];
-                    _stprintf(szProcessNameWithPrefix, TEXT("%s"), szProcessName);
-                    do
+                    if( GetModuleBaseName( hProcess, lphModule[0], szProcessName, 
+                        MAX_PATH ) )
                     {
-                        if(count>0)
-                        {
-                            _stprintf(szProcessNameWithPrefix,TEXT("%s#%d"),szProcessName,count);
-                        }
-                        fProcessExists = false;
-                        for(auto it = vProcessNames.begin(); it < vProcessNames.end(); it++)
-                        {
-                            if(_tcscmp(*it,szProcessNameWithPrefix)==0)
-                            {
-                                fProcessExists = true;
-                                break;
-                            }
-                        }					
-                        count++;
-                    }
-                    while(fProcessExists);
+                        len = _tcslen(szProcessName);
+                        _tcscpy(szProcessName+len-4, TEXT("\0"));
 
-                    vProcessNames.push_back(szProcessNameWithPrefix);
+                        bool fProcessExists = false;
+                        int count = 0;
+                        szProcessNameWithPrefix = new TCHAR[MAX_PATH];
+                        _stprintf(szProcessNameWithPrefix, TEXT("%s"), szProcessName);
+                        do
+                        {
+                            if(count>0)
+                            {
+                                _stprintf(szProcessNameWithPrefix,TEXT("%s#%d"),szProcessName,count);
+                            }
+                            fProcessExists = false;
+                            for(auto it = vProcessNames.begin(); it < vProcessNames.end(); it++)
+                            {
+                                if(_tcscmp(*it,szProcessNameWithPrefix)==0)
+                                {
+                                    fProcessExists = true;
+                                    break;
+                                }
+                            }					
+                            count++;
+                        }
+                        while(fProcessExists);
+
+                        vProcessNames.push_back(szProcessNameWithPrefix);
+                    }
                 }
             }
         }
-    }
+    }    
 
-cleanup:
+    //cleanup
     szProcessName = NULL;
     szProcessNameWithPrefix = NULL;
     return vProcessNames;
@@ -357,7 +353,6 @@ void UCustomPaintWidget::GetTextLength(UFont* Font, const FString& String, float
     SizeY = float(Height) / SizeDevider;
 }
 
-int ChartCapacity = 200;
 float ChartResolution = 0.999f;
 FLinearColor FpsColor = FLinearColor::Blue;
 FLinearColor CpuColor = FLinearColor::White;
@@ -365,9 +360,7 @@ FLinearColor CpuColor = FLinearColor::White;
 UCustomPaintWidget::UCustomPaintWidget(const FObjectInitializer& ObjectInitializer):
     UUserWidget(ObjectInitializer),
     LastQueryDelta(-0.5f),
-    ConsoleFont(nullptr),
-    ConsoleDelaySeconds(12),
-    RoundingWindow(5)
+    ConsoleFont(nullptr)
 {
     FpsRateCache.resize(128);
     CpuConsumptionCache.resize(128);
@@ -391,292 +384,301 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
         return;
     }
 
-    auto Now = FDateTime::Now();
-    auto CounterStartDelta = Now - FrameCounterStart;
-    static auto OneSecond = FTimespan(0, 0, 1);
-
-    if (CounterStartDelta >= OneSecond)
+    //count frames
     {
-        auto Fps = double(FrameCounter) / CounterStartDelta.GetTotalSeconds();
-        FrameCount = Fps;//int(Fps);
-        FrameCounter = 0;
-        FrameCounterStart = Now;
-    }
-    else
-    {
-        ++FrameCounter;
-    }    
+        auto Now = FDateTime::Now();
+        auto CounterStartDelta = Now - FrameCounterStart;
+        static auto OneSecond = FTimespan(0, 0, 1);
 
-    float ChartWidth = 2 * ViewportSize.X / 3;// InContext.MyCullingRect.Right - InContext.MyCullingRect.Left;
-    float ChartHeight = ViewportSize.Y;
-
-    float ArrowLength = ChartWidth / 20.0f;
-    float ArrowIndent = ChartWidth / 40.0f;
-
-    int Bottom = ChartHeight;
-    int Right = ChartWidth;
-
-    float Part1Width = 2.0f * ChartWidth / 3.0f;
-    float Part1Height = 6.0f * ChartHeight / 8.0f;
-
-    float Part2Width = ChartWidth / 3.0f;
-    
-    float Part1CapacityX = ChartCapacity + 1;
-    float Part1CapacityCpu = 110.0f;
-    float Part1CapacityFps = 130.0f;
-
-    float Part1RateX = Part1Width / Part1CapacityX;
-    float Part1RateYCpu = ( ChartHeight - 1.01f * ArrowLength ) / Part1CapacityCpu;
-    float Part1RateYFps = ( ChartHeight - 1.01f * ArrowLength ) / Part1CapacityFps;
-
-    float Part1IndentX = ChartWidth / 12.0f;
-    float Part1IndentY = ChartHeight / 8.0f;
-
-    auto CpuIterator = CpuConsumptionRounded.begin();
-    auto FpsIterator = FpsRateRounded.begin();
-    int PointIndex = 0;
-
-    for
-    (
-        ;
-        (FpsRate.size() > 1) && (PointIndex < FpsRate.size() - 1);
-        ++PointIndex
-    )
-    {
-        float XL = Part1IndentX + Part1RateX * PointIndex;
-        float XR = Part1IndentX + Part1RateX * (PointIndex + 1);
-
-        float Y1 = ChartHeight - Part1IndentY - Part1RateYFps * *FpsIterator;
-        float Y2 = ChartHeight - Part1IndentY - Part1RateYFps * *++FpsIterator;
-
-        float Y3 = ChartHeight - Part1IndentY - Part1RateYCpu * *CpuIterator;
-        float Y4 = ChartHeight - Part1IndentY - Part1RateYCpu * *++CpuIterator;
-
-        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-            InContext,
-            FVector2D(XL, Y1),
-            FVector2D(XR, Y2),
-            FpsColor
-            );
-
-        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-            InContext,
-            FVector2D(XL, Y3),
-            FVector2D(XR, Y4),
-            CpuColor
-            );
-    }
-
-    if(FpsRateRounded.size())
-    {
-        FString Value = FString::Printf(TEXT("FPS: %lld"), int(*FpsRateRounded.rbegin()));
-
-        float ValueWidth, ValueHeight;
-        GetTextLength(ConsoleFont, Value, ConsoleFontSize, ValueWidth, ValueHeight);
-
-        float XR = Part1IndentX + Part1RateX * (FpsRateRounded.size() + 1);
-        float YR = ChartHeight - Part1IndentY - Part1RateYFps * *FpsRateRounded.rbegin() - ValueHeight;
-
-        GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
-            InContext,
-            FText::FromString(Value),
-            FVector2D(XR, YR),
-            ConsoleFont,
-            ConsoleFontSize,
-            ConsoleFontTypeFace,
-            FpsColor
-            );
-    }
-
-    if(CpuConsumptionRounded.size())
-    {
-        FString Value = FString::Printf(TEXT("CPU: %lld%%"), int(*CpuConsumptionRounded.rbegin()));
-
-        float ValueWidth, ValueHeight;
-        GetTextLength(ConsoleFont, Value, ConsoleFontSize, ValueWidth, ValueHeight);
-
-        float XR = Part1IndentX + Part1RateX * (CpuConsumptionRounded.size() + 1);
-        float YR = ChartHeight - Part1IndentY - Part1RateYCpu * *CpuConsumptionRounded.rbegin() - ValueHeight;
-
-        GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
-            InContext,
-            FText::FromString(Value),
-            FVector2D(XR, YR),
-            ConsoleFont,
-            ConsoleFontSize,
-            ConsoleFontTypeFace,
-            CpuColor
-            );
-    }
-
-    //draw arrows
-    // ---
-    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-        InContext,
-        FVector2D(Part1IndentX, ChartHeight - Part1IndentY),
-        FVector2D(ChartWidth - Part1IndentX, ChartHeight - Part1IndentY),
-        CpuColor
-        );
-    // \
-
-    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-        InContext,
-        FVector2D(ChartWidth - Part1IndentX, ChartHeight - Part1IndentY),
-        FVector2D(ChartWidth - Part1IndentX - ArrowLength, ChartHeight - Part1IndentY - ArrowIndent),
-        CpuColor
-        );
-    // /
-    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-        InContext,
-        FVector2D(ChartWidth - Part1IndentX, ChartHeight - Part1IndentY),
-        FVector2D(ChartWidth - Part1IndentX - ArrowLength, ChartHeight - Part1IndentY + ArrowIndent),
-        CpuColor
-        );
-
-    // |
-    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-        InContext,
-        FVector2D(Part1IndentX, ChartHeight - Part1IndentY),
-        FVector2D(Part1IndentX, Part1IndentY / 2.0f),
-        CpuColor
-        );
-
-    // /
-    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-        InContext,
-        FVector2D(Part1IndentX, Part1IndentY / 2.0f),
-        FVector2D(Part1IndentX - ArrowIndent, Part1IndentY / 2.0f + ArrowLength),
-        CpuColor
-        );
-    // \
-
-    GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-        InContext,
-        FVector2D(Part1IndentX, Part1IndentY / 2.0f),
-        FVector2D(Part1IndentX + ArrowIndent, Part1IndentY / 2.0f + ArrowLength),
-        CpuColor
-        );
-
-    float StepFontSize = ConsoleFontSize / 2.0f;
-
-    for (int Point = 10; ; Point += 10 )
-    {        
-        if (Point < Part1CapacityCpu)
+        if (CounterStartDelta >= OneSecond)
         {
-            GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-                InContext,
-                FVector2D(Part1IndentX, ChartHeight - Part1IndentY - Part1RateYCpu * Point),
-                FVector2D(Part1IndentX - ArrowIndent / 2.0f - ArrowIndent / 4.0, ChartHeight - Part1IndentY - Part1RateYCpu * Point),
-                CpuColor
-                );
-
-            GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
-                InContext,
-                FText::FromString(FString::Printf(TEXT("%lld"), Point)),
-                FVector2D(Part1IndentX - ArrowIndent / 2.0f - ArrowIndent / 4.0, ChartHeight - Part1IndentY - Part1RateYCpu * Point),
-                ConsoleFont,
-                StepFontSize,
-                ConsoleFontTypeFace,
-                CpuColor
-                );
+            auto Fps = double(FrameCounter) / CounterStartDelta.GetTotalSeconds();
+            FrameCount = Fps;
+            FrameCounter = 0;
+            FrameCounterStart = Now;
         }
         else
         {
-            if (Part1CapacityCpu > Part1CapacityFps)
-            {
-                break;
-            }
+            ++FrameCounter;
         }
+    }
 
-        if (Point < Part1CapacityFps)
+    float LeftPartWidth = 2 * ViewportSize.X / 3;// InContext.MyCullingRect.Right - InContext.MyCullingRect.Left;
+    float LeftPartHeight = ViewportSize.Y;
+
+    float ArrowLength = LeftPartWidth / 20.0f;
+    float ArrowIndent = LeftPartWidth / 40.0f;
+
+    float ChartWidth = 2.0f * LeftPartWidth / 3.0f;
+    float ChartHeight = 6.0f * LeftPartHeight / 8.0f;
+    float ChartMarginX = LeftPartWidth / 12.0f;
+    float ChartMarginY = LeftPartHeight / 8.0f;
+
+    float ChartDensityTime = float(ChartWidth) / (ChartCapacityTime + 1);
+    float ChartDensityCpu = ( ChartHeight - 1.01f * ArrowLength ) / ChartCapacityCpu;
+    float ChartDensityFps = ( ChartHeight - 1.01f * ArrowLength ) / ChartCapacityFps;
+
+    //draw values chart
+    {
+        auto CpuIterator = CpuConsumptionRounded.begin();
+        auto FpsIterator = FpsRateRounded.begin();
+        int PointIndex = 0;
+
+        for
+        (
+            ;
+            (FpsRate.size() > 1) && (PointIndex < FpsRate.size() - 1);
+            ++PointIndex
+        )
         {
-            FString Value = FString::Printf(TEXT("%lld"), Point);
+            float XL = ChartMarginX + ChartDensityTime * PointIndex;
+            float XR = ChartMarginX + ChartDensityTime * (PointIndex + 1);
 
-            float ValueWidth, ValueHeight;
-            GetTextLength(ConsoleFont, Value, StepFontSize, ValueWidth, ValueHeight);
+            float Y1 = LeftPartHeight - ChartMarginY - ChartDensityFps * *FpsIterator;
+            float Y2 = LeftPartHeight - ChartMarginY - ChartDensityFps * *++FpsIterator;
+
+            float Y3 = LeftPartHeight - ChartMarginY - ChartDensityCpu * *CpuIterator;
+            float Y4 = LeftPartHeight - ChartMarginY - ChartDensityCpu * *++CpuIterator;
 
             GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
                 InContext,
-                FVector2D(Part1IndentX, ChartHeight - Part1IndentY - Part1RateYFps * Point),
-                FVector2D(Part1IndentX + ArrowIndent / 2.0f + ArrowIndent / 4.0, ChartHeight - Part1IndentY - Part1RateYFps * Point),
+                FVector2D(XL, Y1),
+                FVector2D(XR, Y2),
                 FpsColor
                 );
+
+            GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+                InContext,
+                FVector2D(XL, Y3),
+                FVector2D(XR, Y4),
+                CpuColor
+                );
+        }
+    }
+
+    //draw last (current) values
+    {
+        if (FpsRateRounded.size())
+        {
+            FString Value = FString::Printf(TEXT("FPS: %lld"), int(*FpsRateRounded.rbegin()));
+
+            float ValueWidth, ValueHeight;
+            GetTextLength(ConsoleFont, Value, ConsoleFontSize, ValueWidth, ValueHeight);
+
+            float XR = ChartMarginX + ChartDensityTime * (FpsRateRounded.size() + 1);
+            float YR = LeftPartHeight - ChartMarginY - ChartDensityFps * *FpsRateRounded.rbegin() - ValueHeight;
 
             GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
                 InContext,
                 FText::FromString(Value),
-                FVector2D(Part1IndentX + ArrowIndent / 2.0f + ArrowIndent / 4.0 - ValueWidth, ChartHeight - Part1IndentY - Part1RateYFps * Point),
+                FVector2D(XR, YR),
                 ConsoleFont,
-                StepFontSize,
+                ConsoleFontSize,
                 ConsoleFontTypeFace,
                 FpsColor
                 );
         }
-        else
+
+        if (CpuConsumptionRounded.size())
         {
-            if (Part1CapacityFps > Part1CapacityCpu)
-            {
-                break;
-            }
+            FString Value = FString::Printf(TEXT("CPU: %lld%%"), int(*CpuConsumptionRounded.rbegin()));
+
+            float ValueWidth, ValueHeight;
+            GetTextLength(ConsoleFont, Value, ConsoleFontSize, ValueWidth, ValueHeight);
+
+            float XR = ChartMarginX + ChartDensityTime * (CpuConsumptionRounded.size() + 1);
+            float YR = LeftPartHeight - ChartMarginY - ChartDensityCpu * *CpuConsumptionRounded.rbegin() - ValueHeight;
+
+            GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
+                InContext,
+                FText::FromString(Value),
+                FVector2D(XR, YR),
+                ConsoleFont,
+                ConsoleFontSize,
+                ConsoleFontTypeFace,
+                CpuColor
+                );
         }
     }
-
+    //draw arrows
     {
-        FString Hint = "CPU";
-        float SizeX = 0.0f, SizeY = 0.0f;
-        GetTextLength(ConsoleFont, Hint, ConsoleFontSize, SizeX, SizeY);
-
-        GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
+        // ---
+        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
             InContext,
-            FText::FromString(Hint),
-            FVector2D(Part1IndentX - 0.01 * ArrowLength - SizeX, Part1IndentY / 2.0f - SizeY),
-            ConsoleFont,
-            ConsoleFontSize,
-            ConsoleFontTypeFace,
+            FVector2D(ChartMarginX, LeftPartHeight - ChartMarginY),
+            FVector2D(LeftPartWidth - ChartMarginX, LeftPartHeight - ChartMarginY),
+            CpuColor
+            );
+        // \
+
+        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+            InContext,
+            FVector2D(LeftPartWidth - ChartMarginX, LeftPartHeight - ChartMarginY),
+            FVector2D(LeftPartWidth - ChartMarginX - ArrowLength, LeftPartHeight - ChartMarginY - ArrowIndent),
+            CpuColor
+            );
+        // /
+        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+            InContext,
+            FVector2D(LeftPartWidth - ChartMarginX, LeftPartHeight - ChartMarginY),
+            FVector2D(LeftPartWidth - ChartMarginX - ArrowLength, LeftPartHeight - ChartMarginY + ArrowIndent),
+            CpuColor
+            );
+
+        // |
+        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+            InContext,
+            FVector2D(ChartMarginX, LeftPartHeight - ChartMarginY),
+            FVector2D(ChartMarginX, ChartMarginY),
+            CpuColor
+            );
+
+        // /
+        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+            InContext,
+            FVector2D(ChartMarginX, ChartMarginY),
+            FVector2D(ChartMarginX - ArrowIndent, ChartMarginY + ArrowLength),
+            CpuColor
+            );
+        // \
+
+        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+            InContext,
+            FVector2D(ChartMarginX, ChartMarginY),
+            FVector2D(ChartMarginX + ArrowIndent, ChartMarginY + ArrowLength),
             CpuColor
             );
     }
 
+    //draw arrow hints
     {
-        FString Hint = "FPS";
-        float SizeX = 0.0f, SizeY = 0.0f;
-        GetTextLength(ConsoleFont, Hint, ConsoleFontSize, SizeX, SizeY);
-
-        GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
-            InContext,
-            FText::FromString(Hint),
-            FVector2D(Part1IndentX + 0.01, Part1IndentY / 2.0f - SizeY),
-            ConsoleFont,
-            ConsoleFontSize,
-            ConsoleFontTypeFace,
-            FpsColor
-            );
-    }
-
-    int MessageIndex = 0;
-    
-    for (auto Message = ConsoleMessages.rbegin(); Message != ConsoleMessages.rend(); ++Message, ++MessageIndex)
-    {
-        if (ConsoleFont)
         {
+            FString Hint = "CPU";
+            float SizeX = 0.0f, SizeY = 0.0f;
+            GetTextLength(ConsoleFont, Hint, ConsoleFontSize, SizeX, SizeY);
+
             GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
                 InContext,
-                FText::FromString(std::get<0>(*Message)),
-                FVector2D(ChartWidth, MessageIndex * 2 * ConsoleFontSize),
+                FText::FromString(Hint),
+                FVector2D(ChartMarginX - 0.01 * ArrowLength - SizeX, ChartMarginY - SizeY),
                 ConsoleFont,
                 ConsoleFontSize,
                 ConsoleFontTypeFace,
-                ConsoleFontColor
-                );
-        }
-        else
-        {
-            GetDefault<UWidgetBlueprintLibrary>()->DrawText(
-                InContext,
-                std::get<0>(*Message),
-                FVector2D(ChartWidth, MessageIndex * (ChartHeight / 11.0f)),
                 CpuColor
                 );
+        }
+
+        {
+            FString Hint = "FPS";
+            float SizeX = 0.0f, SizeY = 0.0f;
+            GetTextLength(ConsoleFont, Hint, ConsoleFontSize, SizeX, SizeY);
+
+            GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
+                InContext,
+                FText::FromString(Hint),
+                FVector2D(ChartMarginX + 0.01, ChartMarginY - SizeY),
+                ConsoleFont,
+                ConsoleFontSize,
+                ConsoleFontTypeFace,
+                FpsColor
+                );
+        }
+    }
+
+    //draw measurements
+    {
+        float StepFontSize = ConsoleFontSize / 2.0f;
+
+        for (int Point = 10; ; Point += 10)
+        {
+            if (Point < ChartCapacityCpu)
+            {
+                GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+                    InContext,
+                    FVector2D(ChartMarginX, LeftPartHeight - ChartMarginY - ChartDensityCpu * Point),
+                    FVector2D(ChartMarginX - ArrowIndent / 2.0f - ArrowIndent / 4.0, LeftPartHeight - ChartMarginY - ChartDensityCpu * Point),
+                    CpuColor
+                    );
+
+                GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
+                    InContext,
+                    FText::FromString(FString::Printf(TEXT("%lld"), Point)),
+                    FVector2D(ChartMarginX - ArrowIndent / 2.0f - ArrowIndent / 4.0, LeftPartHeight - ChartMarginY - ChartDensityCpu * Point),
+                    ConsoleFont,
+                    StepFontSize,
+                    ConsoleFontTypeFace,
+                    CpuColor
+                    );
+            }
+            else
+            {
+                if (ChartCapacityCpu > ChartCapacityFps)
+                {
+                    break;
+                }
+            }
+
+            if (Point < ChartCapacityFps)
+            {
+                FString Value = FString::Printf(TEXT("%lld"), Point);
+
+                float ValueWidth, ValueHeight;
+                GetTextLength(ConsoleFont, Value, StepFontSize, ValueWidth, ValueHeight);
+
+                GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
+                    InContext,
+                    FVector2D(ChartMarginX, LeftPartHeight - ChartMarginY - ChartDensityFps * Point),
+                    FVector2D(ChartMarginX + ArrowIndent / 2.0f + ArrowIndent / 4.0, LeftPartHeight - ChartMarginY - ChartDensityFps * Point),
+                    FpsColor
+                    );
+
+                GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
+                    InContext,
+                    FText::FromString(Value),
+                    FVector2D(ChartMarginX + ArrowIndent / 2.0f + ArrowIndent / 4.0 - ValueWidth, LeftPartHeight - ChartMarginY - ChartDensityFps * Point),
+                    ConsoleFont,
+                    StepFontSize,
+                    ConsoleFontTypeFace,
+                    FpsColor
+                    );
+            }
+            else
+            {
+                if (ChartCapacityFps > ChartCapacityCpu)
+                {
+                    break;
+                }
+            }
+        }
+    }
+    
+    //draw console messages
+    {
+        int MessageIndex = 0;
+
+        for (auto Message = ConsoleMessages.rbegin(); Message != ConsoleMessages.rend(); ++Message, ++MessageIndex)
+        {
+            if (ConsoleFont)
+            {
+                GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
+                    InContext,
+                    FText::FromString(std::get<0>(*Message)),
+                    FVector2D(LeftPartWidth, MessageIndex * 2 * ConsoleFontSize),
+                    ConsoleFont,
+                    ConsoleFontSize,
+                    ConsoleFontTypeFace,
+                    ConsoleFontColor
+                    );
+            }
+            else
+            {
+                GetDefault<UWidgetBlueprintLibrary>()->DrawText(
+                    InContext,
+                    std::get<0>(*Message),
+                    FVector2D(LeftPartWidth, MessageIndex * (LeftPartHeight / 11.0f)),
+                    CpuColor
+                    );
+            }
         }
     }
 }
@@ -685,7 +687,7 @@ void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
 {
     UUserWidget::NativeTick(MyGeometry, InDeltaTime);
 
-    if (FpsRate.size() == ChartCapacity)
+    if (FpsRate.size() == ChartCapacityTime)
     {
         FpsRate.pop_front();
         FpsRateRounded.pop_front();
@@ -694,10 +696,10 @@ void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
         CpuConsumptionRounded.pop_front();
     }
 
-    float CurrentFps = FrameCount;// ? FrameCount : 1.f / InDeltaTime;
+    float CurrentFps = FrameCount;
     FpsRateCache.push_back(CurrentFps);
     
-    if ((LastQueryDelta < 0) || (LastQueryDelta >= ChartResolution))
+    if (!SkipFirstFrame && (LastQueryDelta < 0) || (LastQueryDelta >= ChartResolution))
     {
         query.Record();
         float CurrentCpuConsumption = query.vciSelectedCounters[0].logs.back().value;

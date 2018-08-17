@@ -29,15 +29,20 @@ protected:
     int32 ConsoleFontSize;
     FName ConsoleFontTypeFace;
     FLinearColor ConsoleFontColor;
-    int32 ConsoleDelaySeconds;
     
     mutable int32 FrameCounter;
     mutable int32 FrameCount;
     mutable FDateTime FrameCounterStart;
 
     float LastQueryDelta;
+    bool SkipFirstFrame = true;
 
-    int RoundingWindow;
+    //static
+    int RoundingWindow = 5;
+    int ChartCapacityTime = 200;
+    float ChartCapacityCpu = 110.0f;
+    float ChartCapacityFps = 130.0f;
+    int ConsoleDelaySeconds = 12;
 
 public:
     GENERATED_BODY()
