@@ -6,14 +6,39 @@
 #include <list>
 #include <vector>
 #include <tuple>
+#include <memory>
 
 #include "CustomPaintWidget.generated.h"
+
+class PerformanceQuery
+{
+protected:
+    PDH_HQUERY NamedQuery;
+    PDH_HQUERY TotalQuery;
+
+    int time;
+
+public:
+    std::vector<CounterInfo> vciSelectedCounters;
+
+    PerformanceQuery();
+
+    void AddNamedCounter(const std::wstring& Name);
+    void Query();
+
+public:
+    static DWORD GetProcessorsCount();
+    static std::vector<std::wstring> GetProcessNames();
+    static std::vector<std::wstring> GetValidCounterNames();
+};
 
 UCLASS()
 class MEDIATESTAMFCPP_API UCustomPaintWidget:
     public UUserWidget
 {
 protected:
+    std::unique_ptr<PerformanceQuery> Query;
+
     std::list< float > FpsRate;
     std::list< float > FpsRateRounded;
     std::vector< float > FpsRateCache;
@@ -38,11 +63,14 @@ protected:
     bool SkipFirstFrame = true;
 
     //static
+    float ChartResolution = 0.999f;
     int RoundingWindow = 5;
     int ChartCapacityTime = 200;
     float ChartCapacityCpu = 110.0f;
     float ChartCapacityFps = 130.0f;
     int ConsoleDelaySeconds = 12;
+    FLinearColor FpsColor = FLinearColor::Blue;
+    FLinearColor CpuColor = FLinearColor::White;
 
 public:
     GENERATED_BODY()
