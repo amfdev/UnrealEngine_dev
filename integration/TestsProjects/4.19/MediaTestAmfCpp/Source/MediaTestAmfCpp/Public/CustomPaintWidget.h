@@ -8,18 +8,31 @@
 #include <tuple>
 #include <memory>
 
+#include "windows.h"
+#include "psapi.h"
+#include "pdh.h"
+#pragma comment(lib, "Pdh.lib")
+
 #include "CustomPaintWidget.generated.h"
+
+struct CounterInfo
+{
+    PDH_HCOUNTER Counter;
+    std::wstring CounterName;
+    double Value;
+};
 
 class PerformanceQuery
 {
 protected:
     PDH_HQUERY NamedQuery;
+    
     PDH_HQUERY TotalQuery;
-
-    int time;
+    PDH_HCOUNTER TotalCounter;
+    double TotalValue;
 
 public:
-    std::vector<CounterInfo> vciSelectedCounters;
+    std::vector<CounterInfo> NamedCounters;
 
     PerformanceQuery();
 

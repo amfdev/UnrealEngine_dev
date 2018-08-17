@@ -1,10 +1,5 @@
 #include "CustomPaintWidget.h"
 
-#include "windows.h"
-#include "psapi.h"
-#include "pdh.h"
-#pragma comment(lib, "Pdh.lib")
-
 #undef DrawText
 
 #include "UObject/UObjectGlobals.h"
@@ -14,224 +9,158 @@
 #include <vector>
 #include <numeric>
 
-struct PerformanceLogItem
+PerformanceQuery::PerformanceQuery()
 {
-    DWORD Time;
-    double Value;
-};
+    PdhOpenQuery(NULL, NULL, &NamedQuery);
+    PdhOpenQuery(NULL, NULL, &TotalQuery);
 
-struct CounterInfo
+    // You can also use L"\\Processor(*)\\% Processor Time" and get individual CPU values with PdhGetFormattedCounterArray()
+    PdhAddEnglishCounter(TotalQuery, L"\\Processor(_Total)\\% Processor Time", NULL, &TotalCounter);
+    PdhCollectQueryData(TotalQuery);
+}
+
+void PerformanceQuery::AddNamedCounter(const std::wstring& Name)
 {
-    PDH_HCOUNTER Counter;
-    std::wstring CounterName;
-    std::list<PerformanceLogItem> PerformanceLog;
-};
+    PDH_STATUS Status = {};
+    CounterInfo CI = {};
+    CI.CounterName = Name;
+    PdhAddCounter(NamedQuery, CI.CounterName.c_str(), 0 , &CI.Counter);
 
-class PerformanceQuery
+    NamedCounters.push_back(CI);
+}
+
+void PerformanceQuery::Query()
 {
-protected:
-    PDH_HQUERY NamedQuery;
-    PDH_HQUERY TotalQuery;
+    ULONG CounterType = {};
+    PDH_FMT_COUNTERVALUE DisplayValue = {};
 
-    int time;
-
-public:
-    std::vector<CounterInfo> vciSelectedCounters;
-
-    PerformanceQuery()
+    //ask named consumptions
+    PdhCollectQueryData(NamedQuery);
+    for(auto Iterator = NamedCounters.begin(); Iterator < NamedCounters.end(); ++Iterator)
     {
-        Init();
+        PdhGetFormattedCounterValue(Iterator->Counter, PDH_FMT_DOUBLE, &CounterType, &DisplayValue);			
+        Iterator->Value = DisplayValue.doubleValue;
     }
 
-    void Init()
+    //ask total consumption
+    PdhCollectQueryData(TotalQuery);
+    PdhGetFormattedCounterValue(TotalCounter, PDH_FMT_DOUBLE, NULL, &DisplayValue);
+    TotalValue = DisplayValue.doubleValue;
+}
+
+DWORD PerformanceQuery::GetProcessorsCount()
+{
+    SYSTEM_INFO SystemInfo = {};
+    GetSystemInfo(&SystemInfo);
+
+    return SystemInfo.dwNumberOfProcessors;
+}
+
+std::vector<std::wstring> PerformanceQuery::GetProcessNames()
+{
+    const int MAX_COUNT = 1024;
+
+    std::vector<std::wstring> ProcessNames;
+
+    DWORD ProcessIDs[MAX_COUNT];
+    DWORD ProcessIDsSize;
+    if(EnumProcesses(ProcessIDs, sizeof(ProcessIDs), &ProcessIDsSize))
     {
-        time = 0;
-
-        PdhOpenQuery(NULL, NULL, &NamedQuery);
-        
-        //
-        /*
-        PdhOpenQuery(NULL, NULL, &TotalQuery);
-
-        // You can also use L"\\Processor(*)\\% Processor Time" and get individual CPU values with PdhGetFormattedCounterArray()
-        PdhAddEnglishCounter(TotalQuery, L"\\Processor(_Total)\\% Processor Time", NULL, &cpuTotal);
-        PdhCollectQueryData(TotalQuery);
-        */
-    }
-
-    void AddNamedCounter(const std::wstring& Name)
-    {
-        PDH_STATUS Status = {};
-        CounterInfo CI = {};
-        CI.CounterName = Name;
-        PdhAddCounter(NamedQuery, CI.CounterName.c_str(), 0 , &CI.Counter);
-
-        vciSelectedCounters.push_back(CI);
-    }
-
-    void Query()
-    {
-        PDH_STATUS status = {};
-        ULONG CounterType = {};
-        PDH_FMT_COUNTERVALUE DisplayValue = {};
-
-        PdhCollectQueryData(NamedQuery);
-
-        for(auto Iterator = vciSelectedCounters.begin(); Iterator < vciSelectedCounters.end(); ++Iterator)
+        DWORD ProcessIDsCount = ProcessIDsSize / sizeof(DWORD);
+        for (DWORD ProcessIndex = 0; ProcessIndex < ProcessIDsCount; ++ProcessIndex)
         {
-            PdhGetFormattedCounterValue(Iterator->Counter, PDH_FMT_DOUBLE, &CounterType, &DisplayValue);			
+            HANDLE Process = OpenProcess(
+                PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+                FALSE,
+                ProcessIDs[ProcessIndex]
+                );
 
-            PerformanceLogItem LogItem;
-            LogItem.Time = time;
-            LogItem.Value = DisplayValue.doubleValue;
-            
-            Iterator->PerformanceLog.push_back(LogItem);				
-        }
-
-        time++;
-
-        //
-        /*PDH_FMT_COUNTERVALUE counterVal;
-
-        PdhCollectQueryData(cpuQuery);
-        PdhGetFormattedCounterValue(cpuTotal, PDH_FMT_DOUBLE, NULL, &counterVal);
-        return counterVal.doubleValue;*/
-    }
-
-    /*int CleanOldRecord()
-    {
-        if(time>100)
-        {
-            for(auto it = vciSelectedCounters.begin(); it < vciSelectedCounters.end(); it++ )
+            if (Process)
             {
-                if(it->logs.size()>100)
+                DWORD NeededSize = 0;
+                HMODULE Modules[MAX_COUNT];
+                if (EnumProcessModulesEx(Process, Modules, sizeof(Modules), &NeededSize, LIST_MODULES_ALL))
                 {
-                    it->logs.erase(it->logs.begin());
-                }
-            }
-            return time-100;
-        }
-        else
-        {
-            return 0;
-        }
-    }*/
-
-public:
-    static DWORD GetProcessorsCount()
-    {
-        SYSTEM_INFO SystemInfo = {};
-        GetSystemInfo(&SystemInfo);
-
-        return SystemInfo.dwNumberOfProcessors;
-    }
-
-    static std::vector<std::wstring> GetProcessNames()
-    {
-        const int MAX_COUNT = 1024;
-
-        std::vector<std::wstring> ProcessNames;
-
-        DWORD ProcessIDs[MAX_COUNT];
-        DWORD ProcessIDsSize;
-        if(EnumProcesses(ProcessIDs, sizeof(ProcessIDs), &ProcessIDsSize))
-        {
-            DWORD ProcessIDsCount = ProcessIDsSize / sizeof(DWORD);
-            for (DWORD ProcessIndex = 0; ProcessIndex < ProcessIDsCount; ++ProcessIndex)
-            {
-                HANDLE Process = OpenProcess(
-                    PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
-                    FALSE,
-                    ProcessIDs[ProcessIndex]
-                    );
-
-                if (Process)
-                {
-                    DWORD NeededSize = 0;
-                    HMODULE Modules[MAX_COUNT];
-                    if (EnumProcessModulesEx(Process, Modules, sizeof(Modules), &NeededSize, LIST_MODULES_ALL))
+                    TCHAR ProcessNameBuffer[MAX_PATH] = {};
+                    if(GetModuleBaseName(Process, Modules[0], ProcessNameBuffer, MAX_PATH))
                     {
-                        TCHAR ProcessNameBuffer[MAX_PATH] = {};
-                        if(GetModuleBaseName(Process, Modules[0], ProcessNameBuffer, MAX_PATH))
+                        int ProcessNameLength = _tcslen(ProcessNameBuffer);
+                        _tcscpy(ProcessNameBuffer + ProcessNameLength - 4, TEXT("\0"));
+
+                        TCHAR ProcessNameWithPrefix[MAX_PATH] = {};
+                        _stprintf(ProcessNameWithPrefix, TEXT("%s"), ProcessNameBuffer);
+
+                        for (int Counter = 0; ; ++Counter)
                         {
-                            int ProcessNameLength = _tcslen(ProcessNameBuffer);
-                            _tcscpy(ProcessNameBuffer + ProcessNameLength - 4, TEXT("\0"));
-
-                            TCHAR ProcessNameWithPrefix[MAX_PATH] = {};
-                            _stprintf(ProcessNameWithPrefix, TEXT("%s"), ProcessNameBuffer);
-
-                            for (int Counter = 0; ; ++Counter)
+                            if(Counter > 0)
                             {
-                                if(Counter > 0)
-                                {
-                                    _stprintf(ProcessNameWithPrefix, TEXT("%s#%d"), ProcessNameBuffer, Counter);
-                                }
+                                _stprintf(ProcessNameWithPrefix, TEXT("%s#%d"), ProcessNameBuffer, Counter);
+                            }
 
-                                bool ProcessExists = false;
-                                for(auto ProcessName = ProcessNames.begin(); ProcessName < ProcessNames.end(); ++ProcessName)
+                            bool ProcessExists = false;
+                            for(auto ProcessName = ProcessNames.begin(); ProcessName < ProcessNames.end(); ++ProcessName)
+                            {
+                                if(!ProcessName->compare(ProcessNameWithPrefix))
                                 {
-                                    if(!ProcessName->compare(ProcessNameWithPrefix))
-                                    {
-                                        ProcessExists = true;
+                                    ProcessExists = true;
 
-                                        break;
-                                    }
-                                }
-
-                                if (!ProcessExists)
-                                {
                                     break;
                                 }
                             }
 
-                            ProcessNames.push_back(ProcessNameWithPrefix);
+                            if (!ProcessExists)
+                            {
+                                break;
+                            }
                         }
+
+                        ProcessNames.push_back(ProcessNameWithPrefix);
                     }
                 }
             }
         }
+    }
         
-        return ProcessNames;
-    }
+    return ProcessNames;
+}
 
-    static std::vector<std::wstring> GetValidCounterNames()
+std::vector<std::wstring> PerformanceQuery::GetValidCounterNames()
+{
+    std::vector<std::wstring> ValidCounterNames;
+
+    ValidCounterNames.push_back(TEXT("\\Processor(_Total)\\% Processor Time"));
+    ValidCounterNames.push_back(TEXT("\\Processor(_Total)\\% Idle Time"));
+
+    DWORD dwNumberOfProcessors = GetProcessorsCount();
+
+    for(DWORD index = 0; index < dwNumberOfProcessors; index++ )
     {
-        std::vector<std::wstring> ValidCounterNames;
-
-        ValidCounterNames.push_back(TEXT("\\Processor(_Total)\\% Processor Time"));
-        ValidCounterNames.push_back(TEXT("\\Processor(_Total)\\% Idle Time"));
-
-        DWORD dwNumberOfProcessors = GetProcessorsCount();
-
-        for(DWORD index = 0; index < dwNumberOfProcessors; index++ )
-        {
-            TCHAR szCounterName[MAX_PATH] = {};
+        TCHAR szCounterName[MAX_PATH] = {};
             
-            wsprintf(szCounterName, TEXT("\\Processor(%u)\\%% Processor Time"), index);
-            ValidCounterNames.push_back(szCounterName);
+        wsprintf(szCounterName, TEXT("\\Processor(%u)\\%% Processor Time"), index);
+        ValidCounterNames.push_back(szCounterName);
             
-            wsprintf(szCounterName, TEXT("\\Processor(%u)\\%% Idle Time"), index);
-            ValidCounterNames.push_back(szCounterName);
-        }
-
-        std::vector<std::wstring> ProcessNames = GetProcessNames();
-
-        for
-        (
-            auto element = ProcessNames.begin(); 
-            element < ProcessNames.end(); 
-            element++
-        )
-        {
-            TCHAR szCounterName[MAX_PATH] = {};
-
-            wsprintf(szCounterName, TEXT("\\Process(%s)\\%% Processor Time"), element->c_str());
-            ValidCounterNames.push_back(szCounterName);
-        }	
-
-        return ValidCounterNames;
+        wsprintf(szCounterName, TEXT("\\Processor(%u)\\%% Idle Time"), index);
+        ValidCounterNames.push_back(szCounterName);
     }
-};
+
+    std::vector<std::wstring> ProcessNames = GetProcessNames();
+
+    for
+    (
+        auto element = ProcessNames.begin(); 
+        element < ProcessNames.end(); 
+        element++
+    )
+    {
+        TCHAR szCounterName[MAX_PATH] = {};
+
+        wsprintf(szCounterName, TEXT("\\Process(%s)\\%% Processor Time"), element->c_str());
+        ValidCounterNames.push_back(szCounterName);
+    }	
+
+    return ValidCounterNames;
+}
 
 void UCustomPaintWidget::GetTextLength(UFont* Font, const FString& String, float FontSize, float& SizeX, float& SizeY)
 {
@@ -593,7 +522,8 @@ void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
     if (!SkipFirstFrame && (LastQueryDelta < 0) || (LastQueryDelta >= ChartResolution))
     {
         Query->Query();
-        float CurrentCpuConsumption = Query->vciSelectedCounters[0].PerformanceLog.back().Value;
+
+        float CurrentCpuConsumption = Query->NamedCounters[0].Value;
         //CpuConsumptionCache.push_back(CurrentCpuConsumption);
 
         LastQueryDelta = 0.0;
