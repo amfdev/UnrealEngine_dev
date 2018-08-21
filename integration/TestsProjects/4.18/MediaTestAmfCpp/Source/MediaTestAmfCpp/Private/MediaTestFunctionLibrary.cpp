@@ -240,16 +240,31 @@ bool UMediaTestFunctionLibrary::GrabLaunchOption(FString& Options, FString& Resu
 
     FString LaunchOption;
     LaunchOption.Reserve(Options.Len());
+    bool SkipDash = false;
+    bool Break = false;
 
-    for (Index = 1; Index < Options.Len(); ++Index)
+    for (Index = 1; !Break && (Index < Options.Len()); ++Index)
     {
         TCHAR Char = Options[Index];
 
         switch (Char)
         {
-        // Don't allow extra spaces, must be -LaunchOptionName
+        // Skip first dash
+        case '-':
+            if (!SkipDash)
+            {
+                SkipDash = true;
+
+                break;
+            }
+
+            // Don't allow --LaunchOptionName
+            return false;
+
         case L' ':
         case L'\t':
+            Break = true;
+
             break;
 
         // Don't allow escaping in the launch option
@@ -336,11 +351,10 @@ FString UMediaTestFunctionLibrary::ParseOption(FString Options, const FString& K
 bool UMediaTestFunctionLibrary::HasLaunchOption(FString Options, const FString& OptionToCheck)
 {
 	bool ReturnValue = false;
-	FString Pair, PairKey, PairValue;	
-	while (GrabOption(Options, Pair))
+	FString Grabbed;
+	while (GrabOption(Options, Grabbed))
 	{
-		GetKeyValue(Pair, PairKey, PairValue);
-		if (OptionToCheck == PairKey)
+		if (OptionToCheck == Grabbed)
 		{
 			ReturnValue = true;
 			break;
