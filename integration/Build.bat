@@ -215,15 +215,7 @@ IF NOT DEFINED Build_Engine IF NOT DEFINED Build_Tests (
 
 IF DEFINED Build_Tests (
     IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 IF NOT DEFINED Build_MediaTest (
-        IF DEFINED Build_Standard (
-            SET Build_Plane=1
-            SET Build_x360=1
-            REM Build_MediaTest is not compatible with standard rendering
-        )
-
         IF DEFINED Build_Amf (
-            SET Build_Plane=1
-            SET Build_x360=1
             SET Build_MediaTest=1
         )
     )

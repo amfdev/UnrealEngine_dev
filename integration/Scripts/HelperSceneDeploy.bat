@@ -46,7 +46,7 @@ SET SceneProjectOutputName=%SceneProjectName%_%Configuration%
 @ECHO Scene project output name: %SceneProjectOutputName%
 
 IF NOT EXIST "%DeployHome%" (
-    @ECHO Create deploy home folder
+    @ECHO Create deploy folder
     MKDIR %DeployHome%
     IF ERRORLEVEL 1 GOTO :error
 )
@@ -58,9 +58,10 @@ IF NOT EXIST "%DeployHome%\Tests" (
     IF ERRORLEVEL 1 GOTO :error
 )
 
-IF NOT EXIST "%DeployHome%\Tests\Media" (
+IF NOT EXIST "%DeployHome%\Media" (
     @ECHO Create media folder
-    MKDIR %DeployHome%\Tests\Media
+
+    MKDIR %DeployHome%\Media
     IF ERRORLEVEL 1 GOTO :error
 )
 
@@ -82,16 +83,12 @@ IF EXIST "%DeployHome%\Tests\%UE_VERSION%\%SceneProjectOutputName%" (
 MKDIR %DeployHome%\Tests\%UE_VERSION%\%SceneProjectOutputName%
 IF ERRORLEVEL 1 GOTO :error
 
-IF NOT DEFINED STITCH_VERSION (
-    IF EXIST "%CD%\TestsProjects\%UE_VERSION%\%SceneProjectName%\Content\Video\1.mp4" (
-        @ECHO Create folder for video file
-        MKDIR "%CD%\Deploy\Tests\%UE_VERSION%\%SceneProjectOutputName%\%SceneProjectName%\Content\Video
-        IF ERRORLEVEL 1 GOTO :error
-    )
+@ECHO Copy shared media files
+IF EXIST "%CD%\TestsProjects\Media" (
+    @ECHO Copy shared video files
 
-    @ECHO Create folder for shared video files
-    IF NOT EXIST "%CD%\Deploy\Media" MKDIR "%CD%\Deploy\Media"
-    IF NOT EXIST "%CD%\Deploy\Tests\Media" MKDIR "%CD%\Deploy\Tests\Media"
+    ROBOCOPY "%CD%\TestsProjects\Media" "%CD%\Deploy\Media" /xf *.playlist /xf *.bat
+    IF ERRORLEVEL 1 GOTO :error
 )
 
 @ECHO Copy scene to deploy folder
@@ -101,24 +98,14 @@ IF ERRORLEVEL 1 (
     rem GOTO :error
 )
 
-IF NOT DEFINED STITCH_VERSION (
-    IF EXIST "%CD%\TestsProjects\%UE_VERSION%\%SceneProjectName%\Content\Video\1.mp4" (
-        @ECHO Copy sample 4K video file
-        COPY "%CD%\TestsProjects\%UE_VERSION%\%SceneProjectName%\Content\Video\1.mp4" "%CD%\Deploy\Tests\%UE_VERSION%\%SceneProjectOutputName%\%SceneProjectName%\Content\Video\1.mp4"
-        IF ERRORLEVEL 1 GOTO :error
+IF ["%SceneName%"] == ["MediaTestAmf"] (
+    @ECHO Copy MediaTest predefined bat files
+
+    ROBOCOPY "%CD%\TestsProjects\Media" %CD%\Deploy\Tests\%UE_VERSION%\%SceneProjectOutputName% *.bat *.playlist
+    IF ERRORLEVEL 1 (
+        @ECHO Todo: investigate why robocopy returns error
+        rem GOTO :error
     )
-)
-
-IF EXIST "%CD%\TestsProjects\Media" (
-    @ECHO Copy shared video files
-
-    REM Todo: eliminate usage
-    COPY "%CD%\TestsProjects\Media" "%CD%\Deploy\Media"
-    IF ERRORLEVEL 1 GOTO :error
-
-    REM Todo: new folder
-    COPY "%CD%\TestsProjects\Media" "%CD%\Deploy\Tests\Media"
-    IF ERRORLEVEL 1 GOTO :error
 )
 
 :done

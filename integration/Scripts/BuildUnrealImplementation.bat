@@ -140,7 +140,7 @@ IF DEFINED PLUGIN_TYPE (
             @ECHO Failed to apply patch!
             @ECHO It seems like the code is already patched,
             @ECHO try to build it...
-            )
+        )
 
         @ECHO:
         @ECHO Build plugin...
@@ -151,7 +151,7 @@ IF DEFINED PLUGIN_TYPE (
         @ECHO Install plugin to UE...
         CALL Scripts\HelperApply.bat
         IF ERRORLEVEL 1 (
-            @ECHO ToDo: investigate why error returned here
+            @ECHO ToDo: investigate why error returned here (from robocopy)
             rem GOTO :error
         )
     )
@@ -168,6 +168,7 @@ IF NOT DEFINED Build_CleanOnly (
     @ECHO Build UnrealEngine solution...
     CALL Scripts\HelperUnrealBuild.bat
     IF ERRORLEVEL 1 GOTO :error
+
 )
 
 :done
