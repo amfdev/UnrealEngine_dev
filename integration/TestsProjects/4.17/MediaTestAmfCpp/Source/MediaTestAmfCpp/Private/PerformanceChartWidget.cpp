@@ -85,7 +85,7 @@ std::vector<std::wstring> PerformanceQuery::GetProcessNames()
                     if(GetModuleBaseName(Process, Modules[0], ProcessNameBuffer, MAX_PATH))
                     {
                         int ProcessNameLength = _tcslen(ProcessNameBuffer);
-                        _tcscpy(ProcessNameBuffer + ProcessNameLength - 4, TEXT("\0"));
+                        _tcscpy_s(ProcessNameBuffer + ProcessNameLength - 4, MAX_PATH - ProcessNameLength + 4, TEXT("\0"));
 
                         TCHAR ProcessNameWithPrefix[MAX_PATH] = {};
                         _stprintf(ProcessNameWithPrefix, TEXT("%s"), ProcessNameBuffer);
