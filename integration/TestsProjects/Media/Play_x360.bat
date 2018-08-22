@@ -1,0 +1,1 @@
+MediaTestAmfCpp.exe -x360 -loop -Amf ?playlist=..\..\..\Media\x360.playlist
