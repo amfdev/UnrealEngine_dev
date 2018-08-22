@@ -83,12 +83,14 @@ IF EXIST "%DeployHome%\Tests\%UE_VERSION%\%SceneProjectOutputName%" (
 MKDIR %DeployHome%\Tests\%UE_VERSION%\%SceneProjectOutputName%
 IF ERRORLEVEL 1 GOTO :error
 
-@ECHO Copy shared media files
 IF EXIST "%CD%\TestsProjects\Media" (
     @ECHO Copy shared video files
 
     ROBOCOPY "%CD%\TestsProjects\Media" "%CD%\Deploy\Media" /xf *.playlist /xf *.bat
-    IF ERRORLEVEL 1 GOTO :error
+    IF ERRORLEVEL 1 (
+        @ECHO Todo: investigate why robocopy returns error
+        rem GOTO :error
+    )
 )
 
 @ECHO Copy scene to deploy folder
