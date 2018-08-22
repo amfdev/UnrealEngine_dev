@@ -165,7 +165,7 @@ IF NOT DEFINED Build_4_17 IF NOT DEFINED Build_4_18 IF NOT DEFINED Build_4_19 IF
 IF NOT DEFINED Build_2015 IF NOT DEFINED Build_2017 (
     @ECHO No Visual Studio version specified, 2015 and 2017 will be added
     SET Build_2015=1
-    SET Build_2017=1
+    REM SET Build_2017=1
 )
 
 IF NOT DEFINED Build_Standard IF NOT DEFINED Build_Amf IF NOT DEFINED Build_Stitch (
