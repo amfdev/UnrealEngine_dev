@@ -86,7 +86,7 @@ IF ERRORLEVEL 1 GOTO :error
 IF EXIST "%CD%\TestsProjects\Media" (
     @ECHO Copy shared video files
 
-    ROBOCOPY "%CD%\TestsProjects\Media" "%CD%\Deploy\Media" /xf *.playlist /xf *.bat
+    ROBOCOPY "%CD%\TestsProjects\Media" "%CD%\Deploy\Media" /xf *.bat
     IF ERRORLEVEL 1 (
         @ECHO Todo: investigate why robocopy returns error
         rem GOTO :error
@@ -103,7 +103,7 @@ IF ERRORLEVEL 1 (
 IF ["%SceneName%"] == ["MediaTestAmf"] (
     @ECHO Copy MediaTest predefined bat files
 
-    ROBOCOPY "%CD%\TestsProjects\Media" %CD%\Deploy\Tests\%UE_VERSION%\%SceneProjectOutputName% *.bat *.playlist
+    ROBOCOPY "%CD%\TestsProjects\Media" %CD%\Deploy\Tests\%UE_VERSION%\%SceneProjectOutputName% *.bat
     IF ERRORLEVEL 1 (
         @ECHO Todo: investigate why robocopy returns error
         rem GOTO :error
