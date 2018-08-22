@@ -20,8 +20,6 @@ SET Build_Development=
 SET Build_Shipping=
 SET Build_BluePrints=
 SET Build_CPP=
-SET Build_Plane=
-SET Build_x360=
 SET Build_MediaTest=
 SET Build_Engine=
 SET Build_Tests=
@@ -85,12 +83,6 @@ FOR %%x IN (%*) DO (
     ) ELSE IF /I "%%~x"=="CPP" (
         SET Build_CPP=1
         SET Build_Tests=1
-    ) ELSE IF /I "%%~x"=="Plane" (
-        SET Build_Tests=1
-        SET Build_Plane=1
-    ) ELSE IF /I "%%~x"=="x360" (
-        SET Build_Tests=1
-        SET Build_x360=1
     ) ELSE IF /I "%%~x"=="MediaTest" (
         SET Build_Tests=1
         SET Build_MediaTest=1
@@ -182,7 +174,7 @@ IF NOT DEFINED Build_Standard IF NOT DEFINED Build_Amf IF NOT DEFINED Build_Stit
     SET Build_Standard=1
     SET Build_Amf=1
 
-    IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 IF NOT DEFINED Build_MediaTest (
+    IF NOT DEFINED Build_MediaTest (
         SET Build_Stitch=1
     )
 )
@@ -214,16 +206,14 @@ IF NOT DEFINED Build_Engine IF NOT DEFINED Build_Tests (
 )
 
 IF DEFINED Build_Tests (
-    IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 IF NOT DEFINED Build_MediaTest (
+    IF NOT DEFINED Build_MediaTest (
         IF DEFINED Build_Amf (
             SET Build_MediaTest=1
         )
     )
 )
 
-IF NOT DEFINED Build_Plane IF NOT DEFINED Build_x360 IF NOT DEFINED Build_MediaTest IF NOT DEFINED Build_Stitch IF DEFINED Build_Tests (
-    SET Build_Plane=1
-    SET Build_x360=1
+IF NOT DEFINED Build_MediaTest IF NOT DEFINED Build_Stitch IF DEFINED Build_Tests (
     SET Build_MediaTest=1
     SET Build_Stitch=1
 )
@@ -250,8 +240,6 @@ SET Build_Development
 SET Build_Shipping
 SET Build_BluePrints
 SET Build_CPP
-SET Build_Plane
-SET Build_x360
 SET Build_MediaTest
 SET Build_Engine
 SET Build_Tests
@@ -327,7 +315,7 @@ FOR %%s IN (2015, 2017) DO (
     @ECHO     Shipping - Unreal Engine and related tests with shipping configuration
     @ECHO     BluePrints - build blueprints variant of the related tests
     @ECHO     CPP - build c++ variant of the related tests
-    @ECHO     Plane, X360, MediaTest - specify name of the test for standard and amf configuration
+    @ECHO     MediaTest - specify name of the test for standard and amf configuration
     @ECHO     Clean - clean up Unreal Engine and plugin repository before build
     @ECHO     Dirty - don't clean Unreal Engine and plugin repository before build
     @ECHO     Origin - take plugin from https://github.com/GPUOpenSoftware/UnrealEngine.git
@@ -490,11 +478,9 @@ FOR %%s IN (2015, 2017) DO (
                 )
             ) ELSE (
 
-                FOR %%t IN (Plane, x360, MediaTest) DO (
+                FOR %%t IN (MediaTest) DO (
 
                     SET SkipTestType=
-                    IF /I ["%%t"] == ["Plane"] IF NOT DEFINED Build_Plane SET SkipTestType=1
-                    IF /I ["%%t"] == ["x360"] IF NOT DEFINED Build_x360 SET SkipTestType=1
                     IF /I ["%%t"] == ["MediaTest"] IF NOT DEFINED Build_MediaTest SET SkipTestType=1
 
                     IF /I ["%%t"] == ["MediaTest"] IF /I ["%~3"] == ["Standard"] SET SkipTestType=1
