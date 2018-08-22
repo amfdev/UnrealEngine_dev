@@ -13,7 +13,7 @@
 #include "pdh.h"
 #pragma comment(lib, "Pdh.lib")
 
-#include "CustomPaintWidget.generated.h"
+#include "PerformanceChartWidget.generated.h"
 
 struct CounterInfo
 {
@@ -46,7 +46,7 @@ public:
 };
 
 UCLASS()
-class MEDIATESTAMFCPP_API UCustomPaintWidget:
+class MEDIATESTAMFCPP_API UPerformanceChartWidget:
     public UUserWidget
 {
 protected:
@@ -88,7 +88,7 @@ protected:
 public:
     GENERATED_BODY()
 
-    UCustomPaintWidget(const FObjectInitializer& ObjectInitializer);
+    UPerformanceChartWidget(const FObjectInitializer& ObjectInitializer);
 
     void NativePaint(FPaintContext& InContext) const override;
     void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;

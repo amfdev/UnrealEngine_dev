@@ -1,4 +1,4 @@
-#include "CustomPaintWidget.h"
+#include "PerformanceChartWidget.h"
 
 #undef DrawText
 
@@ -85,7 +85,7 @@ std::vector<std::wstring> PerformanceQuery::GetProcessNames()
                     if(GetModuleBaseName(Process, Modules[0], ProcessNameBuffer, MAX_PATH))
                     {
                         int ProcessNameLength = _tcslen(ProcessNameBuffer);
-                        _tcscpy(ProcessNameBuffer + ProcessNameLength - 4, TEXT("\0"));
+                        _tcscpy_s(ProcessNameBuffer + ProcessNameLength - 4, MAX_PATH - ProcessNameLength + 4, TEXT("\0"));
 
                         TCHAR ProcessNameWithPrefix[MAX_PATH] = {};
                         _stprintf(ProcessNameWithPrefix, TEXT("%s"), ProcessNameBuffer);
@@ -162,7 +162,7 @@ std::vector<std::wstring> PerformanceQuery::GetValidCounterNames()
     return ValidCounterNames;
 }
 
-void UCustomPaintWidget::GetTextLength(UFont* Font, const FString& String, float FontSize, float& SizeX, float& SizeY)
+void UPerformanceChartWidget::GetTextLength(UFont* Font, const FString& String, float FontSize, float& SizeX, float& SizeY)
 {
     auto FontInfo = Font->GetLegacySlateFontInfo();
     float SizeDevider = FontInfo.Size / FontSize;
@@ -174,7 +174,7 @@ void UCustomPaintWidget::GetTextLength(UFont* Font, const FString& String, float
     SizeY = float(Height) / SizeDevider;
 }
 
-UCustomPaintWidget::UCustomPaintWidget(const FObjectInitializer& ObjectInitializer):
+UPerformanceChartWidget::UPerformanceChartWidget(const FObjectInitializer& ObjectInitializer):
     UUserWidget(ObjectInitializer),
     LastQueryDelta(-0.5f),
     ConsoleFont(nullptr),
@@ -186,7 +186,7 @@ UCustomPaintWidget::UCustomPaintWidget(const FObjectInitializer& ObjectInitializ
     Query->AddNamedCounter(Query->GetValidCounterNames()[ 0 ]);
 }
 
-void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
+void UPerformanceChartWidget::NativePaint(FPaintContext& InContext) const
 {
     UUserWidget::NativePaint(InContext);
 
@@ -503,7 +503,7 @@ void UCustomPaintWidget::NativePaint(FPaintContext& InContext) const
     }
 }
 
-void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+void UPerformanceChartWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
     UUserWidget::NativeTick(MyGeometry, InDeltaTime);
 
@@ -599,12 +599,12 @@ void UCustomPaintWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
     }
 }
 
-void UCustomPaintWidget::AddMessage(const FString& Message)
+void UPerformanceChartWidget::AddMessage(const FString& Message)
 {
     ConsoleMessages.push_back(std::make_tuple(Message, FDateTime::Now()));
 }
 
-void UCustomPaintWidget::SetConsoleFont(UFont* Font, int32 FontSize, FName FontTypeFace, FLinearColor Tint, int32 DelaySeconds)
+void UPerformanceChartWidget::SetConsoleFont(UFont* Font, int32 FontSize, FName FontTypeFace, FLinearColor Tint, int32 DelaySeconds)
 {
     ConsoleFont = Font;
     ConsoleFontSize = FontSize;
