@@ -80,19 +80,56 @@ bool UMediaTestFunctionLibrary::IsFileExist(const FString& FileNameIn)
 
 bool UMediaTestFunctionLibrary::GrabOption(FString& Options, FString& Result)
 {
-	FString QuestionMark(TEXT("?"));
-	FString SwitchMark(TEXT("-"));
+	static FString QuestionMark(TEXT("?"));
+    static FString SwitchMark(TEXT("-"));
+    static FString QuotesMark(TEXT("\""));
 
-	int QuestionIndex = TrimStart(Options).Find(QuestionMark, ESearchCase::CaseSensitive);
-	int SwitchIndex = TrimStart(Options).Find(SwitchMark, ESearchCase::CaseSensitive);
+    FString WorkingCopy = TrimStart(Options);
+
+	int QuotesIndex = WorkingCopy.Find(QuotesMark, ESearchCase::CaseSensitive);
+    int CloseQoutesIndex = -1;
+
+    if (!QuotesIndex)
+    {
+        FString RightPart = Options.Right(Options.Len() - 1);
+        int CloseQoutesIndex = RightPart.Find(QuotesMark, ESearchCase::CaseSensitive);
+        
+        //Closing quotes found
+        if (-1 != CloseQoutesIndex)
+        {
+            WorkingCopy = RightPart.Left(CloseQoutesIndex);
+        }
+        //Error in syntax
+        else
+        {
+            return false;
+        }
+    }
+
+    int QuestionIndex = WorkingCopy.Find(QuestionMark, ESearchCase::CaseSensitive);
+    int SwitchIndex = WorkingCopy.Find(SwitchMark, ESearchCase::CaseSensitive);
+    bool GrabResult = false;
 
     if (0 == QuestionIndex)
     {
-        return GrabParamEqualValue(Options, Result);
+        GrabResult = GrabParamEqualValue(WorkingCopy, Result);
     }
     else if (0 == SwitchIndex)
     {
-        return GrabLaunchOption(Options, Result);
+        GrabResult = GrabLaunchOption(WorkingCopy, Result);
+    }
+
+    if (GrabResult)
+    {
+        //Error in syntax
+        if (!QuotesIndex && WorkingCopy.Trim().Len())
+        {
+            return false;
+        }
+
+        Options = WorkingCopy;
+
+        return true;
     }
 
     return false;
@@ -104,6 +141,7 @@ bool UMediaTestFunctionLibrary::GrabParamEqualValue(FString& Options, FString& R
     LaunchOption.Reserve(Options.Len());
     
     bool ParamFound = false;
+    bool ParamFinished = false;
     bool ValueFound = false;
     bool InQuotas = false;
     
@@ -149,8 +187,8 @@ bool UMediaTestFunctionLibrary::GrabParamEqualValue(FString& Options, FString& R
             break;
 
         case '\\':
-            // Don't allow escaping in the ?param=value sequence
-            if (!InQuotas)
+            // Don't allow escaping in the ?param= part
+            if (!InQuotas && !ParamFinished)
             {
                 return false;
             }
@@ -195,6 +233,7 @@ bool UMediaTestFunctionLibrary::GrabParamEqualValue(FString& Options, FString& R
         case '=':
             if (ParamFound)
             {
+                ParamFinished = true;
                 LaunchOptionAndValue.AppendChar(Char);
             }
             else
@@ -241,8 +280,9 @@ bool UMediaTestFunctionLibrary::GrabLaunchOption(FString& Options, FString& Resu
     FString LaunchOption;
     LaunchOption.Reserve(Options.Len());
     bool SkipDash = false;
+    bool Break = false;
 
-    for (Index = 1; Index < Options.Len(); ++Index)
+    for (Index = 1; !Break && (Index < Options.Len()); ++Index)
     {
         TCHAR Char = Options[Index];
 
@@ -260,9 +300,10 @@ bool UMediaTestFunctionLibrary::GrabLaunchOption(FString& Options, FString& Resu
             // Don't allow --LaunchOptionName
             return false;
 
-        // Don't allow extra spaces, must be -LaunchOptionName
         case L' ':
         case L'\t':
+            Break = true;
+
             break;
 
         // Don't allow escaping in the launch option
@@ -337,7 +378,7 @@ FString UMediaTestFunctionLibrary::ParseOption(FString Options, const FString& K
 	while (GrabOption(Options, Pair))
 	{
 		GetKeyValue(Pair, PairKey, PairValue);
-		if (Key == PairKey)
+		if (!Key.Compare(PairKey, ESearchCase::IgnoreCase))
 		{
 			ReturnValue = MoveTemp(PairValue);
 			break;
@@ -352,7 +393,7 @@ bool UMediaTestFunctionLibrary::HasLaunchOption(FString Options, const FString& 
 	FString Grabbed;
 	while (GrabOption(Options, Grabbed))
 	{
-		if (OptionToCheck == Grabbed)
+		if (!OptionToCheck.Compare(Grabbed, ESearchCase::IgnoreCase))
 		{
 			ReturnValue = true;
 			break;
