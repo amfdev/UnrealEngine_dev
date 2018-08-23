@@ -503,6 +503,7 @@ FOR %%s IN (2015, 2017) DO (
 
 :buildScene
     @ECHO:
+    @ECHO SceneConfiguration: %SceneConfiguration%
     @ECHO SceneConfigurationPrintableName: %SceneConfigurationPrintableName%
     @ECHO SceneSourceType: %SceneSourceType%
     @ECHO ResultsFileName: %ResultsFileName%
