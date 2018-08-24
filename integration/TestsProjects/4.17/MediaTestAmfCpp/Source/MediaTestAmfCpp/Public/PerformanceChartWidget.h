@@ -27,9 +27,9 @@ class PerformanceQuery
 protected:
     PDH_HQUERY NamedQuery;
     
-    PDH_HQUERY TotalQuery;
-    PDH_HCOUNTER TotalCounter;
-    double TotalValue;
+    //PDH_HQUERY TotalQuery;
+    //PDH_HCOUNTER TotalCounter;
+    //double TotalValue;
 
 public:
     std::vector<CounterInfo> NamedCounters;
