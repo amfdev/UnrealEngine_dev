@@ -12,11 +12,11 @@
 PerformanceQuery::PerformanceQuery()
 {
     PdhOpenQuery(NULL, NULL, &NamedQuery);
-    PdhOpenQuery(NULL, NULL, &TotalQuery);
+    //PdhOpenQuery(NULL, NULL, &TotalQuery);
 
     // You can also use L"\\Processor(*)\\% Processor Time" and get individual CPU values with PdhGetFormattedCounterArray()
-    PdhAddEnglishCounter(TotalQuery, L"\\Processor(_Total)\\% Processor Time", NULL, &TotalCounter);
-    PdhCollectQueryData(TotalQuery);
+    //PdhAddEnglishCounter(TotalQuery, L"\\Processor(_Total)\\% Processor Time", NULL, &TotalCounter);
+    //PdhCollectQueryData(TotalQuery);
 }
 
 void PerformanceQuery::AddNamedCounter(const std::wstring& Name)
@@ -43,9 +43,9 @@ void PerformanceQuery::Query()
     }
 
     //ask total consumption
-    PdhCollectQueryData(TotalQuery);
-    PdhGetFormattedCounterValue(TotalCounter, PDH_FMT_DOUBLE, NULL, &DisplayValue);
-    TotalValue = DisplayValue.doubleValue;
+    //PdhCollectQueryData(TotalQuery);
+    //PdhGetFormattedCounterValue(TotalCounter, PDH_FMT_DOUBLE, NULL, &DisplayValue);
+    //TotalValue = DisplayValue.doubleValue;
 }
 
 DWORD PerformanceQuery::GetProcessorsCount()
@@ -62,39 +62,41 @@ std::vector<std::wstring> PerformanceQuery::GetProcessNames()
 
     std::vector<std::wstring> ProcessNames;
 
+    auto CurrentProcessID = GetCurrentProcessId();
+
     DWORD ProcessIDs[MAX_COUNT];
-    DWORD ProcessIDsSize;
+    DWORD ProcessIDsSize = 0;
     if(EnumProcesses(ProcessIDs, sizeof(ProcessIDs), &ProcessIDsSize))
     {
         DWORD ProcessIDsCount = ProcessIDsSize / sizeof(DWORD);
         for (DWORD ProcessIndex = 0; ProcessIndex < ProcessIDsCount; ++ProcessIndex)
         {
-            HANDLE Process = OpenProcess(
+            HANDLE ProcessHandle = OpenProcess(
                 PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
                 FALSE,
                 ProcessIDs[ProcessIndex]
                 );
 
-            if (Process)
+            if (ProcessHandle)
             {
                 DWORD NeededSize = 0;
                 HMODULE Modules[MAX_COUNT];
-                if (EnumProcessModulesEx(Process, Modules, sizeof(Modules), &NeededSize, LIST_MODULES_ALL))
+                if (EnumProcessModulesEx(ProcessHandle, Modules, sizeof(Modules), &NeededSize, LIST_MODULES_ALL))
                 {
                     TCHAR ProcessNameBuffer[MAX_PATH] = {};
-                    if(GetModuleBaseName(Process, Modules[0], ProcessNameBuffer, MAX_PATH))
+                    if(GetModuleBaseName(ProcessHandle, Modules[0], ProcessNameBuffer, MAX_PATH))
                     {
                         int ProcessNameLength = _tcslen(ProcessNameBuffer);
                         _tcscpy_s(ProcessNameBuffer + ProcessNameLength - 4, MAX_PATH - ProcessNameLength + 4, TEXT("\0"));
 
                         TCHAR ProcessNameWithPrefix[MAX_PATH] = {};
-                        _stprintf(ProcessNameWithPrefix, TEXT("%s"), ProcessNameBuffer);
+                        _stprintf_s(ProcessNameWithPrefix, MAX_PATH, TEXT("%s"), ProcessNameBuffer);
 
                         for (int Counter = 0; ; ++Counter)
                         {
                             if(Counter > 0)
                             {
-                                _stprintf(ProcessNameWithPrefix, TEXT("%s#%d"), ProcessNameBuffer, Counter);
+                                _stprintf_s(ProcessNameWithPrefix, MAX_PATH, TEXT("%s#%d"), ProcessNameBuffer, Counter);
                             }
 
                             bool ProcessExists = false;
@@ -114,7 +116,14 @@ std::vector<std::wstring> PerformanceQuery::GetProcessNames()
                             }
                         }
 
-                        ProcessNames.push_back(ProcessNameWithPrefix);
+                        if (ProcessIDs[ProcessIndex] == CurrentProcessID)
+                        {
+                            ProcessNames.insert(ProcessNames.begin(), ProcessNameWithPrefix);
+                        }
+                        else
+                        {
+                            ProcessNames.push_back(ProcessNameWithPrefix);
+                        }
                     }
                 }
             }
@@ -137,14 +146,14 @@ std::vector<std::wstring> PerformanceQuery::GetValidCounterNames()
     {
         TCHAR szCounterName[MAX_PATH] = {};
             
-        wsprintf(szCounterName, TEXT("\\Processor(%u)\\%% Processor Time"), index);
+        _stprintf_s(szCounterName, MAX_PATH, TEXT("\\Processor(%u)\\%% Processor Time"), unsigned(index));
         ValidCounterNames.push_back(szCounterName);
             
-        wsprintf(szCounterName, TEXT("\\Processor(%u)\\%% Idle Time"), index);
+        _stprintf_s(szCounterName, MAX_PATH, TEXT("\\Processor(%u)\\%% Idle Time"), unsigned(index));
         ValidCounterNames.push_back(szCounterName);
     }
 
-    std::vector<std::wstring> ProcessNames = GetProcessNames();
+    auto ProcessNames = GetProcessNames();
 
     for
     (
@@ -155,7 +164,7 @@ std::vector<std::wstring> PerformanceQuery::GetValidCounterNames()
     {
         TCHAR szCounterName[MAX_PATH] = {};
 
-        wsprintf(szCounterName, TEXT("\\Process(%s)\\%% Processor Time"), element->c_str());
+        _stprintf_s(szCounterName, MAX_PATH, TEXT("\\Process(%s)\\%% Processor Time"), element->c_str());
         ValidCounterNames.push_back(szCounterName);
     }	
 
@@ -483,7 +492,7 @@ void UPerformanceChartWidget::NativePaint(FPaintContext& InContext) const
                 GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
                     InContext,
                     FText::FromString(std::get<0>(*Message)),
-                    FVector2D(LeftPartWidth, MessageIndex * 2 * ConsoleFontSize),
+                    FVector2D(LeftPartWidth/3, MessageIndex * 2 * ConsoleFontSize),
                     ConsoleFont,
                     ConsoleFontSize,
                     ConsoleFontTypeFace,
@@ -495,7 +504,7 @@ void UPerformanceChartWidget::NativePaint(FPaintContext& InContext) const
                 GetDefault<UWidgetBlueprintLibrary>()->DrawText(
                     InContext,
                     std::get<0>(*Message),
-                    FVector2D(LeftPartWidth, MessageIndex * (LeftPartHeight / 11.0f)),
+                    FVector2D(LeftPartWidth/3, MessageIndex * (LeftPartHeight / 11.0f)),
                     CpuColor
                     );
             }

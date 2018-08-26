@@ -8,9 +8,10 @@
 #include <tuple>
 #include <memory>
 
-#include "windows.h"
-#include "psapi.h"
-#include "pdh.h"
+//#include <windows.h>
+#include "MinWindows.h"
+#include <psapi.h>
+#include <pdh.h>
 #pragma comment(lib, "Pdh.lib")
 
 #include "PerformanceChartWidget.generated.h"

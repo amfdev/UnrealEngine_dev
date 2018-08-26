@@ -492,7 +492,7 @@ void UPerformanceChartWidget::NativePaint(FPaintContext& InContext) const
                 GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
                     InContext,
                     FText::FromString(std::get<0>(*Message)),
-                    FVector2D(LeftPartWidth, MessageIndex * 2 * ConsoleFontSize),
+                    FVector2D(LeftPartWidth/3, MessageIndex * 2 * ConsoleFontSize),
                     ConsoleFont,
                     ConsoleFontSize,
                     ConsoleFontTypeFace,
@@ -504,7 +504,7 @@ void UPerformanceChartWidget::NativePaint(FPaintContext& InContext) const
                 GetDefault<UWidgetBlueprintLibrary>()->DrawText(
                     InContext,
                     std::get<0>(*Message),
-                    FVector2D(LeftPartWidth, MessageIndex * (LeftPartHeight / 11.0f)),
+                    FVector2D(LeftPartWidth/3, MessageIndex * (LeftPartHeight / 11.0f)),
                     CpuColor
                     );
             }
