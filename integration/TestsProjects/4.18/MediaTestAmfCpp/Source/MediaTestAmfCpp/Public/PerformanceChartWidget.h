@@ -8,9 +8,10 @@
 #include <tuple>
 #include <memory>
 
-#include "windows.h"
-#include "psapi.h"
-#include "pdh.h"
+//#include <windows.h>
+#include "MinWindows.h"
+#include <psapi.h>
+#include <pdh.h>
 #pragma comment(lib, "Pdh.lib")
 
 #include "PerformanceChartWidget.generated.h"
@@ -27,9 +28,9 @@ class PerformanceQuery
 protected:
     PDH_HQUERY NamedQuery;
     
-    PDH_HQUERY TotalQuery;
-    PDH_HCOUNTER TotalCounter;
-    double TotalValue;
+    //PDH_HQUERY TotalQuery;
+    //PDH_HCOUNTER TotalCounter;
+    //double TotalValue;
 
 public:
     std::vector<CounterInfo> NamedCounters;
