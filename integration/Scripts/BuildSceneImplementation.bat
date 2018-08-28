@@ -46,7 +46,7 @@ IF NOT DEFINED Build_GenerateSolutionOnly (
         IF ERRORLEVEL 1 GOTO :error
     )
 
-}
+)
 
 :done
     @ECHO Scene built successfully

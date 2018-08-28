@@ -248,6 +248,8 @@ SET Build_Engine
 SET Build_Tests
 SET Build_Dirty
 SET Build_Clean
+SET Build_CleanOnly
+SET Build_GenerateSolutionOnly
 SET Build_SourceOrigin
 SET Build_SourceClone
 SET Build_SourcePatch
