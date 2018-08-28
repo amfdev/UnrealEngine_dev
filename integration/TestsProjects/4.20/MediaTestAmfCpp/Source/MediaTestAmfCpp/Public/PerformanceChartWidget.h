@@ -9,7 +9,8 @@
 #include <memory>
 
 //#include <windows.h>
-#include "MinWindows.h"
+#define _WIN32_WINDOWS 0x0501
+#include "Windows/MinWindows.h"
 #include <psapi.h>
 #include <pdh.h>
 #pragma comment(lib, "Pdh.lib")
