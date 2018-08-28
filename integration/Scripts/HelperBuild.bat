@@ -22,7 +22,8 @@ SET maxcpucount=/maxcpucount
 SET configuration=Release
 SET platform=x64
 
-%MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %PLUGIN_SOLUTION%
+REM %MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %PLUGIN_SOLUTION%
+%MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %PLUGIN_SOLUTION%
 IF ERRORLEVEL 1 GOTO :error
 
 :done

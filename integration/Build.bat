@@ -26,6 +26,7 @@ SET Build_Tests=
 SET Build_Dirty=
 SET Build_Clean=
 SET Build_CleanOnly=
+SET Build_GenerateSolutionOnly=
 SET Build_SourceOrigin=
 SET Build_SourceClone=
 SET Build_SourcePatch=
@@ -96,6 +97,8 @@ FOR %%x IN (%*) DO (
         SET Build_Clean=1
     ) ELSE IF /I "%%~x"=="CleanOnly" (
         SET Build_CleanOnly=1
+    ) ELSE IF /I "%%~x"=="GenerateOnly" (
+        SET Build_GenerateSolutionOnly=1
     ) ELSE IF /I "%%~x"=="Origin" (
         SET Build_SourceOrigin=1
     ) ELSE IF /I "%%~x"=="Clone" (
@@ -171,7 +174,7 @@ IF NOT DEFINED Build_2015 IF NOT DEFINED Build_2017 (
 IF NOT DEFINED Build_Standard IF NOT DEFINED Build_Amf IF NOT DEFINED Build_Stitch (
     @ECHO No rendering type specified by args
 
-    SET Build_Standard=1
+    REM SET Build_Standard=1
     SET Build_Amf=1
 
     IF NOT DEFINED Build_MediaTest (

@@ -21,6 +21,11 @@ IF NOT DEFINED UnrealConfiguration (
     GOTO :error
 )
 
+IF NOT DEFINED UnrealBuildLogFile (
+    @ECHO Error: UnrealBuildLogFile variable undefined!
+    GOTO :error
+)
+
 :checkRights
 FSUTIL DIRTY QUERY %systemdrive% >nul
 if %errorlevel% == 0 (
@@ -51,13 +56,14 @@ IF ERRORLEVEL 1 GOTO :error
 @ECHO MsBuild: %MSBUILD_EXE%
 @ECHO Target: %target%
 @ECHO Affinity: %maxcpucount%
-@ECHO Params: %parameters%
+REM @ECHO Params: %parameters%
 @ECHO Solution: %solution%
 @ECHO Log file: %UnrealBuildLogFile%
 @ECHO:
 
 SET errorInUE=
-CALL %MSBUILD_EXE% /target:"%target%" "%maxcpucount%" /property:Configuration="%UnrealConfiguration%";Platform="%platform%" "%parameters%" "%solution%" >> "%UnrealBuildLogFile%" 2>>&1
+REM CALL %MSBUILD_EXE% /target:"%target%" "%maxcpucount%" /property:Configuration="%UnrealConfiguration%";Platform="%platform%" "%parameters%" "%solution%" >> "%UnrealBuildLogFile%" 2>>&1
+CALL %MSBUILD_EXE% /target:"%target%" "%maxcpucount%" /property:Configuration="%UnrealConfiguration%";Platform="%platform%" "%solution%" >> "%UnrealBuildLogFile%" 2>>&1
 IF ERRORLEVEL 1 (
 
     SET errorInUE=1

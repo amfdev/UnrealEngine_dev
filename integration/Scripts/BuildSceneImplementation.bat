@@ -28,15 +28,25 @@ IF DEFINED AMF_VERSION (
     SET UnrealHome=%UnrealHome%-Stitch
 )
 
-@ECHO Build test scenes
-CALL Scripts\HelperSceneBuild.bat
-IF ERRORLEVEL 1 GOTO :error
-
 IF NOT DEFINED Build_CleanOnly (
-    @ECHO Deploy scenes
-    CALL Scripts\HelperSceneDeploy.bat
+    @ECHO Generate solution files
+    CALL Scripts\HelperSceneGenerateSolution.bat
     IF ERRORLEVEL 1 GOTO :error
 )
+
+IF NOT DEFINED Build_GenerateSolutionOnly (
+
+    @ECHO Build test scenes
+    CALL Scripts\HelperSceneBuild.bat
+    IF ERRORLEVEL 1 GOTO :error
+
+    IF NOT DEFINED Build_CleanOnly (
+        @ECHO Deploy scenes
+        CALL Scripts\HelperSceneDeploy.bat
+        IF ERRORLEVEL 1 GOTO :error
+    )
+
+}
 
 :done
     @ECHO Scene built successfully
