@@ -92,7 +92,8 @@ public:
 
     UPerformanceChartWidget(const FObjectInitializer& ObjectInitializer);
 
-    void NativePaint(FPaintContext& InContext) const override;
+    //void NativePaint(FPaintContext& InContext) const override;
+    int32 NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
     void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
     UFUNCTION(BlueprintCallable, Category = "PerformanceWidget", meta = (BlueprintThreadSafe))
@@ -103,4 +104,8 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "PerformanceWidget", meta = (BlueprintThreadSafe))
     static void GetTextLength(UFont* Font, const FString& String, float FontSize, float& SizeX, float& SizeY);
+
+    static void DrawLine(FVector2D PositionA, FVector2D PositionB, FLinearColor Tint, bool bAntiAlias, int32 LayerId, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements);
+    static void DrawText(const FString& InString, FVector2D Position, FLinearColor Tint, int32 LayerId, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements);
+    static void DrawTextFormatted(const FText& Text, FVector2D Position, UFont* Font, int32 FontSize, FName FontTypeFace, FLinearColor Tint, int32 LayerId, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements);
 };

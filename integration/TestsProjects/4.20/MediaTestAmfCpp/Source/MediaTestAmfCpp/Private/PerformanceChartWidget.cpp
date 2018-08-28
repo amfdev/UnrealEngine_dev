@@ -4,6 +4,8 @@
 
 #include "UObject/UObjectGlobals.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Rendering/DrawElements.h"
+#include "Styling/CoreStyle.h"
 #include "Engine/Font.h"
 
 #include <vector>
@@ -183,6 +185,62 @@ void UPerformanceChartWidget::GetTextLength(UFont* Font, const FString& String, 
     SizeY = float(Height) / SizeDevider;
 }
 
+void UPerformanceChartWidget::DrawLine(FVector2D PositionA, FVector2D PositionB, FLinearColor Tint, bool bAntiAlias, int32 LayerId, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements)
+{
+    TArray<FVector2D> Points;
+    Points.Add(PositionA);
+    Points.Add(PositionB);
+
+    FSlateDrawElement::MakeLines(
+        OutDrawElements,
+        LayerId,
+        AllottedGeometry.ToPaintGeometry(),
+        Points,
+        ESlateDrawEffect::None,
+        Tint,
+        bAntiAlias
+        );
+}
+
+void UPerformanceChartWidget::DrawText(const FString& InString, FVector2D Position, FLinearColor Tint, int32 LayerId, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements)
+{
+    //Context.MaxLayer++;
+
+    //TODO UMG Create a font asset usable as a UFont or as a slate font asset.
+    FSlateFontInfo FontInfo = FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText").Font;
+
+    FSlateDrawElement::MakeText(
+        OutDrawElements,
+        LayerId,
+        AllottedGeometry.ToOffsetPaintGeometry(Position),
+        InString,
+        FontInfo,
+        ESlateDrawEffect::None,
+        Tint
+        );
+}
+
+void UPerformanceChartWidget::DrawTextFormatted(const FText& Text, FVector2D Position, UFont* Font, int32 FontSize, FName FontTypeFace, FLinearColor Tint, int32 LayerId, const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements)
+{
+    if ( Font )
+    {
+        //Context.MaxLayer++;
+
+        //TODO UMG Create a font asset usable as a UFont or as a slate font asset.
+        FSlateFontInfo FontInfo(Font, FontSize, FontTypeFace);
+
+        FSlateDrawElement::MakeText(
+            OutDrawElements,
+            LayerId,
+            AllottedGeometry.ToOffsetPaintGeometry(Position),
+            Text,
+            FontInfo,
+            ESlateDrawEffect::None,
+            Tint
+            );
+    }
+}
+
 UPerformanceChartWidget::UPerformanceChartWidget(const FObjectInitializer& ObjectInitializer):
     UUserWidget(ObjectInitializer),
     LastQueryDelta(-0.5f),
@@ -195,22 +253,25 @@ UPerformanceChartWidget::UPerformanceChartWidget(const FObjectInitializer& Objec
     Query->AddNamedCounter(Query->GetValidCounterNames()[ 0 ]);
 }
 
-void UPerformanceChartWidget::NativePaint(FPaintContext& InContext) const
+//void UPerformanceChartWidget::NativePaint(FPaintContext& InContext) const
+int32 UPerformanceChartWidget::NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
-    UUserWidget::NativePaint(InContext);
+    UUserWidget::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
 
-    const FVector2D ViewportSize = InContext.AllottedGeometry.Size;
+    const FVector2D ViewportSize = AllottedGeometry.Size;
 
     if (!ConsoleFont)
     {
-        GetDefault<UWidgetBlueprintLibrary>()->DrawText(
-            InContext,
+        DrawText(
             "Error: font not set for performace widget",
             FVector2D(ViewportSize.X / 2.0f, ViewportSize.Y / 2.0f),
-            FLinearColor::Red
+            FLinearColor::Red,
+            ++LayerId,
+            AllottedGeometry,
+            OutDrawElements
             );
 
-        return;
+        return LayerId;
     }
 
     //count frames
@@ -269,18 +330,24 @@ void UPerformanceChartWidget::NativePaint(FPaintContext& InContext) const
             float Y3 = LeftPartHeight - ChartMarginY - ChartDensityCpu * *CpuIterator;
             float Y4 = LeftPartHeight - ChartMarginY - ChartDensityCpu * *++CpuIterator;
 
-            GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-                InContext,
+            DrawLine(
                 FVector2D(XL, Y1),
                 FVector2D(XR, Y2),
-                FpsColor
+                FpsColor,
+                true,
+                ++LayerId,
+                AllottedGeometry,
+                OutDrawElements
                 );
 
-            GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-                InContext,
+            DrawLine(
                 FVector2D(XL, Y3),
                 FVector2D(XR, Y4),
-                CpuColor
+                CpuColor,
+                true,
+                ++LayerId,
+                AllottedGeometry,
+                OutDrawElements
                 );
         }
     }
@@ -297,14 +364,16 @@ void UPerformanceChartWidget::NativePaint(FPaintContext& InContext) const
             float XR = ChartMarginX + ChartDensityTime * (FpsRateRounded.size() + 1);
             float YR = LeftPartHeight - ChartMarginY - ChartDensityFps * *FpsRateRounded.rbegin() - ValueHeight;
 
-            GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
-                InContext,
+            DrawTextFormatted(
                 FText::FromString(Value),
                 FVector2D(XR, YR),
                 ConsoleFont,
                 ConsoleFontSize,
                 ConsoleFontTypeFace,
-                FpsColor
+                FpsColor,
+                ++LayerId,
+                AllottedGeometry,
+                OutDrawElements
                 );
         }
 
@@ -318,64 +387,84 @@ void UPerformanceChartWidget::NativePaint(FPaintContext& InContext) const
             float XR = ChartMarginX + ChartDensityTime * (CpuConsumptionRounded.size() + 1);
             float YR = LeftPartHeight - ChartMarginY - ChartDensityCpu * *CpuConsumptionRounded.rbegin() - ValueHeight;
 
-            GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
-                InContext,
+            DrawTextFormatted(
                 FText::FromString(Value),
                 FVector2D(XR, YR),
                 ConsoleFont,
                 ConsoleFontSize,
                 ConsoleFontTypeFace,
-                CpuColor
+                CpuColor,
+                ++LayerId,
+                AllottedGeometry,
+                OutDrawElements
                 );
         }
     }
     //draw arrows
     {
         // ---
-        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-            InContext,
+        DrawLine(
             FVector2D(ChartMarginX, LeftPartHeight - ChartMarginY),
             FVector2D(LeftPartWidth - ChartMarginX, LeftPartHeight - ChartMarginY),
-            CpuColor
+            CpuColor,
+            true,
+            ++LayerId,
+            AllottedGeometry,
+            OutDrawElements
             );
         // \
 
-        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-            InContext,
+        DrawLine(
             FVector2D(LeftPartWidth - ChartMarginX, LeftPartHeight - ChartMarginY),
             FVector2D(LeftPartWidth - ChartMarginX - ArrowLength, LeftPartHeight - ChartMarginY - ArrowIndent),
-            CpuColor
+            CpuColor,
+            true,
+            ++LayerId,
+            AllottedGeometry,
+            OutDrawElements
             );
         // /
-        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-            InContext,
+        DrawLine(
             FVector2D(LeftPartWidth - ChartMarginX, LeftPartHeight - ChartMarginY),
             FVector2D(LeftPartWidth - ChartMarginX - ArrowLength, LeftPartHeight - ChartMarginY + ArrowIndent),
-            CpuColor
+            CpuColor,
+            true,
+            ++LayerId,
+            AllottedGeometry,
+            OutDrawElements
             );
 
         // |
-        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-            InContext,
+        DrawLine(
             FVector2D(ChartMarginX, LeftPartHeight - ChartMarginY),
             FVector2D(ChartMarginX, ChartMarginY),
-            CpuColor
+            CpuColor,
+            true,
+            ++LayerId,
+            AllottedGeometry,
+            OutDrawElements
             );
 
         // /
-        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-            InContext,
+        DrawLine(
             FVector2D(ChartMarginX, ChartMarginY),
             FVector2D(ChartMarginX - ArrowIndent, ChartMarginY + ArrowLength),
-            CpuColor
+            CpuColor,
+            true,
+            ++LayerId,
+            AllottedGeometry,
+            OutDrawElements
             );
         // \
 
-        GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-            InContext,
+        DrawLine(
             FVector2D(ChartMarginX, ChartMarginY),
             FVector2D(ChartMarginX + ArrowIndent, ChartMarginY + ArrowLength),
-            CpuColor
+            CpuColor,
+            true,
+            ++LayerId,
+            AllottedGeometry,
+            OutDrawElements
             );
     }
 
@@ -386,14 +475,16 @@ void UPerformanceChartWidget::NativePaint(FPaintContext& InContext) const
             float SizeX = 0.0f, SizeY = 0.0f;
             GetTextLength(ConsoleFont, Hint, ConsoleFontSize, SizeX, SizeY);
 
-            GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
-                InContext,
+            DrawTextFormatted(
                 FText::FromString(Hint),
                 FVector2D(ChartMarginX - 0.01 * ArrowLength - SizeX, ChartMarginY - SizeY),
                 ConsoleFont,
                 ConsoleFontSize,
                 ConsoleFontTypeFace,
-                CpuColor
+                CpuColor,
+                ++LayerId,
+                AllottedGeometry,
+                OutDrawElements
                 );
         }
 
@@ -402,14 +493,16 @@ void UPerformanceChartWidget::NativePaint(FPaintContext& InContext) const
             float SizeX = 0.0f, SizeY = 0.0f;
             GetTextLength(ConsoleFont, Hint, ConsoleFontSize, SizeX, SizeY);
 
-            GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
-                InContext,
+            DrawTextFormatted(
                 FText::FromString(Hint),
                 FVector2D(ChartMarginX + 0.01, ChartMarginY - SizeY),
                 ConsoleFont,
                 ConsoleFontSize,
                 ConsoleFontTypeFace,
-                FpsColor
+                FpsColor,
+                ++LayerId,
+                AllottedGeometry,
+                OutDrawElements
                 );
         }
     }
@@ -422,21 +515,26 @@ void UPerformanceChartWidget::NativePaint(FPaintContext& InContext) const
         {
             if (Point < ChartCapacityCpu)
             {
-                GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-                    InContext,
+                DrawLine(
                     FVector2D(ChartMarginX, LeftPartHeight - ChartMarginY - ChartDensityCpu * Point),
                     FVector2D(ChartMarginX - ArrowIndent / 2.0f - ArrowIndent / 4.0, LeftPartHeight - ChartMarginY - ChartDensityCpu * Point),
-                    CpuColor
+                    CpuColor,
+                    true,
+                    ++LayerId,
+                    AllottedGeometry,
+                    OutDrawElements
                     );
 
-                GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
-                    InContext,
+                DrawTextFormatted(
                     FText::FromString(FString::Printf(TEXT("%lld"), Point)),
                     FVector2D(ChartMarginX - ArrowIndent / 2.0f - ArrowIndent / 4.0, LeftPartHeight - ChartMarginY - ChartDensityCpu * Point),
                     ConsoleFont,
                     StepFontSize,
                     ConsoleFontTypeFace,
-                    CpuColor
+                    CpuColor,
+                    ++LayerId,
+                    AllottedGeometry,
+                    OutDrawElements
                     );
             }
             else
@@ -454,21 +552,26 @@ void UPerformanceChartWidget::NativePaint(FPaintContext& InContext) const
                 float ValueWidth, ValueHeight;
                 GetTextLength(ConsoleFont, Value, StepFontSize, ValueWidth, ValueHeight);
 
-                GetDefault<UWidgetBlueprintLibrary>()->DrawLine(
-                    InContext,
+                DrawLine(
                     FVector2D(ChartMarginX, LeftPartHeight - ChartMarginY - ChartDensityFps * Point),
                     FVector2D(ChartMarginX + ArrowIndent / 2.0f + ArrowIndent / 4.0, LeftPartHeight - ChartMarginY - ChartDensityFps * Point),
-                    FpsColor
+                    FpsColor,
+                    true,
+                    ++LayerId,
+                    AllottedGeometry,
+                    OutDrawElements
                     );
 
-                GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
-                    InContext,
+                DrawTextFormatted(
                     FText::FromString(Value),
                     FVector2D(ChartMarginX + ArrowIndent / 2.0f + ArrowIndent / 4.0 - ValueWidth, LeftPartHeight - ChartMarginY - ChartDensityFps * Point),
                     ConsoleFont,
                     StepFontSize,
                     ConsoleFontTypeFace,
-                    FpsColor
+                    FpsColor,
+                    ++LayerId,
+                    AllottedGeometry,
+                    OutDrawElements
                     );
             }
             else
@@ -489,27 +592,33 @@ void UPerformanceChartWidget::NativePaint(FPaintContext& InContext) const
         {
             if (ConsoleFont)
             {
-                GetDefault<UWidgetBlueprintLibrary>()->DrawTextFormatted(
-                    InContext,
+                DrawTextFormatted(
                     FText::FromString(std::get<0>(*Message)),
                     FVector2D(LeftPartWidth/3, MessageIndex * 2 * ConsoleFontSize),
                     ConsoleFont,
                     ConsoleFontSize,
                     ConsoleFontTypeFace,
-                    ConsoleFontColor
+                    ConsoleFontColor,
+                    ++LayerId,
+                    AllottedGeometry,
+                    OutDrawElements
                     );
             }
             else
             {
-                GetDefault<UWidgetBlueprintLibrary>()->DrawText(
-                    InContext,
+                DrawText(
                     std::get<0>(*Message),
                     FVector2D(LeftPartWidth/3, MessageIndex * (LeftPartHeight / 11.0f)),
-                    CpuColor
+                    CpuColor,
+                    ++LayerId,
+                    AllottedGeometry,
+                    OutDrawElements
                     );
             }
         }
     }
+
+    return LayerId;
 }
 
 void UPerformanceChartWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
