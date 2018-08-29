@@ -34,32 +34,32 @@ SET Platform=Win64
 SET SceneProjectName=%SceneName%
 
 IF /I ["%SceneSourceType%"] == ["BluePrints"] (
-    @ECHO Error: BluePrints scene does not need solution generation!
-    GOTO :error
+    @ECHO Attention: BluePrints scene does not need solution generation!
 
 ) ELSE IF /I ["%SceneSourceType%"] == ["CPP"] (
     @ECHO Generate solution for C++ scene...
 
     SET SceneProjectName=%SceneProjectName%Cpp
 
+    @ECHO Scene name: %SceneProjectName%
+    @ECHO Output file name: %SceneBuildLogFile%
+
+    @ECHO Generate solution files for scene...
+
+    CD %UnrealHome%
+    IF ERRORLEVEL 1 GOTO :error
+
+    CALL Engine\Binaries\DotNET\UnrealBuildTool.exe -projectfiles -project="..\..\..\TestsProjects\%UE_VERSION%\%SceneProjectName%\%SceneProjectName%.uproject" -game -engine -progress
+    IF ERRORLEVEL 1 GOTO :error
+
+    @ECHO Solution file generated successfully
+
 ) ELSE (
     @ECHO Error: unsupported scene source type: %SceneSourceType%!
     GOTO :error\
 )
 
-@ECHO Scene name: %SceneProjectName%
-@ECHO Output file name: %SceneBuildLogFile%
-
-@ECHO Generate solution files for scene...
-
-CD %UnrealHome%
-IF ERRORLEVEL 1 GOTO :error
-
-CALL Engine\Binaries\DotNET\UnrealBuildTool.exe -projectfiles -project="..\..\..\TestsProjects\%UE_VERSION%\%SceneProjectName%\%SceneProjectName%.uproject" -game -engine -progress
-IF ERRORLEVEL 1 GOTO :error
-
 :done
-    @ECHO Solution file generated successfully
     EXIT /B 0
 
 :error
