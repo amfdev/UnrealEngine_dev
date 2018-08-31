@@ -73,7 +73,6 @@ IF DEFINED Build_CleanOnly (
     IF ERRORLEVEL 1 GOTO :error
 
     CALL Engine\Build\BatchFiles\RunUAT.bat BuildCookRun -project="..\TestsProjects\%UE_VERSION%\%SceneProjectName%\%SceneProjectName%.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -build -stage -pak -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%" >> "%SceneBuildLogFile%" 2>>&1
-    CALL Engine\Build\BatchFiles\RunUAT.bat BuildCookRun -project="..\TestsProjects\%UE_VERSION%\%SceneProjectName%\%SceneProjectName%.uproject" -noP4 -platform=%Platform% -clientconfig=%Configuration% -serverconfig=%Configuration% -cook -build -stage -pak -archive -archivedirectory="%UE_VERSION%_%Configuration%_%Platform%" >> "%SceneBuildLogFile%" 2>>&1
     IF ERRORLEVEL 1 GOTO :error
 
     @ECHO Demo scene built successfully for %UE_VERSION%.
@@ -83,5 +82,5 @@ IF DEFINED Build_CleanOnly (
     EXIT /B 0
 
 :error
-    @ECHO Error: failed to build demo scene for %UE_VERSION%!
+    @ECHO Error: failed to build or clean demo scene for %UE_VERSION%!
     EXIT /B 1
