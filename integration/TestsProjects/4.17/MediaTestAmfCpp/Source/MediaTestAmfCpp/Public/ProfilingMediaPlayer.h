@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class MEDIATESTAMFCPP_API UProfilingMediaPlayer : public UMediaPlayer
 {
 	GENERATED_BODY()
