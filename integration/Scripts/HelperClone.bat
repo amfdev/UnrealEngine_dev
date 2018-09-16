@@ -40,6 +40,10 @@ IF NOT EXIST %PLUGIN_FOLDER% (
     @ECHO Git pull
     git pull %PLUGIN_URL% %PLUGIN_BRANCH%
     IF ERRORLEVEL 1 GOTO :error
+
+    @ECHO Git checkout
+    git checkout %PLUGIN_BRANCH%
+    IF ERRORLEVEL 1 GOTO :error
 )
 
 :done
