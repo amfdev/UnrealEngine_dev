@@ -9,10 +9,12 @@
  * 
  */
 UCLASS()
-class MEDIATESTAMFCPP_API UMediaTestFunctionLibrary : public UBlueprintFunctionLibrary
+class MEDIATESTAMFCPP_API UMediaTestFunctionLibrary:
+    public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-	
+
+public:	
 	UFUNCTION(BlueprintCallable, Category = "Files")
 	static bool FileSaveString(const FString& FileNameIn, const FString& SaveTextIn);
 
@@ -90,4 +92,18 @@ class MEDIATESTAMFCPP_API UMediaTestFunctionLibrary : public UBlueprintFunctionL
 	*/
 	UFUNCTION(BlueprintPure, Category = "System")
 	static bool HasLaunchOption(FString Options, const FString& OptionToCheck);
+
+    UFUNCTION(BlueprintPure, Category = "System", meta = (BlueprintThreadSafe))
+    static FTimespan ParseTimespan(const FString& String);
+
+    UFUNCTION(BlueprintPure, Category = "System", meta = (BlueprintThreadSafe))
+    static FString Timespan2Filename(const FTimespan& Timespan);
+
+    static int32 GetMilliseconds(const FTimespan& Timespan)
+    {
+        return (int32)((Timespan.GetTicks() / ETimespan::TicksPerMillisecond) % 1000);
+    }
+
+    //UFUNCTION(BlueprintPure, Category = "System")
+    static bool SavePixmap(const uint8* Pixels, int Width, int Height, int Stride, const FString& Filename);
 };

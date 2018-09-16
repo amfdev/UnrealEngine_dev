@@ -3,6 +3,7 @@
 #include "Misc/Paths.h"
 #include "Modules/ModuleManager.h"
 #include "Misc/PackageName.h"
+#include "HighResScreenshot.h"
 
 bool UMediaTestFunctionLibrary::FileSaveString(const FString& FileNameIn, const FString& SaveTextIn)
 {
@@ -385,7 +386,7 @@ FString UMediaTestFunctionLibrary::ParseOption(FString Options, const FString& K
 		}
 	}
 	return ReturnValue;
-}
+}   
 
 bool UMediaTestFunctionLibrary::HasLaunchOption(FString Options, const FString& OptionToCheck)
 {
@@ -400,4 +401,51 @@ bool UMediaTestFunctionLibrary::HasLaunchOption(FString Options, const FString& 
 		}
 	}
 	return ReturnValue;
+}
+
+FTimespan UMediaTestFunctionLibrary::ParseTimespan(const FString& String)
+{
+    FTimespan Timespan;
+
+    FTimespan::Parse(String, Timespan);
+    
+    return Timespan;
+}
+
+FString UMediaTestFunctionLibrary::Timespan2Filename(const FTimespan& Timespan)
+{
+    return
+        (Timespan.GetHours() < 10 ? FString("0") : FString())
+        +
+        FString::FromInt(Timespan.GetHours())
+        + "_" +
+        (Timespan.GetMinutes() < 10 ? FString("0") : FString())
+        +
+        FString::FromInt(Timespan.GetMinutes())
+        + "_" +
+        (Timespan.GetSeconds() < 10 ? FString("0") : FString())
+        +
+        FString::FromInt(Timespan.GetSeconds())
+        + "_" +
+        (GetMilliseconds(Timespan) < 10 ? FString("000") : FString()) + (GetMilliseconds(Timespan) < 100 ? FString("00") : FString())
+        +
+        FString::FromInt(GetMilliseconds(Timespan));
+}
+
+bool UMediaTestFunctionLibrary::SavePixmap(const uint8* Pixels, int Width, int Height, int Stride, const FString& Filename)
+{
+    TArray<FColor> Bitmap;
+    Bitmap.InsertZeroed(0, Width * Height);
+
+    //todo: block copy
+    for(int Pixel = 0; Pixel < Width * Height; ++Pixel)
+    {
+        Bitmap[Pixel].B = Pixels[Pixel * Stride + 0];
+        Bitmap[Pixel].G = Pixels[Pixel * Stride + 1];
+        Bitmap[Pixel].R = Pixels[Pixel * Stride + 2];
+        Bitmap[Pixel].A = Pixels[Pixel * Stride + 3];
+    }
+
+    FString ResultPath;
+    return GetHighResScreenshotConfig().SaveImage(Filename, Bitmap, FIntPoint(Width, Height), &ResultPath);
 }

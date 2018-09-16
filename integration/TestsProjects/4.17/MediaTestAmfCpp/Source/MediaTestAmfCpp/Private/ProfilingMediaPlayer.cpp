@@ -1,7 +1,6 @@
 #include "ProfilingMediaPlayer.h"
 
-//#include "../AmfMediaPrivate.h"
-//#include "AmfMediaOutput.h"
+#include "MediaTestFunctionLibrary.h"
 
 #include "Runtime/Media/Public/IMediaTextureSink.h"
 #include "Runtime/Core/Public/Windows/COMPointer.h"
@@ -41,46 +40,34 @@
 
 #include "HideWindowsPlatformTypes.h"*/
 
+#include <vector>
+
 UProfilingMediaPlayer::UProfilingMediaPlayer(const FObjectInitializer& ObjectInitializer):
     Super(ObjectInitializer),
     Profiling(false),
-    Frequency(0)
+    Frequency(0),
+    Seeking(false)
 {
+    OnMediaEvent().AddLambda(
+        [this](EMediaEvent Event)
+        {
+            this->OnMediaEventHandler(Event);
+        }
+        );
 }
 
-void SaveTexture2DDebug_(const uint8* PPixelData, int width, int height, FString Filename)
+void UProfilingMediaPlayer::OnMediaEventHandler(EMediaEvent Event)
 {
-    TArray<FColor> OutBMP;
-    int w = width;
-    int h = height;
+    AccessibleTextureCopy.SafeRelease();
+}
 
-    OutBMP.InsertZeroed(0, w*h);
-
-    for (int i = 0; i < (w*h); ++i)
+bool UProfilingMediaPlayer::ProfileMedia(const FTimespan& Start, const FTimespan& End, int ShotsPerSecond, const FString& OutputPath)
+{
+    if (nullptr == GDynamicRHI)
     {
-        uint8 R = PPixelData[i * 4 + 2];
-        uint8 G = PPixelData[i * 4 + 1];
-        uint8 B = PPixelData[i * 4 + 0];
-        uint8 A = PPixelData[i * 4 + 3];
-
-        OutBMP[i].R = R;
-        OutBMP[i].G = G;
-        OutBMP[i].B = B;
-        OutBMP[i].A = A;
+        return false;
     }
 
-    FIntPoint DestSize(w, h);
-
-    FString ResultPath;
-    FHighResScreenshotConfig& HighResScreenshotConfig = GetHighResScreenshotConfig();
-    bool bSaved = HighResScreenshotConfig.SaveImage(Filename, OutBMP, DestSize, &ResultPath);
-
-    //UE_LOG(LogHTML5UI, Warning, TEXT("UHTML5UIWidget::SaveTexture2DDebug: %d %d"), w, h);
-    //UE_LOG(LogHTML5UI, Warning, TEXT("UHTML5UIWidget::SaveTexture2DDebug: %s %d"), *ResultPath, bSaved == true ? 1 : 0);
-}
-
-bool UProfilingMediaPlayer::SetProfilingInterval(const FTimespan& Start, const FTimespan& End, int Frequency_)
-{
     if (!SupportsSeeking())
     {
         return false;
@@ -89,165 +76,120 @@ bool UProfilingMediaPlayer::SetProfilingInterval(const FTimespan& Start, const F
     Profiling = true;
     StartTime = Start;
     EndTime = End;
-    Frequency = Frequency_;
-
-    FTimespan step = FTimespan(0, 0, 0, 0, 1000 / Frequency);
-
-    for (FTimespan seekTime = StartTime; seekTime <= EndTime; seekTime += step)
-    {
-        Seek(seekTime);
-
-        ENQUEUE_UNIQUE_RENDER_COMMAND_ONEPARAMETER(
-            RequireTextureSink,
-            /*IMediaTextureSink**/UProfilingMediaPlayer*,
-            ProfilingMediaPlayer,
-            this,
-            {
-                ProfilingMediaPlayer->ProfilerCallerHelper();
-            }
-            );
-        FlushRenderingCommands();
-    }
-
+    Frequency = ShotsPerSecond;
+    OutputFolder = OutputPath;
+    SeekTime = StartTime;
+    
     return true;
 }
 
-/*class D3D11RHI_API FD3D11TextureBaseAccess:
-    public FD3D11TextureBase
+//called in the
+void UProfilingMediaPlayer::ProfilerCallerHelper(const FTimespan& FrameTime)
 {
-public:
-    FD3D11TextureBaseAccess(
-        const FD3D11TextureBase& source
-    ):
-        FD3D11TextureBase(
-            source.D3DRHI,
-            source.IHVResourceHandle,
-            source.MemorySize,
-            source.BaseShaderResource,
-            source.Resource,
-            source.ShaderResourceView,
-            source.RenderTargetViews,
-            source.bCreatedRTVsPerSlice,
-            source.RTVArraySize,
-            source.NumDepthStencilViews
-        )
-    {
-    }
+    /*auto Sink = GetVideoTexture();
+    check(Sink);
 
-    virtual ~FD3D11TextureBaseAccess() {}
+    FRHITexture *TextureRHI = Sink->GetTextureSinkTexture();
+    check(TextureRHI);
 
-    //public FD3D11DynamicRHI* GetD3DRHI() { return D3DRHI; }
-};*/
-
-void UProfilingMediaPlayer::ProfilerCallerHelper()
-{
-    //IMediaTextureSink* Sink = dynamic_cast<IMediaTextureSink*>(GetVideoTexture());
-    auto Sink = GetVideoTexture();
-    if (!Sink)
-    {
-        return;
-    }
-
-    FRHITexture* TextureRHI = Sink->GetTextureSinkTexture();
-    if (!TextureRHI)
-    {
-        return;
-    }
-
-    FRHITexture2D* Texture2DRHI = TextureRHI->GetTexture2D();
-    check(Texture2DRHI != nullptr);
-
-    if (Texture2DRHI->GetSizeX() == 1 && Texture2DRHI->GetSizeY() == 1)
-    {
-        return;
-    }
-
-    /*
-    CopiedSurface = SubmittedSurface;
-    SubmittedSurface = nullptr;
-
-    TRefCountPtr<IDXGIResource>	DxgiResource;
-    static_cast<ID3D11Texture2D*>(CopiedSurface->GetPlaneAt(0)->GetNative())->
-    QueryInterface(IID_PPV_ARGS(DxgiResource.GetInitReference()));
-    check(DxgiResource != nullptr);
-
-    HANDLE SharedHandle = nullptr;
-    DxgiResource->GetSharedHandle(&SharedHandle);
-    check(SharedHandle != nullptr);
-
-    TRefCountPtr<ID3D11Resource> SharedResource;
-    EngineDevice->OpenSharedResource(SharedHandle, IID_PPV_ARGS(SharedResource.GetInitReference()));
-    check(SharedResource != nullptr);
-
-    EngineDeviceContext->CopyResource(
-    static_cast<ID3D11Texture2D*>(Texture2DRHI->GetNativeResource()),
-    SharedResource
-    );
-    EngineDeviceContext->End(CopyEventQuery);
-    */
-
-    //TD3D11Texture2D<FD3D11BaseTexture2D> *textureWrapper(static_cast< TD3D11Texture2D<FD3D11BaseTexture2D> *>(Texture2DRHI));
-    if (nullptr == GDynamicRHI)
-    {
-        return;
-    }
-
-    ID3D11Device* EngineDevice = static_cast<ID3D11Device*>(GDynamicRHI->RHIGetNativeDevice());
+    ID3D11Device *EngineDevice = static_cast<ID3D11Device*>(GDynamicRHI->RHIGetNativeDevice());
     check(EngineDevice != nullptr);
 
     TRefCountPtr<ID3D11DeviceContext> EngineDeviceContext;
     EngineDevice->GetImmediateContext(EngineDeviceContext.GetInitReference());
-    
-    ID3D11Texture2D *texture(static_cast<ID3D11Texture2D*>(Texture2DRHI->GetNativeResource()));
 
-    /////////////////////////////
-    D3D11_TEXTURE2D_DESC description;
-    texture->GetDesc(&description);
-    
-    description.BindFlags = 0;
-    description.CPUAccessFlags = D3D11_CPU_ACCESS_READ |     D3D11_CPU_ACCESS_WRITE;
-    description.Usage = D3D11_USAGE_STAGING;
+    FRHITexture2D *Texture2DRHI = TextureRHI->GetTexture2D();
+    check(Texture2DRHI != nullptr);
 
-    ID3D11Texture2D* texTemp = NULL;
+    ID3D11Texture2D *NativeTexture(static_cast<ID3D11Texture2D*>(Texture2DRHI->GetNativeResource()));
 
-    HRESULT hr = EngineDevice->CreateTexture2D(&description, NULL, &texTemp);
-    if (FAILED(hr))
+    //D3D11_TEXTURE2D_DESC NativeTextureDescription;
+    //NativeTexture->GetDesc(&NativeTextureDescription);
+
+    //assume that the texture's format could not be changed without events
+    if (!AccessibleTextureCopy /*|| 0 != memcmp(&AccessibleTextureDescription, &NativeTextureDescription, sizeof(D3D11_TEXTURE2D_DESC))* /)
     {
-        if (hr == E_OUTOFMEMORY) {
-        printf("GetImageData - CreateTexture2D - OUT OF MEMORY \n");
-        }
-        if (texTemp)
+        //D3D11_TEXTURE2D_DESC NativeTextureDescription;
+        NativeTexture->GetDesc(&AccessibleTextureDescription/*NativeTextureDescription* /);
+        //AccessibleTextureDescription = NativeTextureDescription;
+
+        //extends access rights
+        AccessibleTextureDescription.BindFlags = 0;
+        AccessibleTextureDescription.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
+        AccessibleTextureDescription.Usage = D3D11_USAGE_STAGING;
+
+        if (FAILED(EngineDevice->CreateTexture2D(&AccessibleTextureDescription, NULL, AccessibleTextureCopy.GetInitReference())))
         {
-            texTemp->Release();
-            texTemp = NULL;
+            return;
         }
-        return;
     }
-    EngineDeviceContext->CopyResource(texTemp, texture);
 
-    D3D11_MAPPED_SUBRESOURCE  mapped;
-    unsigned int subresource = 0;
-    hr = EngineDeviceContext->Map(texTemp, 0, D3D11_MAP_READ, 0, &mapped);
-    if (FAILED(hr))
+    EngineDeviceContext->CopyResource(AccessibleTextureCopy.GetReference(), NativeTexture);
+
+    D3D11_MAPPED_SUBRESOURCE MappedTexture = {};
+
+    if (FAILED(EngineDeviceContext->Map(AccessibleTextureCopy.GetReference(), 0, D3D11_MAP_READ, 0, &MappedTexture)))
     {
         return;
     }
 
-    DWORD nWidth = description.Width;
-    DWORD nHeight = description.Height;
-    const int pitch = mapped.RowPitch;
-    BYTE* source = (BYTE*)(mapped.pData);
-    BYTE* dest = new BYTE[(nWidth)*(nHeight) * 4];
-    BYTE* destTemp = dest;
-    for (DWORD i = 0; i < nHeight; ++i)
+    std::vector<BYTE> Pixels(AccessibleTextureDescription.Width * AccessibleTextureDescription.Height * 4);    
+
+    BYTE *Source = (BYTE*)(MappedTexture.pData);
+    BYTE *TargetPixel = &(*Pixels.begin());
+
+    for 
+    (
+        UINT SkanLine = 0;
+        SkanLine < AccessibleTextureDescription.Height;
+        ++SkanLine, Source += MappedTexture.RowPitch, TargetPixel += AccessibleTextureDescription.Width * 4
+    )
     {
-        memcpy(destTemp, source, nWidth * 4);
-        source += pitch;
-        destTemp += nWidth * 4;
+        memcpy(TargetPixel, Source, AccessibleTextureDescription.Width * 4);
     }
-    EngineDeviceContext->Unmap(texTemp, 0);
 
-    FDateTime dateTime = FDateTime::Now();
+    EngineDeviceContext->Unmap(AccessibleTextureCopy.GetReference(), 0);
 
-    SaveTexture2DDebug_(dest, nWidth, nHeight, FString("E:/out") + dateTime.ToString() + ".png");
+    /*UMediaTestFunctionLibrary::SavePixmap(
+        Pixels.data(),
+        AccessibleTextureDescription.Width,
+        AccessibleTextureDescription.Height,
+        4,
+        OutputFolder + UMediaTestFunctionLibrary::Timespan2Filename(SeekTime) + ".png"
+        );*/
+}
+
+//called in the BP thread
+bool UProfilingMediaPlayer::Tick(float DeltaTime)
+{
+    bool Ticked = UMediaPlayer::Tick(DeltaTime);
+
+    /*if (Seeking)
+    {
+        FTimespan Step = FTimespan(0, 0, 0, 0, 1000 / Frequency);
+
+        if (SeekTime <= EndTime)
+        {
+            Seek(SeekTime);
+
+            ENQUEUE_UNIQUE_RENDER_COMMAND_TWOPARAMETER(
+                RequireTextureSink,
+                UProfilingMediaPlayer*,
+                ProfilingMediaPlayer,
+                this,
+                FTimespan,
+                SeekTime,
+                SeekTime,
+                {
+                    ProfilingMediaPlayer->ProfilerCallerHelper(SeekTime);
+                }
+                );
+
+            FlushRenderingCommands();
+
+            SeekTime += Step;
+        }
+    }*/
+
+    return Ticked;
 }
