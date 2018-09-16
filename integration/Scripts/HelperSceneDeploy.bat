@@ -25,24 +25,22 @@ SET DeployHome=Deploy
 SET Configuration=%SceneConfiguration%
 SET Platform=Win64
 
-SET SceneProjectName=%SceneName%
-
 IF /I ["%SceneSourceType%"] == ["BluePrints"] (
     @ECHO Deploy blueprints scene
 
 ) ELSE IF /I ["%SceneSourceType%"] == ["CPP"] (
     @ECHO Deploy C++ scene
 
-    SET SceneProjectName=%SceneProjectName%Cpp
+    SET SceneProjectName=%SceneName%Cpp
 
 ) ELSE (
     @ECHO Error: unsupported scene source type: %SceneSourceType%!
     GOTO :error\
 )
 
-SET SceneProjectOutputName=%SceneProjectName%_%Configuration%
+SET SceneProjectOutputName=!SceneProjectName!_%Configuration%
 
-@ECHO Project name to deploy: %SceneProjectName%
+@ECHO Project name to deploy: !SceneProjectName!
 @ECHO Scene project output name: %SceneProjectOutputName%
 
 IF NOT EXIST "%DeployHome%" (
@@ -94,7 +92,7 @@ IF EXIST "%CD%\TestsProjects\Media" (
 )
 
 @ECHO Copy scene to deploy folder
-ROBOCOPY %CD%\TestsProjects\%UE_VERSION%\%SceneProjectName%\Saved\StagedBuilds\WindowsNoEditor %CD%\Deploy\Tests\%UE_VERSION%\%SceneProjectOutputName% /E /xf *.pdb /xf *.txt
+ROBOCOPY %CD%\TestsProjects\%UE_VERSION%\!SceneProjectName!\Saved\StagedBuilds\WindowsNoEditor %CD%\Deploy\Tests\%UE_VERSION%\%SceneProjectOutputName% /E /xf *.pdb /xf *.txt
 IF ERRORLEVEL 1 (
     @ECHO Todo: investigate why robocopy returns error
     rem GOTO :error
