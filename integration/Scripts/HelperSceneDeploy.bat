@@ -28,6 +28,8 @@ SET Platform=Win64
 IF /I ["%SceneSourceType%"] == ["BluePrints"] (
     @ECHO Deploy blueprints scene
 
+    SET SceneProjectName=%SceneName%
+
 ) ELSE IF /I ["%SceneSourceType%"] == ["CPP"] (
     @ECHO Deploy C++ scene
 
