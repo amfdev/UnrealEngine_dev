@@ -41,9 +41,20 @@ IF NOT EXIST %PLUGIN_FOLDER% (
     git pull %PLUGIN_URL% %PLUGIN_BRANCH%
     IF ERRORLEVEL 1 GOTO :error
 
-    @ECHO Git checkout
+    @ECHO Git checkout demanded branch
     git checkout %PLUGIN_BRANCH%
-    IF ERRORLEVEL 1 GOTO :error
+    rem IF ERRORLEVEL 1 GOTO :error
+
+    @ECHO Git test switch to demanded branch
+    git rev-parse --abbrev-ref HEAD
+    SET GIT_BRANCH_TEST="git rev-parse --abbrev-ref HEAD"
+    for /f "eol=# delims= " %%i in ('%GIT_BRANCH_TEST%') do (SET GIT_CURRENT_BRANCH=%%i)
+
+    IF NOT ["%GIT_CURRENT_BRANCH%"] == ["%PLUGIN_BRANCH%"] (
+        @ECHO Git test for demanded branch failed
+        @ECHO Current branch: %GIT_CURRENT_BRANCH%
+        GOTO :error
+    )
 )
 
 :done
