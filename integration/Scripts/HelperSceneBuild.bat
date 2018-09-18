@@ -49,8 +49,6 @@ IF /I ["%SceneSourceType%"] == ["BluePrints"] (
 @ECHO Scene project name: !SceneProjectName!
 @ECHO Output file name: %SceneBuildLogFile%
 
-EXIT /b 0
-
 IF DEFINED Build_CleanOnly (
     @ECHO Clean scene...
 

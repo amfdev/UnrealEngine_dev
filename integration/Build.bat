@@ -571,4 +571,4 @@ FOR %%s IN (2015, 2017) DO (
 
     @ECHO %Verbose%
 
-    EXIT /b 0
+    EXIT /B 0
