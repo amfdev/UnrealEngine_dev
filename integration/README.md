@@ -9,6 +9,8 @@ play 4k video to tests media playback inside Unreal Engine.
 Unreal Engine 4.17
 Unreal Engine 4.18
 Unreal Engine 4.19
+Unreal Engine 4.20
+Unreal Engine 4.21
 
 ## Supported Visual Studio versions
 Visual Studio 2015
@@ -41,7 +43,7 @@ Build.bat [Command1] [Command2] [Command3] ...
     Available commands:
         Engine - build Unreal Engine
         Tests - build tests
-        4.17 4.18 4.19 - specify Unreal Engine version
+        4.17 4.18 4.19 4.20 4.21 - specify Unreal Engine version
         Standard - build Unreal Engine and related tests with standard media playback
         Amf - build Unreal Engine and related tests with accelerated AMF media playback
         Stitch - build Unreal Engine and related tests with stitch media playback
@@ -73,7 +75,7 @@ Build.bat [Command1] [Command2] [Command3] ...
 
 "Build.bat Development 4.17 Blueprints Amf" - builds tests projects with Amf playback using Development configuration of UnrealEngine 4.17
 
-"Build.bat Engine 4.18" - builds Development and Shipping configuration of Unreal Engine with and without Amf patches
+"Build.bat Engine 4.18 4.21" - builds Development and Shipping configuration of Unreal Engine 4.18 and 4.21 with and without Amf patches
 
 "Build.bat Amf Engine Mediatest" -builds cumulative mediatest example for all supported Unreal Engine versions
 

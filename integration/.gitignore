@@ -7,12 +7,16 @@
 /AmfMedia-4.19-amfdev
 /AmfMedia-4.20
 /AmfMedia-4.20-amfdev
+/AmfMedia-4.21
+/AmfMedia-4.21-amfdev
 /AmfStitchMedia-4.18
 /AmfStitchMedia-4.18-amfdev
 /AmfStitchMedia-4.19
 /AmfStitchMedia-4.19-amfdev
 /AmfStitchMedia-4.20
 /AmfStitchMedia-4.20-amfdev
+/AmfStitchMedia-4.21
+/AmfStitchMedia-4.21-amfdev
 /UnrealEngine-4.17
 /UnrealEngine-4.17-amf
 /UnrealEngine-4.18
@@ -25,4 +29,7 @@
 /UnrealEngine-4.20
 /UnrealEngine-4.20-amf
 /UnrealEngine-4.20-stitch
+/UnrealEngine-4.21
+/UnrealEngine-4.21-amf
+/UnrealEngine-4.21-stitch
 /Logs

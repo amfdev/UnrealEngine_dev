@@ -19,7 +19,8 @@ IF NOT EXIST %PLUGIN_FOLDER% (
     @ECHO branch: %PLUGIN_BRANCH%
     @ECHO folder: %PLUGIN_FOLDER%
 
-    git clone -b "%PLUGIN_BRANCH%" --single-branch "%PLUGIN_URL%" "%PLUGIN_FOLDER%"
+    rem git clone -b "%PLUGIN_BRANCH%" --single-branch "%PLUGIN_URL%" "%PLUGIN_FOLDER%"
+    git clone -b "%PLUGIN_BRANCH%" "%PLUGIN_URL%" "%PLUGIN_FOLDER%"
     IF ERRORLEVEL 1 (
         @ECHO:
         @ECHO Unable to clone %PLUGIN_URL% %PLUGIN_BRANCH%

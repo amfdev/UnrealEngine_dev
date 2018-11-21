@@ -11,6 +11,7 @@ SET Build_4_17=
 SET Build_4_18=
 SET Build_4_19=
 SET Build_4_20=
+SET Build_4_21=
 SET Build_2015=
 SET Build_2017=
 SET Build_Amf=
@@ -64,6 +65,8 @@ FOR %%x IN (%*) DO (
         SET Build_4_19=1
     ) ELSE IF /I "%%~x"=="4.20" (
         SET Build_4_20=1
+    ) ELSE IF /I "%%~x"=="4.21" (
+        SET Build_4_21=1
     ) ELSE IF /I "%%~x"=="2015" (
         SET Build_2015=1
     ) ELSE IF /I "%%~x"=="2017" (
@@ -157,16 +160,18 @@ IF DEFINED Build_Verbose (
 
 @ECHO %Verbose%
 
-IF NOT DEFINED Build_4_17 IF NOT DEFINED Build_4_18 IF NOT DEFINED Build_4_19 IF NOT DEFINED Build_4_20 (
-    @ECHO No UnrealEngine version specified, 4.17, 4.18, 4.19, 4.20 will be added
+IF NOT DEFINED Build_4_17 IF NOT DEFINED Build_4_18 IF NOT DEFINED Build_4_19 IF NOT DEFINED Build_4_20 IF NOT DEFINED Build_4_21 (
+    @ECHO No UnrealEngine version specified, 4.17, 4.18, 4.19, 4.20, 4.21 will be added
     SET Build_4_17=1
     SET Build_4_18=1
     SET Build_4_19=1
     SET Build_4_20=1
+    SET Build_4_21=1
 )
 
 IF NOT DEFINED Build_2015 IF NOT DEFINED Build_2017 (
-    @ECHO No Visual Studio version specified, 2015 and 2017 will be added
+    @ECHO No Visual Studio version specified, 2015 will be added
+    REM @ECHO No Visual Studio version specified, 2015 and 2017 will be added
     SET Build_2015=1
     REM SET Build_2017=1
 )
@@ -201,11 +206,14 @@ IF NOT DEFINED Build_Dirty IF NOT DEFINED Build_Clean (
 )
 
 IF NOT DEFINED Build_Engine IF NOT DEFINED Build_Tests (
-    @ECHO Not engine or tests are defined, both engine and tests will be built
     SET Build_Engine=1
-    SET Build_Tests=1
-    SET Build_BluePrints=1
-    SET Build_CPP=1
+
+    rem IF NOT DEFINED Build_Standard (
+        @ECHO Not engine or tests are defined, both engine and tests will be built
+        SET Build_Tests=1
+        SET Build_BluePrints=1
+        SET Build_CPP=1
+    rem )
 )
 
 IF DEFINED Build_Tests (
@@ -216,9 +224,10 @@ IF DEFINED Build_Tests (
     )
 )
 
-IF NOT DEFINED Build_MediaTest IF NOT DEFINED Build_Stitch IF DEFINED Build_Tests (
+IF NOT DEFINED Build_Standard IF NOT DEFINED Build_MediaTest IF NOT DEFINED Build_Stitch IF DEFINED Build_Tests (
     SET Build_MediaTest=1
-    SET Build_Stitch=1
+
+    REM SET Build_Stitch=1
 )
 
 IF NOT DEFINED Build_SourceOrigin IF NOT DEFINED Build_SourceClone (
@@ -234,6 +243,7 @@ SET Build_4_17
 SET Build_4_18
 SET Build_4_19
 SET Build_4_20
+SET Build_4_21
 SET Build_2015
 SET Build_2017
 SET Build_Amf
@@ -257,6 +267,8 @@ SET Build_Minimal
 SET Build_Verbose
 SET Param_AmfBranch
 SET Param_StitchBranch
+
+REM EXIT /B 0
 
 @ECHO:
 
@@ -290,7 +302,7 @@ FOR %%s IN (2015, 2017) DO (
     IF NOT DEFINED SkipVisualStudio (
         SET VS_VERSION=%%s
 
-        FOR %%v IN (17, 18, 19, 20) DO (
+        FOR %%v IN (17, 18, 19, 20, 21) DO (
 
             IF DEFINED Build_4_%%v (
                 CALL :runBuildHelper 4.%%v
@@ -311,7 +323,7 @@ FOR %%s IN (2015, 2017) DO (
     @ECHO Available commands:
     @ECHO     Engine - build Unreal Engine
     @ECHO     Tests - build tests
-    @ECHO     4.17 4.18 4.19 4.20 - specify Unreal Engine version
+    @ECHO     4.17 4.18 4.19 4.20 4.21 - specify Unreal Engine version
     @ECHO     2015 2017 - specify Visual Studio version
     @ECHO     Standard - build Unreal Engine and related tests with standard media playback
     @ECHO     Amf - build Unreal Engine and related tests with accelerated AMF media playback
@@ -337,6 +349,7 @@ FOR %%s IN (2015, 2017) DO (
 :error
     @ECHO:
     @ECHO Error: Work of build system failed!
+
     EXIT /B 1
 
 :runBuildHelper unreal_number
