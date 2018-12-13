@@ -151,7 +151,7 @@ IF DEFINED PLUGIN_TYPE (
         @ECHO Install plugin to UE...
         CALL Scripts\HelperApply.bat
         IF ERRORLEVEL 1 (
-            @ECHO ToDo: investigate why error returned here (from robocopy)
+            @ECHO Todo: investigate why robocopy returns error
             rem GOTO :error
         )
     )
