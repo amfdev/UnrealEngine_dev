@@ -1,0 +1,1 @@
+MediaTestAmfCpp.exe -vulkan -plane -loop -Amf ?playlist=..\..\..\Media\planescreen.playlist
