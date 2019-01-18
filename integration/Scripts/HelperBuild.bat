@@ -23,7 +23,7 @@ SET configuration=Release
 SET platform=x64
 
 REM %MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %PLUGIN_SOLUTION%
-%MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %PLUGIN_SOLUTION%
+%MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %PLUGIN_SOLUTION%  >> "%PluginBuildLogFile%" 2>>&1
 IF ERRORLEVEL 1 GOTO :error
 
 :done

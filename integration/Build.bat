@@ -33,6 +33,7 @@ SET Build_SourceClone=
 SET Build_SourcePatch=
 SET Build_Minimal=
 SET Build_Verbose=
+SET Build_VulkanVersion=
 
 SET Command_AmfBranch=
 SET Param_AmfBranch=
@@ -94,6 +95,8 @@ FOR %%x IN (%*) DO (
         SET Build_Engine=1
     ) ELSE IF /I "%%~x"=="Tests" (
         SET Build_Tests=1
+    ) ELSE IF /I "%%~x"=="Vulkan" (
+        SET Build_VulkanVersion=1
     ) ELSE IF /I "%%~x"=="Dirty" (
         SET Build_Dirty=1
     ) ELSE IF /I "%%~x"=="Clean" (
@@ -419,6 +422,7 @@ FOR %%s IN (2015, 2017) DO (
 
     SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%renderTypePrintable%_%VS_VERSION%
     SET UnrealBuildLogFile=%CD%\%LogFolderName%\%UnrealConfigurationPrintableName%.log
+    SET PluginBuildLogFile=%CD%\%LogFolderName%\PluginBuild.log
     SET returnCode=0
     SET buildResult=""
 

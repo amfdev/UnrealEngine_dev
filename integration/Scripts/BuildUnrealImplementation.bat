@@ -67,6 +67,7 @@ SET PLUGIN_URL=
 SET PLUGIN_BRANCH=
 SET PLUGIN_SOLUTION=
 SET PLUGIN_APPLY_PROGRAM=
+SET PLUGIN_LOGFILE=
 
 IF DEFINED Build_SourceOrigin (
     SET PLUGIN_URL=https://github.com/GPUOpenSoftware/UnrealEngine.git
@@ -96,7 +97,14 @@ IF DEFINED AMF_VERSION (
         SET PLUGIN_BRANCH=AmfMedia-%AMF_VERSION%
     )
 
-    SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs%VS_VERSION%\AmfMediaCommon.sln
+    IF DEFINED Build_VulkanVersion (
+        @ECHO Build Vulkan version of AmfMedia library plugin
+        SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs%VS_VERSION%\AmfMediaFactoryHelper.sln
+    ) ELSE (
+        @ECHO Build DX11 version of AmfMedia library plugin
+        SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs%VS_VERSION%\AmfMediaCommon.sln
+    )
+
     SET PLUGIN_APPLY_PROGRAM=AmfMediaInstall.bat
 
 ) ELSE IF DEFINED STITCH_VERSION (
