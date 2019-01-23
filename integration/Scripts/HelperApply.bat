@@ -16,6 +16,10 @@ IF NOT DEFINED UnrealHome (
     GOTO :error
 )
 
+@ECHO Plugin folder: %PLUGIN_FOLDER%
+@ECHO Install programm: %PLUGIN_APPLY_PROGRAM%
+@ECHO Unreal home: %UnrealHome%
+
 SET CurrentDirectory=%CD%
 
 CD %UnrealHome%

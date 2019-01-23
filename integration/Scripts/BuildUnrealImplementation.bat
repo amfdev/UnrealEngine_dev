@@ -100,12 +100,12 @@ IF DEFINED AMF_VERSION (
     IF DEFINED Build_VulkanVersion (
         @ECHO Build Vulkan version of AmfMedia library plugin
         SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs%VS_VERSION%\AmfMediaFactoryHelper.sln
+        SET PLUGIN_APPLY_PROGRAM=AmfMediaInstallVulkan.bat
     ) ELSE (
         @ECHO Build DX11 version of AmfMedia library plugin
         SET PLUGIN_SOLUTION=Engine\Source\ThirdParty\AMD\AMF_SDK\amf\public\proj\vs%VS_VERSION%\AmfMediaCommon.sln
+        SET PLUGIN_APPLY_PROGRAM=AmfMediaInstall.bat
     )
-
-    SET PLUGIN_APPLY_PROGRAM=AmfMediaInstall.bat
 
 ) ELSE IF DEFINED STITCH_VERSION (
     @ECHO Prepare stitch plugin...
