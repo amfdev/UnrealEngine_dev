@@ -108,6 +108,11 @@ IF ["%SceneName%"] == ["MediaTestAmf"] (
         @ECHO Todo: investigate why robocopy returns error
         rem GOTO :error
     )
+
+    IF DEFINED Build_VulkanVersion (
+        @ECHO Install AMF media dll
+        COPY "%UnrealHome%\Engine\Binaries\Thirdparty\AMD\amf\Win64\AmfMediaFactoryHelper.dll" %CD%\Deploy\Tests\%UE_VERSION%\%SceneProjectOutputName%
+    )
 )
 
 :done
