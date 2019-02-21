@@ -14,13 +14,20 @@ IF NOT DEFINED VS_VERSION (
     GOTO :error
 )
 
-SET UnrealHome=UnrealEngine-%UE_VERSION%
-
-IF DEFINED AMF_VERSION (
-    SET UnrealHome=%UnrealHome%-Amf
-) ELSE IF DEFINED STITCH_VERSION (
-    SET UnrealHome=%UnrealHome%-Stitch
+IF NOT DEFINED UnrealHome (
+    @ECHO Error: UnrealHome variable undefined!
+    GOTO :error
 )
+
+rem to fix too long paths
+rem SET UnrealHome=UnrealEngine-%UE_VERSION%
+rem SET UnrealHome=UE-%UE_VERSION%
+
+rem IF DEFINED AMF_VERSION (
+rem     SET UnrealHome=%UnrealHome%-Amf
+rem ) ELSE IF DEFINED STITCH_VERSION (
+rem     SET UnrealHome=%UnrealHome%-Stitch
+rem )
 
 IF NOT DEFINED UnrealConfiguration (
     @ECHO Error: UnrealConfiguration variable undefined!

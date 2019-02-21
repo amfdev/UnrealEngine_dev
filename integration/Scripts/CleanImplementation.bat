@@ -4,20 +4,25 @@ SETLOCAL
 CALL Scripts\UtilityTestDefines.bat
 IF ERRORLEVEL 1 GOTO :error
 
-SET UnrealHome=
-
 IF NOT DEFINED UE_VERSION (
     @ECHO Error: UE_VERSION variable undefined!
     GOTO :error
 )
 
-SET UnrealHome=UnrealEngine-%UE_VERSION%
-
-IF DEFINED AMF_VERSION (
-    SET UnrealHome=%UnrealHome%-Amf
-) ELSE IF DEFINED STITCH_VERSION (
-    SET UnrealHome=%UnrealHome%-Stitch
+IF NOT DEFINED UnrealHome (
+    @ECHO Error: UnrealHome variable undefined!
+    GOTO :error
 )
+
+rem SET UnrealHome=
+
+rem SET UnrealHome=UnrealEngine-%UE_VERSION%
+
+rem IF DEFINED AMF_VERSION (
+rem    SET UnrealHome=%UnrealHome%-Amf
+rem ) ELSE IF DEFINED STITCH_VERSION (
+rem     SET UnrealHome=%UnrealHome%-Stitch
+rem )
 
 SET AmfHome=
 

@@ -11,6 +11,7 @@ Unreal Engine 4.18
 Unreal Engine 4.19
 Unreal Engine 4.20
 Unreal Engine 4.21
+Unreal Engine 4.22
 
 ## Supported Visual Studio versions
 Visual Studio 2015
@@ -43,7 +44,7 @@ Build.bat [Command1] [Command2] [Command3] ...
     Available commands:
         Engine - build Unreal Engine
         Tests - build tests
-        4.17 4.18 4.19 4.20 4.21 - specify Unreal Engine version
+        4.17 4.18 4.19 4.20 4.21 4.22 - specify Unreal Engine version
         Standard - build Unreal Engine and related tests with standard media playback
         Amf - build Unreal Engine and related tests with accelerated AMF media playback
         Stitch - build Unreal Engine and related tests with stitch media playback
@@ -64,7 +65,7 @@ Build.bat [Command1] [Command2] [Command3] ...
   An order of the arguments are not sensitive.
 
   *If no one of the Engine or Tests params specified, both will be built (Engine first, then related tests).
-  *If no one of the versions specified both will be built (4.17, then 4.18).
+  *If no one of the versions specified all UE versions will be built (4.17, 4.18, ...).
   *If no one of the playback specified both will be built (Standart first, then with Amf patches and support).
   *If no one of the tests projects type specified both will be built (Blueprints and C++).
 

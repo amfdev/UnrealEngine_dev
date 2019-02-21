@@ -19,14 +19,19 @@ IF NOT DEFINED SceneSourceType (
     GOTO :error
 )
 
-@ECHO Prepare folders...
-SET UnrealHome=UnrealEngine-%UE_VERSION%
-
-IF DEFINED AMF_VERSION (
-    SET UnrealHome=%UnrealHome%-Amf
-) ELSE IF DEFINED STITCH_VERSION (
-    SET UnrealHome=%UnrealHome%-Stitch
+IF NOT DEFINED UnrealHome (
+    @ECHO Error: UnrealHome variable undefined!
+    GOTO :error
 )
+
+rem @ECHO Prepare folders...
+rem SET UnrealHome=UnrealEngine-%UE_VERSION%
+
+rem IF DEFINED AMF_VERSION (
+rem     SET UnrealHome=%UnrealHome%-Amf
+rem ) ELSE IF DEFINED STITCH_VERSION (
+rem     SET UnrealHome=%UnrealHome%-Stitch
+rem )
 
 IF NOT DEFINED Build_CleanOnly (
     @ECHO Generate solution files

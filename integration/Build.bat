@@ -428,6 +428,15 @@ FOR %%s IN (2015, 2017) DO (
     SET UnrealConfigurationPrintableName=UnrealEngine_%UE_VERSION%_%UnrealConfiguration%_%renderTypePrintable%_%VS_VERSION%
     SET UnrealBuildLogFile=%CD%\%LogFolderName%\%UnrealConfigurationPrintableName%.log
     SET PluginBuildLogFile=%CD%\%LogFolderName%\PluginBuild.log
+
+    SET UnrealHome=UE-%UE_VERSION%
+
+    IF DEFINED AMF_VERSION (
+        SET UnrealHome=%UnrealHome%-Amf
+    ) ELSE IF DEFINED STITCH_VERSION (
+        SET UnrealHome=%UnrealHome%-Stitch
+    )
+
     SET returnCode=0
     SET buildResult=""
 

@@ -19,13 +19,14 @@ SETLOCAL
 
 IF DEFINED AMF_VERSION (
     CD %PLUGIN_FOLDER%
+
     IF ERRORLEVEL 1 GOTO :error
 
     IF ["%UE_VERSION%"] == ["4.17"] (
 
         IF DEFINED Build_SourcePatch (
             git apply ..\Patches\AmfMedia_UE417.patch
-            IF ERRORLEVEL 1 GOTO :error
+            rem IF ERRORLEVEL 1 GOTO :error
         )
 
     ) ELSE IF ["%UE_VERSION%"] == ["4.18"] (
@@ -39,7 +40,7 @@ IF DEFINED AMF_VERSION (
             REM IF ERRORLEVEL 1 SET result=failed
         )
 
-        IF /I ["failed"] == ["%result%"] GOTO :error
+        rem IF /I ["failed"] == ["%result%"] GOTO :error
 
     ) ELSE IF ["%UE_VERSION%"] == ["4.19"] (
 
@@ -55,7 +56,22 @@ IF DEFINED AMF_VERSION (
             IF ERRORLEVEL 1 SET result=failed
         )
 
-        IF /I ["failed"] == ["%result%"] GOTO :error
+        rem IF /I ["failed"] == ["%result%"] GOTO :error
+    )
+
+    IF DEFINED Build_SourcePatch (
+        IF EXIST "..\Patches\Plugin\AmfMedia_%UE_VERSION%.diff" (
+            @ECHO Found patch for plugin, patching...
+            git apply "..\Patches\Plugin\AmfMedia_%UE_VERSION%.diff"
+            IF ERRORLEVEL 1 (
+                @ECHO Error: patching for plugin AmfMedia unsuccessfull...
+                SET result=failed
+            ) ELSE (
+                @ECHO Plugin AmfMedia patched successfully
+            )
+        ) ELSE (
+            @ECHO Patch for plugin AmfMedia not found
+        )
     )
 )
 
@@ -83,10 +99,26 @@ IF DEFINED STITCH_VERSION (
 
         IF /I ["failed"] == ["%result%"] GOTO :error
     )
+
+    IF DEFINED Build_SourcePatch (
+        CD %PLUGIN_FOLDER%
+        IF EXIST "..\Patches\Plugin\AmfStitchMedia_%UE_VERSION%.diff" (
+            @ECHO Found patch for plugin, patching...
+            git apply "..\Patches\Plugin\AmfStitchMedia_%UE_VERSION%.diff"
+            IF ERRORLEVEL 1 (
+                @ECHO Error: patching for plugin AmfStitchMedia unsuccessfull...
+                SET result=failed
+            ) ELSE (
+                @ECHO AmfStitchMedia plugin patched successfully
+            )
+        ) ELSE (
+            @ECHO Patch for plugin AmfStitchMedia not found
+        )
+    )
 )
 
 :done
-    @ECHO Patch applied successfully
+    @ECHO Patches applied successfully
     EXIT /B 0
 
 :error
