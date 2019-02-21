@@ -103,7 +103,13 @@ IF ERRORLEVEL 1 (
 IF ["%SceneName%"] == ["MediaTestAmf"] (
     @ECHO Copy MediaTest predefined bat files
 
-    ROBOCOPY "%CD%\TestsProjects\Media" %CD%\Deploy\Tests\%UE_VERSION%\%SceneProjectOutputName% *.bat
+    IF NOT DEFINED Build_VulkanVersion (
+        ROBOCOPY "%CD%\TestsProjects\Media" %CD%\Deploy\Tests\%UE_VERSION%\%SceneProjectOutputName% *.bat /xf *Vulkan*
+    ) ELSE (
+        ROBOCOPY "%CD%\TestsProjects\Media" %CD%\Deploy\Tests\%UE_VERSION%\%SceneProjectOutputName% *.bat /xf Play_x360.bat /xf Play_planescreen.bat
+    )
+
+
     IF ERRORLEVEL 1 (
         @ECHO Todo: investigate why robocopy returns error
         rem GOTO :error
