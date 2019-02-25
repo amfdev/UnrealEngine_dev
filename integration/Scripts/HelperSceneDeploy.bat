@@ -42,6 +42,10 @@ IF /I ["%SceneSourceType%"] == ["BluePrints"] (
 
 SET SceneProjectOutputName=!SceneProjectName!_%Configuration%
 
+IF DEFINED Build_VulkanVersion (
+    SET SceneProjectOutputName=!SceneProjectName!_%Configuration%_Vulkan
+)
+
 @ECHO Project name to deploy: !SceneProjectName!
 @ECHO Scene project output name: %SceneProjectOutputName%
 
@@ -106,7 +110,7 @@ IF ["%SceneName%"] == ["MediaTestAmf"] (
     IF NOT DEFINED Build_VulkanVersion (
         ROBOCOPY "%CD%\TestsProjects\Media" %CD%\Deploy\Tests\%UE_VERSION%\%SceneProjectOutputName% *.bat /xf *Vulkan*
     ) ELSE (
-        ROBOCOPY "%CD%\TestsProjects\Media" %CD%\Deploy\Tests\%UE_VERSION%\%SceneProjectOutputName% *.bat /xf Play_x360.bat /xf Play_planescreen.bat
+        ROBOCOPY "%CD%\TestsProjects\Media" %CD%\Deploy\Tests\%UE_VERSION%\%SceneProjectOutputName% *.bat
     )
 
 
