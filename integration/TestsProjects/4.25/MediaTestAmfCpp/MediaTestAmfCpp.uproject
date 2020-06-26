@@ -1,0 +1,20 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{5FA3EF68-440B-DC12-B68D-1E8085AB18CA}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "MediaTestAmfCpp",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"UMG"
+			]
+		}
+	],
+	"TargetPlatforms": [
+		"WindowsNoEditor"
+	]
+}
