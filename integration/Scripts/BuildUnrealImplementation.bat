@@ -44,27 +44,27 @@ IF NOT DEFINED Build_CleanOnly (
         @ECHO No UnrealEngine folder found, create it
         MKDIR "%UnrealHome%"
         IF ERRORLEVEL 1 GOTO :error
-    )
 
-    @ECHO:
-    @ECHO Clone UnrealEngine...
-    CALL Scripts\HelperUnrealClone.bat
-    IF ERRORLEVEL 1 GOTO :error
+        @ECHO:
+        @ECHO Clone UnrealEngine...
+        CALL Scripts\HelperUnrealClone.bat
+        IF ERRORLEVEL 1 GOTO :error
 
-    @ECHO:
-    @ECHO Setup MS_BUILD_EXE...
-    REM Must be after cloning
-    CALL Scripts\UtilitySetupMSBuildExe.bat
-    IF ERRORLEVEL 1 GOTO :error
+        @ECHO:
+        @ECHO Setup MS_BUILD_EXE...
+        REM Must be after cloning
+        CALL Scripts\UtilitySetupMSBuildExe.bat
+        IF ERRORLEVEL 1 GOTO :error
 
-    @ECHO:
-    @ECHO Setup UnrealEngine...
-    CALL Scripts\HelperUnrealSetup.bat
-    IF ERRORLEVEL 1 GOTO :error
-    
-    IF DEFINED Build_PrepareUE (
-        @ECHO UnrealEngine was prepared
-        GOTO :done
+        @ECHO:
+        @ECHO Setup UnrealEngine...
+        CALL Scripts\HelperUnrealSetup.bat
+        IF ERRORLEVEL 1 GOTO :error
+        
+        IF DEFINED Build_PrepareUE (
+            @ECHO UnrealEngine was prepared
+            GOTO :done
+        )
     )
 
 )
