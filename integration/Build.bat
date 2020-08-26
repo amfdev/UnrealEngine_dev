@@ -21,6 +21,7 @@ SET Build_2017=
 SET Build_Amf=
 SET Build_Standard=
 SET Build_Stitch=
+SET Build_PrepareUE=
 SET Build_Development=
 SET Build_Shipping=
 SET Build_BluePrints=
@@ -90,6 +91,8 @@ FOR %%x IN (%*) DO (
         SET Build_Stitch=1
     ) ELSE IF /I "%%~x"=="Standard" (
         SET Build_Standard=1
+    ) ELSE IF /I "%%~x"=="PrepareUE" (
+        SET Build_PrepareUE=1
     ) ELSE IF /I "%%~x"=="Development" (
         SET Build_Development=1
     ) ELSE IF /I "%%~x"=="Shipping" (
@@ -257,6 +260,12 @@ IF NOT DEFINED Build_SourceOrigin IF NOT DEFINED Build_SourceClone (
     )
 )
 
+IF DEFINED Build_PrepareUE (
+    SET Build_Standard=
+    SET Build_Amf=
+    SET Build_Stitch=
+)
+
 @ECHO:
 SET Build_4_17
 SET Build_4_18
@@ -273,6 +282,7 @@ SET Build_2017
 SET Build_Amf
 SET Build_Standard
 SET Build_Stitch
+SET Build_PrepareUE
 SET Build_Development
 SET Build_Shipping
 SET Build_BluePrints
@@ -408,6 +418,10 @@ FOR %%s IN (2015, 2017) DO (
             )
         )
     )
+    
+    IF DEFINED Build_PrepareUE (
+        CALL :runBuildProcess %~1 Development PrepareUE
+    )
 
     EXIT /B 0
 
@@ -424,6 +438,8 @@ FOR %%s IN (2015, 2017) DO (
         SET AMF_VERSION=!UE_VERSION!
     ) ELSE IF ["%~3"] == ["Stitch"] (
         SET STITCH_VERSION=!UE_VERSION!
+    ) ELSE IF ["%~3"] == ["PrepareUE"] (
+        REM only prepare UE for optimize traffic
     ) ELSE (
         @ECHO Error! unsupported renderType
         EXIT /B 1

@@ -61,6 +61,11 @@ IF NOT DEFINED Build_CleanOnly (
     @ECHO Setup UnrealEngine...
     CALL Scripts\HelperUnrealSetup.bat
     IF ERRORLEVEL 1 GOTO :error
+    
+    IF DEFINED Build_PrepareUE (
+        @ECHO UnrealEngine was prepared
+        GOTO :done
+    )
 
 )
 
