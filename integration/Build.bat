@@ -113,9 +113,21 @@ FOR %%x IN (%*) DO (
     ) ELSE IF /I "%%~x"=="Vulkan" (
         SET Build_VulkanVersion=1
     ) ELSE IF /I "%%~x"=="Dirty" (
-        SET Build_Dirty=1
+        IF DEFINED Build_Clean  (
+            @ECHO
+            @ECHO Error: Dirty and Clean build specified together!
+            GOTO :usage
+        ) ELSE (
+            SET Build_Dirty=1
+        )
     ) ELSE IF /I "%%~x"=="Clean" (
-        SET Build_Clean=1
+        IF DEFINED Build_Dirty  (
+            @ECHO
+            @ECHO Error: Dirty and Clean build specified together!
+            GOTO :usage
+        ) ELSE (
+            SET Build_Clean=1
+        )
     ) ELSE IF /I "%%~x"=="CleanOnly" (
         SET Build_CleanOnly=1
     ) ELSE IF /I "%%~x"=="GenerateOnly" (
@@ -224,8 +236,11 @@ IF NOT DEFINED Build_BluePrints IF NOT DEFINED Build_CPP IF DEFINED Build_Tests 
 )
 
 IF NOT DEFINED Build_Dirty IF NOT DEFINED Build_Clean (
-    @ECHO No rebuilding flags specified, clean build will be used
-    SET Build_Clean=1
+    rem @ECHO No rebuilding flags specified, clean build will be used
+    rem SET Build_Clean=1
+    @ECHO
+    @ECHO Error: Clean or Dirty build type must be specified!
+    GOTO :usage
 )
 
 IF NOT DEFINED Build_Engine IF NOT DEFINED Build_Tests (
