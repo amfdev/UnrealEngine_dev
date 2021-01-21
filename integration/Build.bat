@@ -16,6 +16,7 @@ SET Build_4_22=
 SET Build_4_23=
 SET Build_4_24=
 SET Build_4_25=
+SET Build_4_26=
 SET Build_2015=
 SET Build_2017=
 SET Build_Amf=
@@ -80,6 +81,8 @@ FOR %%x IN (%*) DO (
         SET Build_4_24=1
     ) ELSE IF /I "%%~x"=="4.25" (
         SET Build_4_25=1
+    ) ELSE IF /I "%%~x"=="4.26" (
+        SET Build_4_26=1
     ) ELSE IF /I "%%~x"=="2015" (
         SET Build_2015=1
     ) ELSE IF /I "%%~x"=="2017" (
@@ -175,7 +178,7 @@ IF DEFINED Build_Verbose (
 
 @ECHO %Verbose%
 
-IF NOT DEFINED Build_4_17 IF NOT DEFINED Build_4_18 IF NOT DEFINED Build_4_19 IF NOT DEFINED Build_4_20 IF NOT DEFINED Build_4_21 IF NOT DEFINED Build_4_22 IF NOT DEFINED Build_4_23 IF NOT DEFINED Build_4_24 IF NOT DEFINED Build_4_25 (
+IF NOT DEFINED Build_4_17 IF NOT DEFINED Build_4_18 IF NOT DEFINED Build_4_19 IF NOT DEFINED Build_4_20 IF NOT DEFINED Build_4_21 IF NOT DEFINED Build_4_22 IF NOT DEFINED Build_4_23 IF NOT DEFINED Build_4_24 IF NOT DEFINED Build_4_25 IF NOT DEFINED Build_4_26(
     @ECHO No UnrealEngine version specified, 4.17, 4.18, 4.19, 4.20, 4.21, 4.22, 4.23 will be added
     SET Build_4_17=1
     SET Build_4_18=1
@@ -186,6 +189,7 @@ IF NOT DEFINED Build_4_17 IF NOT DEFINED Build_4_18 IF NOT DEFINED Build_4_19 IF
     SET Build_4_23=1
     SET Build_4_24=1
     SET Build_4_25=1
+    SET Build_4_26=1
 )
 
 IF NOT DEFINED Build_2015 IF NOT DEFINED Build_2017 (
@@ -267,6 +271,7 @@ SET Build_4_22
 SET Build_4_23
 SET Build_4_24
 SET Build_4_25
+SET Build_4_26
 
 SET Build_2015
 SET Build_2017
@@ -326,7 +331,7 @@ FOR %%s IN (2015, 2017) DO (
     IF NOT DEFINED SkipVisualStudio (
         SET VS_VERSION=%%s
 
-        FOR %%v IN (17, 18, 19, 20, 21, 22, 23, 24, 25) DO (
+        FOR %%v IN (17, 18, 19, 20, 21, 22, 23, 24, 25, 26) DO (
 
             IF DEFINED Build_4_%%v (
                 CALL :runBuildHelper 4.%%v
@@ -347,7 +352,7 @@ FOR %%s IN (2015, 2017) DO (
     @ECHO Available commands:
     @ECHO     Engine - build Unreal Engine
     @ECHO     Tests - build tests
-    @ECHO     4.17 4.18 4.19 4.20 4.21 4.22 4.23 - specify Unreal Engine version
+    @ECHO     4.17 4.18 4.19 4.20 4.21 4.22 4.23 4.24 4.25 4.26 - specify Unreal Engine version
     @ECHO     2015 2017 - specify Visual Studio version
     @ECHO     Standard - build Unreal Engine and related tests with standard media playback
     @ECHO     Amf - build Unreal Engine and related tests with accelerated AMF media playback
