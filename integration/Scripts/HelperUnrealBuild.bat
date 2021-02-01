@@ -62,12 +62,22 @@ REM @ECHO Params: %parameters%
 @ECHO:
 
 SET errorInUE=
-REM CALL %MSBUILD_EXE% /target:"%target%" "%maxcpucount%" /property:Configuration="%UnrealConfiguration%";Platform="%platform%" "%parameters%" "%solution%" >> "%UnrealBuildLogFile%" 2>>&1
-CALL %MSBUILD_EXE% /target:"%target%" "%maxcpucount%" /property:Configuration="%UnrealConfiguration%";Platform="%platform%" "%solution%" >> "%UnrealBuildLogFile%" 2>>&1
-IF ERRORLEVEL 1 (
 
-    SET errorInUE=1
-    @ECHO Error: MSBUILD_EXE returns error when building UnrealEngine!
+IF DEFINED Build_MSBuild (
+    REM CALL %MSBUILD_EXE% /target:"%target%" "%maxcpucount%" /property:Configuration="%UnrealConfiguration%";Platform="%platform%" "%parameters%" "%solution%" >> "%UnrealBuildLogFile%" 2>>&1
+    CALL %MSBUILD_EXE% /target:"%target%" "%maxcpucount%" /property:Configuration="%UnrealConfiguration%";Platform="%platform%" "%solution%" >> "%UnrealBuildLogFile%" 2>>&1
+    IF ERRORLEVEL 1 (
+        SET errorInUE=1
+        @ECHO Error: MSBUILD_EXE returns error when building UnrealEngine!
+    )
+
+) ELSE IF DEFINED Build_Devenv (
+    rem PATH %Build_DevenvPath%
+    START /wait "" "devenv.exe" "%solution%" /Build "%UnrealConfiguration%|%platform%" >> "%UnrealBuildLogFile%" 2>>&1
+    IF ERRORLEVEL 1 (
+        SET errorInUE=1
+        @ECHO Error: Devenv returns error when building UnrealEngine!
+    )
 )
 
 @ECHO Copy prerequirements

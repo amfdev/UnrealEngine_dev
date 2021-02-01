@@ -33,7 +33,7 @@ IF DEFINED Build_Minimal (
 )
 
 @ECHO Generate UnrealEngine project files
-CALL GenerateProjectFiles.bat
+CALL GenerateProjectFiles.bat -CurrentPlatform -%VS_VERSION%
 IF ERRORLEVEL 1 GOTO :error
 
 rem @ECHO Add dependency to shipping configuration

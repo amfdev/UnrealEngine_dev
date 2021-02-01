@@ -51,11 +51,27 @@ IF NOT DEFINED Build_CleanOnly (
     CALL Scripts\HelperUnrealClone.bat
     IF ERRORLEVEL 1 GOTO :error
 
-    @ECHO:
-    @ECHO Setup MS_BUILD_EXE...
-    REM Must be after cloning
-    CALL Scripts\UtilitySetupMSBuildExe.bat
-    IF ERRORLEVEL 1 GOTO :error
+    rem
+    rem ivm: why need to be tested here?
+    rem may be should be tested only before build?
+    rem
+    rem IF DEFINED Build_Devenv (
+    rem    @ECHO:
+    rem    @ECHO Setup Devenv...
+    rem    REM Must be after cloning
+    rem    CALL Scripts\UtilitySetupDevEnvExe.bat
+    rem    IF ERRORLEVEL 1 (
+    rem        @ECHO:
+    rem        @ECHO Error: DevEnv could not be found!
+    rem        GOTO :error
+    rem    )
+    rem ) ELSE (
+    rem    @ECHO:
+    rem    @ECHO Setup MS_BUILD_EXE...
+    rem    REM Must be after cloning
+    rem    CALL Scripts\UtilitySetupMSBuildExe.bat
+    rem    IF ERRORLEVEL 1 GOTO :error
+    rem )
 
     @ECHO:
     @ECHO Setup UnrealEngine...

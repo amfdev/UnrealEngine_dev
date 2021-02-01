@@ -11,20 +11,41 @@ IF NOT DEFINED PLUGIN_SOLUTION (
     GOTO :error
 )
 
-CALL Scripts\UtilitySetupMSBuildExe.bat
-IF ERRORLEVEL 1 GOTO :error
 
-CD %PLUGIN_FOLDER%
-IF ERRORLEVEL 1 GOTO :error
+IF DEFINED Build_MSBuild (
 
-SET target=build
-SET maxcpucount=/maxcpucount
-SET configuration=Release
-SET platform=x64
+    CALL Scripts\UtilitySetupMSBuildExe.bat
+    IF ERRORLEVEL 1 GOTO :error
 
-REM %MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %PLUGIN_SOLUTION%
-%MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %PLUGIN_SOLUTION%  >> "%PluginBuildLogFile%" 2>>&1
-IF ERRORLEVEL 1 GOTO :error
+    CD %PLUGIN_FOLDER%
+    IF ERRORLEVEL 1 GOTO :error
+
+    SET target=build
+    SET maxcpucount=/maxcpucount
+    SET configuration=Release
+    SET platform=x64
+
+    REM %MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %PLUGIN_SOLUTION%
+    %MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %PLUGIN_SOLUTION% >> "%PluginBuildLogFile%" 2>>&1
+    IF ERRORLEVEL 1 GOTO :error
+
+) ELSE IF DEFINED Build_Devenv (
+
+    CD %PLUGIN_FOLDER%
+    IF ERRORLEVEL 1 GOTO :error
+
+    SET target=build
+    SET maxcpucount=/maxcpucount
+    SET configuration=Release
+    SET platform=x64
+
+    REM %MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %PLUGIN_SOLUTION%
+    REM %MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %PLUGIN_SOLUTION%  >> "%PluginBuildLogFile%" 2>>&1
+    
+    rem PATH %Build_DevenvPath%
+    START /wait "" "devenv.exe" "%PLUGIN_SOLUTION%" /Build "%configuration%|%platform%" >> "%PluginBuildLogFile%" 2>>&1
+    IF ERRORLEVEL 1 GOTO :error
+)
 
 :done
     @ECHO Solution %PLUGIN_FOLDER%\%PLUGIN_SOLUTION% built successfully

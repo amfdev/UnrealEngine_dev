@@ -1,3 +1,5 @@
+CLS
+
 @SET Verbose=OFF
 @ECHO %Verbose%
 
@@ -17,8 +19,11 @@ SET Build_4_23=
 SET Build_4_24=
 SET Build_4_25=
 SET Build_4_26=
+
 SET Build_2015=
 SET Build_2017=
+SET Build_2019=
+
 SET Build_Amf=
 SET Build_Standard=
 SET Build_Stitch=
@@ -40,6 +45,10 @@ SET Build_Minimal=
 SET Build_Verbose=
 SET Build_VulkanVersion=
 
+SET Build_MSBuild=
+SET Build_Devenv=
+SET Build_DevenvPath=
+
 SET Command_AmfBranch=
 SET Param_AmfBranch=
 SET Command_StitchBranch=
@@ -50,7 +59,11 @@ SET Param_GitLogin=
 SET Command_GitPassword=
 SET Param_GitPassword=
 
+SET Command_DevenvPath=
+SET Param_DevenvPath=
+
 FOR %%x IN (%*) DO (
+
     IF DEFINED Command_AmfBranch (
         SET Param_AmfBranch=%%~x
         SET Command_AmfBranch=
@@ -63,6 +76,10 @@ FOR %%x IN (%*) DO (
     ) ELSE IF DEFINED Command_GitPassword (
         SET Param_GitPassword=%%~x
         SET Command_GitPassword=
+    ) ELSE IF DEFINED Command_DevenvPath (
+        SET Param_DevenvPath="%%~x"
+        SET Command_DevenvPath=
+
     ) ELSE IF /I "%%~x"=="4.17" (
         SET Build_4_17=1
     ) ELSE IF /I "%%~x"=="4.18" (
@@ -83,10 +100,14 @@ FOR %%x IN (%*) DO (
         SET Build_4_25=1
     ) ELSE IF /I "%%~x"=="4.26" (
         SET Build_4_26=1
+
     ) ELSE IF /I "%%~x"=="2015" (
         SET Build_2015=1
     ) ELSE IF /I "%%~x"=="2017" (
         SET Build_2017=1
+    ) ELSE IF /I "%%~x"=="2019" (
+        SET Build_2019=1
+
     ) ELSE IF /I "%%~x"=="Amf" (
         SET Build_Amf=1
     ) ELSE IF /I "%%~x"=="Stitch" (
@@ -138,6 +159,7 @@ FOR %%x IN (%*) DO (
         SET Build_SourceClone=1
     ) ELSE IF /I "%%~x"=="SourcePatch" (
         SET Build_SourcePatch=1
+    
     ) ELSE IF /I "%%~x"=="AmfBranch:" (
 
         IF DEFINED Command_AmfBranch (
@@ -145,29 +167,26 @@ FOR %%x IN (%*) DO (
         ) ELSE (
             SET Command_AmfBranch=1
         )
-
     ) ELSE IF /I "%%~x"=="StitchBranch:" (
 
-        IF DEFINED Command_StitchBranch (
+        IF DEFINED Param_StitchBranch (
             @ECHO Error: stitch branch parameter already specified!
+            GOTO :usage
         ) ELSE (
             SET Command_StitchBranch=1
         )
 
-    ) ELSE IF /I "%%~x"=="GitLogin:" (
-
-        IF DEFINED Command_StitchBranch (
-            @ECHO Error: stitch branch parameter already specified!
+    ) ELSE IF /I "%%~x"=="MSBuild" (
+        SET Build_MSBuild=1
+    ) ELSE IF /I "%%~x"=="Devenv" (
+        SET Build_Devenv=1
+    
+    ) ELSE IF /I "%%~x"=="DevenvPath:" (
+        IF DEFINED Param_DevenvPath (
+            @ECHO Error: Devenv path already specified!
+            GOTO :usage
         ) ELSE (
-            SET Command_StitchBranch=1
-        )
-
-    ) ELSE IF /I "%%~x"=="StitchBranch:" (
-
-        IF DEFINED Command_StitchBranch (
-            @ECHO Error: stitch branch parameter already specified!
-        ) ELSE (
-            SET Command_StitchBranch=1
+            SET Command_DevenvPath=1
         )
 
     ) ELSE IF /I "%%~x"=="Minimal" (
@@ -204,11 +223,33 @@ IF NOT DEFINED Build_4_17 IF NOT DEFINED Build_4_18 IF NOT DEFINED Build_4_19 IF
     SET Build_4_26=1
 )
 
-IF NOT DEFINED Build_2015 IF NOT DEFINED Build_2017 (
-    @ECHO No Visual Studio version specified, 2015 will be added
-    REM @ECHO No Visual Studio version specified, 2015 and 2017 will be added
-    SET Build_2015=1
-    REM SET Build_2017=1
+IF NOT DEFINED Build_2015 IF NOT DEFINED Build_2017 IF NOT DEFINED Build_2019 (
+    @ECHO No Visual Studio version specified, 2017 will be added
+    SET Build_2017=1
+)
+
+IF NOT DEFINED Build_MSBuild IF NOT DEFINED Build_Devenv (
+    @ECHO No MSBuild or Devenv build system defined, define Devenv
+    SET Build_Devenv=1
+)
+
+REM Test availability of devenv
+IF DEFINED Build_Devenv (
+    IF DEFINED Param_DevenvPath (
+        PATH %Param_DevenvPath%
+    )
+
+    rem START /b /wait devenv /? > nul 2>&1
+    rem IF ERRORLEVEL 1 (
+        rem @ECHO Error: Path to devenv.exe [DevenvPath: param] must be set or vsdevcmd must be called before Build.bat!
+    rem     GOTO :error
+    rem )
+)
+
+IF DEFINED Param_DevenvPath (
+    @ECHO Set path to devenv: %Param_DevenvPath%
+
+    PATH %Param_DevenvPath%
 )
 
 IF NOT DEFINED Build_Standard IF NOT DEFINED Build_Amf IF NOT DEFINED Build_Stitch (
@@ -290,11 +331,15 @@ SET Build_4_26
 
 SET Build_2015
 SET Build_2017
-SET Build_Amf
+SET Build_2019
+
 SET Build_Standard
+SET Build_Amf
 SET Build_Stitch
+
 SET Build_Development
 SET Build_Shipping
+
 SET Build_BluePrints
 SET Build_CPP
 SET Build_MediaTest
@@ -312,7 +357,7 @@ SET Build_Verbose
 SET Param_AmfBranch
 SET Param_StitchBranch
 
-REM EXIT /B 0
+rem EXIT /B 0
 
 @ECHO:
 
@@ -335,13 +380,19 @@ IF NOT EXIST %LogFolderName% (
 
 @ECHO project_name,start_date,start_time,end_date,end_time,result>>"%ResultsFileName%""
 
-FOR %%s IN (2015, 2017) DO (
+FOR %%s IN (2015, 2017, 2019) DO (
     SET SkipVisualStudio=
 
     IF /I ["%%s"] == ["2015"] IF NOT DEFINED Build_2015 SET SkipVisualStudio=1
     IF /I ["%%s"] == ["2017"] IF NOT DEFINED Build_2017 SET SkipVisualStudio=1
-    REM Skip building vs2017 samples if they were already built in the previous cycle
+    IF /I ["%%s"] == ["2019"] IF NOT DEFINED Build_2019 SET SkipVisualStudio=1
+
+    REM Skip building samples if they was already built in the previous cycle
+
     IF /I ["%%s"] == ["2017"] IF NOT DEFINED Build_Engine IF DEFINED Build_2015 SET SkipVisualStudio=1
+
+    IF /I ["%%s"] == ["2019"] IF NOT DEFINED Build_Engine IF DEFINED Build_2015 SET SkipVisualStudio=1
+    IF /I ["%%s"] == ["2019"] IF NOT DEFINED Build_Engine IF DEFINED Build_2017 SET SkipVisualStudio=1
 
     IF NOT DEFINED SkipVisualStudio (
         SET VS_VERSION=%%s
@@ -368,7 +419,7 @@ FOR %%s IN (2015, 2017) DO (
     @ECHO     Engine - build Unreal Engine
     @ECHO     Tests - build tests
     @ECHO     4.17 4.18 4.19 4.20 4.21 4.22 4.23 4.24 4.25 4.26 - specify Unreal Engine version
-    @ECHO     2015 2017 - specify Visual Studio version
+    @ECHO     2015 2017 2019 - specify Visual Studio version
     @ECHO     Standard - build Unreal Engine and related tests with standard media playback
     @ECHO     Amf - build Unreal Engine and related tests with accelerated AMF media playback
     @ECHO     Stitch - build Unreal Engine and related tests with stitch media playback
