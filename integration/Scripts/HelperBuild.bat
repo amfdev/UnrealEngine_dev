@@ -34,16 +34,13 @@ IF DEFINED Build_MSBuild (
     CD %PLUGIN_FOLDER%
     IF ERRORLEVEL 1 GOTO :error
 
-    SET target=build
-    SET maxcpucount=/maxcpucount
-    SET configuration=Release
-    SET platform=x64
+    rem SET target=build
+    rem SET maxcpucount=/maxcpucount
+    rem SET configuration=Release
+    rem SET platform=x64
+    rem SET devenvConfigurationName=Release|x64
 
-    REM %MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %parameters% %PLUGIN_SOLUTION%
-    REM %MSBUILD_EXE% /target:%target% %maxcpucount% /property:Configuration=%configuration%;Platform=%platform% %PLUGIN_SOLUTION%  >> "%PluginBuildLogFile%" 2>>&1
-    
-    rem PATH %Build_DevenvPath%
-    START /wait "" "devenv.exe" "%PLUGIN_SOLUTION%" /Build "%configuration%|%platform%" >> "%PluginBuildLogFile%" 2>>&1
+    START /wait "" "devenv.exe" "%PLUGIN_SOLUTION%" /Build "Release|x64" /Out "%PluginBuildLogFile%"
     IF ERRORLEVEL 1 GOTO :error
 )
 

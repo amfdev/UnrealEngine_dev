@@ -72,8 +72,8 @@ IF DEFINED Build_MSBuild (
     )
 
 ) ELSE IF DEFINED Build_Devenv (
-    rem PATH %Build_DevenvPath%
-    START /wait "" "devenv.exe" "%solution%" /Build "%UnrealConfiguration%|%platform%" >> "%UnrealBuildLogFile%" 2>>&1
+    @ECHO UE Devenv configuration: "%solution%" "%UnrealConfiguration%|%platform%" "%UnrealBuildLogFile%"
+    START /wait "" "devenv.exe" "%solution%" /Build "%UnrealConfiguration%|%platform%" /Out "%UnrealBuildLogFile%"
     IF ERRORLEVEL 1 (
         SET errorInUE=1
         @ECHO Error: Devenv returns error when building UnrealEngine!
