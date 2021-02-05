@@ -1,0 +1,9 @@
+/Build
+/DerivedDataCache
+/Intermediate
+/Saved
+/.vs
+/Binaries
+/*.opendb
+/*.db
+/*.sln
