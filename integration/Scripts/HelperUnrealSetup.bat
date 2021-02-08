@@ -36,7 +36,7 @@ rem @ECHO Engine/Binaries/DotNET/GitDependencies.exe %* >>.git\hooks\post-merge
 rem :no_git_hooks_directory
 
 @ECHO Installing prerequisites...
-start /wait Engine\Extras\Redist\en-us\UE4PrereqSetup_x64.exe /quiet
+START /wait Engine\Extras\Redist\en-us\UE4PrereqSetup_x64.exe /quiet
 
 :done
     @ECHO UnrealEngine setup completed
