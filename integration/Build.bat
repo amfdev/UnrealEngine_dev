@@ -62,6 +62,10 @@ SET Param_GitPassword=
 SET Command_DevenvPath=
 SET Param_DevenvPath=
 
+SET Command_UEBranch=
+SET Param_UEBranch=
+SET /a Counter_UEVersionsToTest=0
+
 FOR %%x IN (%*) DO (
 
     IF DEFINED Command_AmfBranch (
@@ -79,27 +83,40 @@ FOR %%x IN (%*) DO (
     ) ELSE IF DEFINED Command_DevenvPath (
         SET Param_DevenvPath="%%~x"
         SET Command_DevenvPath=
+    ) ELSE IF DEFINED Command_UEBranch (
+        SET Param_UEBranch="%%~x"
+        SET Command_UEBranch=
 
     ) ELSE IF /I "%%~x"=="4.17" (
         SET Build_4_17=1
+        SET /a Counter_UEVersionsToTest+=1
     ) ELSE IF /I "%%~x"=="4.18" (
         SET Build_4_18=1
+        SET /a Counter_UEVersionsToTest+=1
     ) ELSE IF /I "%%~x"=="4.19" (
         SET Build_4_19=1
+        SET /a Counter_UEVersionsToTest+=1
     ) ELSE IF /I "%%~x"=="4.20" (
         SET Build_4_20=1
+        SET /a Counter_UEVersionsToTest+=1
     ) ELSE IF /I "%%~x"=="4.21" (
         SET Build_4_21=1
+        SET /a Counter_UEVersionsToTest+=1
     ) ELSE IF /I "%%~x"=="4.22" (
         SET Build_4_22=1
+        SET /a Counter_UEVersionsToTest+=1
     ) ELSE IF /I "%%~x"=="4.23" (
         SET Build_4_23=1
+        SET /a Counter_UEVersionsToTest+=1
     ) ELSE IF /I "%%~x"=="4.24" (
         SET Build_4_24=1
+        SET /a Counter_UEVersionsToTest+=1
     ) ELSE IF /I "%%~x"=="4.25" (
         SET Build_4_25=1
+        SET /a Counter_UEVersionsToTest+=1
     ) ELSE IF /I "%%~x"=="4.26" (
         SET Build_4_26=1
+        SET /a Counter_UEVersionsToTest+=1
 
     ) ELSE IF /I "%%~x"=="2015" (
         SET Build_2015=1
@@ -189,6 +206,13 @@ FOR %%x IN (%*) DO (
             SET Command_DevenvPath=1
         )
 
+    ) ELSE IF /I "%%~x"=="UEBranch:" (
+        IF DEFINED Command_UEBranch (
+            @ECHO Error: UE branch parameter already specified!
+        ) ELSE (
+            SET Command_UEBranch=1
+        )
+    
     ) ELSE IF /I "%%~x"=="Minimal" (
         SET Build_Minimal=1
     ) ELSE IF /I "%%~x"=="Verbose" (
@@ -210,7 +234,7 @@ IF DEFINED Build_Verbose (
 @ECHO %Verbose%
 
 IF NOT DEFINED Build_4_17 IF NOT DEFINED Build_4_18 IF NOT DEFINED Build_4_19 IF NOT DEFINED Build_4_20 IF NOT DEFINED Build_4_21 IF NOT DEFINED Build_4_22 IF NOT DEFINED Build_4_23 IF NOT DEFINED Build_4_24 IF NOT DEFINED Build_4_25 IF NOT DEFINED Build_4_26 (
-    @ECHO No UnrealEngine version specified, 4.17, 4.18, 4.19, 4.20, 4.21, 4.22, 4.23 will be added
+    @ECHO No UnrealEngine version specified, all supported versions will be added
     SET Build_4_17=1
     SET Build_4_18=1
     SET Build_4_19=1
@@ -221,6 +245,13 @@ IF NOT DEFINED Build_4_17 IF NOT DEFINED Build_4_18 IF NOT DEFINED Build_4_19 IF
     SET Build_4_24=1
     SET Build_4_25=1
     SET Build_4_26=1
+    SET /a Counter_UEVersionsToTest+=10
+)
+
+IF DEFINED Param_UEBranch IF %Counter_UEVersionsToTest% GTR 1 (
+    @ECHO
+    @ECHO UE tag or branch could be specified only for single tested UE version!
+    GOTO :usage
 )
 
 IF NOT DEFINED Build_2015 IF NOT DEFINED Build_2017 IF NOT DEFINED Build_2019 (

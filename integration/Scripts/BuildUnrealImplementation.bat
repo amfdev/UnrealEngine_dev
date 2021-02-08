@@ -39,10 +39,26 @@ IF NOT DEFINED UnrealConfiguration (
 IF NOT DEFINED Build_CleanOnly (
 
     @ECHO:
+
+    IF EXIST "%UnrealHome%\" (
+        IF DEFINED Build_Clean (
+            @ECHO Delete UnrealEngine folder: %UnrealHome%
+            RMDIR "%UnrealHome%\" /Q /S
+            IF ERRORLEVEL 1 (
+                @ECHO Could not delete dirty UnrealEngine folder: %UnrealHome%
+                GOTO :error
+            )
+        )
+    )
+
     @ECHO Test UnrealEngine folder...
-    IF NOT EXIST "%UnrealHome%" (
-        @ECHO No UnrealEngine folder found, create it
+    IF NOT EXIST "%UnrealHome%\" (
+        @ECHO Create UnrealEngine folder: %UnrealHome%
         MKDIR "%UnrealHome%"
+        IF ERRORLEVEL 1 (
+            @ECHO Could not create UnrealEngine folder: %UnrealHome%
+            GOTO :error
+        )
         IF ERRORLEVEL 1 GOTO :error
     )
 
