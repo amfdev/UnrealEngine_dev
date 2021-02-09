@@ -12,7 +12,6 @@ IF NOT DEFINED PLUGIN_URL (
 )
 
 IF NOT EXIST %PLUGIN_FOLDER% (
-
     @ECHO:
     @ECHO git clone:
     @ECHO url: %PLUGIN_URL%
