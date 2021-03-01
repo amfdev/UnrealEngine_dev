@@ -48,7 +48,7 @@ IF NOT DEFINED Build_Clean (
     rem IF ERRORLEVEL 1 GOTO :error
 
     IF DEFINED Param_UEBranch (
-        git checkout -b %Param_UEBranch% %Param_UEBranch%
+        git checkout %Param_UEBranch% %Param_UEBranch%
         @ECHO Error: could not switch to specified branch or tag!
         rem GOTO :error
     )
