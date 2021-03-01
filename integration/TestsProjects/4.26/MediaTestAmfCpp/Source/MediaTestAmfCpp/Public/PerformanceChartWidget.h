@@ -7,6 +7,7 @@
 #include <vector>
 #include <tuple>
 #include <memory>
+#include <string>
 
 //#include <windows.h>
 #define _WIN32_WINDOWS 0x0700
